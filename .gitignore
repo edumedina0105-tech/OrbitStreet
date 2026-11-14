@@ -1,0 +1,36 @@
+# Dependencias y builds
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+.turbo/
+
+# Entorno y secretos (NUNCA commitear)
+.env
+.env.*
+!.env.example
+*.pem
+
+# Documentos de trabajo local (no se publican en el repo)
+docs/PLAN_IMPLEMENTACION.md
+.clinerules
+
+# Datos crudos grandes (se regeneran desde la API de NASA POWER)
+data/raw/
+
+# Firmware (PlatformIO): builds locales
+apps/firmware/.pio/
+apps/firmware/.vscode/
+*.elf
+*.map
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+
+# Despliegue
+.vercel

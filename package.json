@@ -1,0 +1,17 @@
+{
+  "name": "orbitstreet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OrbitStreet - Earth System Trend Detective (NASA Space Apps Challenge 2026). Web de ciencia ciudadana con datos reales de NASA POWER y capa opcional de hardware ESP32.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace apps/web",
+    "build": "npm run build --workspace apps/web",
+    "start": "npm run start --workspace apps/web",
+    "lint": "npm run lint --workspace apps/web"
+  },
+  "license": "Apache-2.0"
+}

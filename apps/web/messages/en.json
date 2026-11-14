@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "title": "OrbitStreet — Earth System Trend Detective",
+    "description": "Is your corner of the planet really changing? Investigate real NASA POWER data: what is changing, where, by how much, and whether the change is statistically significant."
+  },
+  "header": {
+    "brand": "OrbitStreet",
+    "tagline": "The sky and your street",
+    "nav": {
+      "questions": "The 4 questions",
+      "honesty": "Our honesty"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Language"
+  },
+  "home": {
+    "hero": {
+      "badge": "Real NASA data · MERRA-2 reanalysis",
+      "title": "Is your corner of the planet really changing?",
+      "subtitle": "OrbitStreet turns anyone into an Earth System Trend Detective. Pick any place and a variable — temperature, rainfall, humidity — and find out what is changing, where, by how much, and whether the change is statistically significant.",
+      "ctaQuestions": "Start investigating",
+      "ctaHonesty": "Why trust us"
+    },
+    "questions": {
+      "title": "Every good detective asks four questions",
+      "subtitle": "OrbitStreet answers all of them with decades of real NASA data and mathematics — never guesses.",
+      "what": {
+        "title": "What is changing?",
+        "description": "Temperature highs, days above 35 °C, rainfall, humidity: real variables measured by NASA Earth science missions and models."
+      },
+      "where": {
+        "title": "Where is it changing?",
+        "description": "Any place on Earth you choose — your city, your region — at NASA grid-cell scale, and later at street level with our open-hardware node."
+      },
+      "howMuch": {
+        "title": "How much is it changing?",
+        "description": "The rate of change in real units, such as °C per decade, with confidence intervals — not just a line going up."
+      },
+      "significant": {
+        "title": "Is it significant?",
+        "description": "A rising line may be just natural noise. We apply the same statistical tests scientists use (Mann-Kendall, Sen's slope) before calling a change real."
+      }
+    },
+    "honesty": {
+      "title": "Honest by design",
+      "subtitle": "We would rather answer a few questions well than promise what the data cannot support.",
+      "reanalysis": {
+        "title": "We say what the data is",
+        "description": "NASA POWER is a reanalysis (MERRA-2), not a direct satellite measurement. We state that clearly, as any honest tool should."
+      },
+      "deterministic": {
+        "title": "Statistics, not improvisation",
+        "description": "Every number is computed deterministically in code. AI only writes the plain-language report; it never calculates figures."
+      },
+      "yearsNeeded": {
+        "title": "A new sensor proves nothing",
+        "description": "A few weeks of local data cannot reveal a climate trend. Instead, we tell you how many years of measurements would be needed."
+      },
+      "simulated": {
+        "title": "No fake data in disguise",
+        "description": "Any simulated or test data is always clearly labeled [SIMULATED DATA / TESTBED]."
+      }
+    }
+  },
+  "footer": {
+    "challenge": "Built for the NASA Space Apps Challenge 2026 — “Be An Earth System Trend Detective!”",
+    "license": "Open source under Apache-2.0.",
+    "notForecast": "Not a weather forecast: long-term change detection."
+  }
+}

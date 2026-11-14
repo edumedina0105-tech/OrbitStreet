@@ -1,0 +1,71 @@
+{
+  "metadata": {
+    "title": "OrbitStreet — Detective de tendencias del sistema Tierra",
+    "description": "¿Está cambiando realmente tu rincón del planeta? Investiga datos reales de NASA POWER: qué está cambiando, dónde, cuánto y si el cambio es estadísticamente significativo."
+  },
+  "header": {
+    "brand": "OrbitStreet",
+    "tagline": "El cielo y tu calle",
+    "nav": {
+      "questions": "Las 4 preguntas",
+      "honesty": "Nuestra honestidad"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Idioma"
+  },
+  "home": {
+    "hero": {
+      "badge": "Datos reales de la NASA · reanálisis MERRA-2",
+      "title": "¿Está cambiando realmente tu rincón del planeta?",
+      "subtitle": "OrbitStreet convierte a cualquier persona en detective de tendencias del sistema Tierra. Elige un lugar y una variable — temperatura, lluvia, humedad — y descubre qué está cambiando, dónde, cuánto y si el cambio es estadísticamente significativo.",
+      "ctaQuestions": "Empezar a investigar",
+      "ctaHonesty": "Por qué confiar"
+    },
+    "questions": {
+      "title": "Todo buen detective hace cuatro preguntas",
+      "subtitle": "OrbitStreet responde todas con décadas de datos reales de la NASA y matemáticas — nunca suposiciones.",
+      "what": {
+        "title": "¿Qué está cambiando?",
+        "description": "Temperaturas máximas, días sobre 35 °C, lluvia, humedad: variables reales medidas por misiones y modelos de ciencias de la Tierra de la NASA."
+      },
+      "where": {
+        "title": "¿Dónde está cambiando?",
+        "description": "Cualquier lugar del planeta que elijas — tu ciudad, tu región — a escala de la celda de la NASA y, más adelante, a escala de calle con nuestro nodo de hardware abierto."
+      },
+      "howMuch": {
+        "title": "¿Cuánto está cambiando?",
+        "description": "La tasa de cambio en unidades reales, como °C por década, con intervalos de confianza — no solo una línea que sube."
+      },
+      "significant": {
+        "title": "¿Es significativo?",
+        "description": "Una línea que sube puede ser solo ruido natural. Aplicamos las mismas pruebas estadísticas que usan los científicos (Mann-Kendall, pendiente de Sen) antes de llamar real a un cambio."
+      }
+    },
+    "honesty": {
+      "title": "Honesto por diseño",
+      "subtitle": "Preferimos responder bien pocas preguntas antes que prometer lo que los datos no pueden respaldar.",
+      "reanalysis": {
+        "title": "Decimos qué son los datos",
+        "description": "NASA POWER es un reanálisis (MERRA-2), no una medición satelital directa. Lo declaramos con claridad, como debería hacer cualquier herramienta honesta."
+      },
+      "deterministic": {
+        "title": "Estadística, no improvisación",
+        "description": "Cada número se calcula de forma determinista con código. La IA solo redacta el informe en lenguaje claro; nunca calcula cifras."
+      },
+      "yearsNeeded": {
+        "title": "Un sensor nuevo no prueba nada",
+        "description": "Unas semanas de datos locales no pueden revelar una tendencia climática. En su lugar, te decimos cuántos años de mediciones serían necesarios."
+      },
+      "simulated": {
+        "title": "Nada de datos falsos disfrazados",
+        "description": "Todo dato simulado o de prueba se etiqueta siempre como [DATOS SIMULADOS / TESTBED]."
+      }
+    }
+  },
+  "footer": {
+    "challenge": "Creado para el NASA Space Apps Challenge 2026 — «¡Sé un detective de tendencias del sistema Tierra!»",
+    "license": "Código abierto bajo Apache-2.0.",
+    "notForecast": "No es un pronóstico del tiempo: detección de cambios de largo plazo."
+  }
+}
