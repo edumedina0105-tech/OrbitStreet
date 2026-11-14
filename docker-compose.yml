@@ -1,0 +1,17 @@
+# PostgreSQL local para desarrollo (producción: Railway provee DATABASE_URL).
+# Uso: docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orbitstreet
+    ports:
+      - "5432:5432"
+    volumes:
+      - orbitstreet_pgdata:/var/lib/postgresql/data
+
+volumes:
+  orbitstreet_pgdata:

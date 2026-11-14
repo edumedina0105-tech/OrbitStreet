@@ -1,0 +1,107 @@
+// OrbitStreet — fuente única de verdad del modelo de datos (NASA Space Apps 2026)
+// Esquema orientado a series de tiempo con índices adecuados.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Estación IoT de ciencia ciudadana (capa ESP32, Fase 2).
+model Station {
+  id        String        @id @default(cuid())
+  name      String
+  latitude  Float
+  longitude Float
+  altitude  Float?
+  status    StationStatus @default(PENDING)
+  /// Identificador autogenerado por el nodo (hash de MAC), único.
+  deviceId  String?       @unique
+  createdAt DateTime      @default(now())
+
+  telemetry TelemetryRecord[]
+
+  @@index([latitude, longitude])
+}
+
+enum StationStatus {
+  PENDING
+  ONLINE
+  OFFLINE
+}
+
+/// Telemetría de estaciones en tierra (series de tiempo).
+model TelemetryRecord {
+  id          String   @id @default(cuid())
+  station     Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  stationId   String
+  timestamp   DateTime
+  temperature Float?
+  humidity    Float?
+  pressure    Float?
+  /// Sesgo respecto a la línea base NASA (normal mes×hora) en °C.
+  nasaBias    Float?
+  quality     Quality  @default(UNVALIDATED)
+
+  /// Índice compuesto obligatorio para consultas por estación y tiempo.
+  @@index([stationId, timestamp])
+}
+
+enum Quality {
+  UNVALIDATED
+  VALIDATED
+  SUSPICIOUS
+}
+
+/// Investigación guardada del Modo Detective (parámetros + resultados deterministas).
+model Investigation {
+  id          String   @id @default(cuid())
+  locale      String
+  variable    String
+  latitude    Float
+  longitude   Float
+  periodStart DateTime
+  periodEnd   DateTime
+  /// Parámetros de la consulta (estación del año, desestacionalización, etc.).
+  paramsJson  Json
+  /// Resultados deterministas calculados en código: Mann-Kendall, Sen, IC, FDR.
+  resultJson  Json
+  /// Conclusión redactada por IA (solo texto; la IA nunca calcula cifras).
+  aiConclusion String?
+  createdAt   DateTime @default(now())
+
+  @@index([variable, createdAt])
+}
+
+/// Caché de series NASA POWER (evita llamar a la API en cada análisis).
+model PowerCache {
+  id        String   @id @default(cuid())
+  latitude  Float
+  longitude Float
+  parameter String
+  temporal  String   // "daily" | "hourly"
+  start     DateTime
+  end       DateTime
+  dataJson  Json
+  fetchedAt DateTime @default(now())
+
+  @@unique([latitude, longitude, parameter, temporal, start, end])
+}
+
+/// Series comunitarias subidas por usuarios ("sube tu serie"), con su análisis.
+model CommunitySeries {
+  id           String   @id @default(cuid())
+  label        String
+  variable     String
+  latitude     Float?
+  longitude    Float?
+  unit         String
+  /// Datos originales: [{ date, value }]
+  dataJson     Json
+  /// Análisis determinista (MK/Sen/IC) generado por el mismo motor estadístico.
+  analysisJson Json?
+  createdAt    DateTime @default(now())
+}
