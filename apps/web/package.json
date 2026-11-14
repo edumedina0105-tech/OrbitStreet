@@ -6,10 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@orbitstreet/database": "*",
+    "@orbitstreet/shared-types": "*",
     "next": "15.5.29",
     "next-intl": "^4.15.1",
     "react": "19.1.0",
@@ -24,6 +27,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3"
   }
 }
