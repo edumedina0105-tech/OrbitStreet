@@ -10,7 +10,7 @@
  *    al prompt para reducir inyección de instrucciones.
  */
 
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+const DEFAULT_MODEL = 'gemini-3.8-flash';
 const TIMEOUT_MS = 15_000;
 
 /** Exportada para tests: el prompt debe acotar el dominio y el idioma. */

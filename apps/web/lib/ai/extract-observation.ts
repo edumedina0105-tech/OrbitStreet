@@ -12,7 +12,7 @@ import { OBSERVABLE_VARIABLES, withinPhysicalBounds } from '@/lib/observations/p
  *  - El usuario siempre confirma/edita el valor extraído (humano en el loop).
  */
 
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+const DEFAULT_MODEL = 'gemini-3.8-flash';
 const TIMEOUT_MS = 20_000;
 
 export const ALLOWED_IMAGE_TYPES = [

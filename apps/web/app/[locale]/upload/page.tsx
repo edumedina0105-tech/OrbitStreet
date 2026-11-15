@@ -32,7 +32,7 @@ export default async function UploadPage({ params }: Props) {
         <div className="mt-8 max-w-md rounded-xl border border-amber-500/40 bg-amber-500/10 p-6">
           <p className="text-sm text-amber-300">{t('loginRequired')}</p>
           <Link
-            href="/account"
+            href="/"
             className="mt-4 inline-flex rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400"
           >
             {t('loginCta')}

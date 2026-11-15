@@ -13,6 +13,7 @@
       "account": "Cuenta"
     },
     "login": "Iniciar sesión",
+    "account": "Cuenta",
     "cta": "Ver análisis"
   },
   "languageSwitcher": {
@@ -59,6 +60,7 @@
         "empty": "Sin observaciones comunitarias en esta celda todavía — sé el primero.",
         "showPins": "Ver en el mapa",
         "hidePins": "Ocultar del mapa",
+        "pinName": "Dato comunitario",
         "cellTitle": "Datos comunitarios en esta celda ({count})",
         "verdictPlausible": "coincide con la celda NASA",
         "verdictDoubtful": "sesgo dudoso vs celda",
@@ -142,6 +144,19 @@
         "description": "Todo dato simulado o de prueba se etiqueta siempre como [DATOS SIMULADOS / TESTBED]."
       }
     }
+  },
+  "comparator": {
+    "title": "Comparar regiones",
+    "subtitle": "La NASA menciona en su guía que un mismo fenómeno global puede causar efectos inversos en dos regiones distintas. Compara las tendencias lado a lado y calcula su divergencia.",
+    "regionA": "Región A",
+    "regionB": "Región B",
+    "compare": "Comparar",
+    "comparing": "Descargando ambas series…",
+    "sameRegion": "Elige dos regiones distintas para comparar.",
+    "error": "No se pudieron descargar ambas series. Inténtalo de nuevo.",
+    "sentence": "Mientras {regionA} muestra una tendencia {trendA} de {slopeA} {unit} por década (p = {pA}), {regionB} muestra una tendencia {trendB} de {slopeB} {unit} por década (p = {pB}).",
+    "divergence": "Tasa de divergencia: {diff} {unit} por década",
+    "note": "Serie {start}–{end} · estación: {season} · mismo motor determinista (Mann-Kendall + Sen) que el análisis principal."
   },
   "detective": {
     "title": "Modo Detective",
@@ -299,8 +314,8 @@
   "upload": {
     "title": "Sube tu serie",
     "subtitle": "Aporta tus propias mediciones — un pluviómetro casero, un termómetro escolar, una estación personal. Tu serie pasa por exactamente las mismas estadísticas deterministas que los datos de la NASA, y siempre se etiqueta como dato comunitario (no validado).",
-    "loginRequired": "Subir datos requiere una cuenta con contraseña. Esto protege la base comunitaria de bots y subidas masivas.",
-    "loginCta": "Crear cuenta / iniciar sesión",
+    "loginRequired": "Para subir tu serie necesitas una cuenta. Inicia sesión o crea una con el botón «Iniciar sesión» del encabezado — solo usuario y contraseña.",
+    "loginCta": "Ir al inicio",
     "labelField": "Nombre de la serie",
     "variable": "Variable",
     "latitude": "Latitud (opcional)",

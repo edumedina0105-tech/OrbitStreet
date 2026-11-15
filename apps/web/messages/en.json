@@ -13,6 +13,7 @@
       "account": "Account"
     },
     "login": "Log in",
+    "account": "Account",
     "cta": "View analysis"
   },
   "languageSwitcher": {
@@ -59,6 +60,7 @@
         "empty": "No community observations in this cell yet — be the first one.",
         "showPins": "Show on map",
         "hidePins": "Hide from map",
+        "pinName": "Community data",
         "cellTitle": "Community observations in this cell ({count})",
         "verdictPlausible": "matches the NASA cell",
         "verdictDoubtful": "doubtful bias vs cell",
@@ -142,6 +144,19 @@
         "description": "Any simulated or test data is always clearly labeled [SIMULATED DATA / TESTBED]."
       }
     }
+  },
+  "comparator": {
+    "title": "Compare regions",
+    "subtitle": "NASA's guide notes that the same global phenomenon can cause opposite effects in two different regions. Compare the trends side by side and compute their divergence rate.",
+    "regionA": "Region A",
+    "regionB": "Region B",
+    "compare": "Compare",
+    "comparing": "Downloading both series…",
+    "sameRegion": "Pick two different regions to compare.",
+    "error": "Both series could not be downloaded. Please try again.",
+    "sentence": "While {regionA} shows a {trendA} trend of {slopeA} {unit} per decade (p = {pA}), {regionB} shows a {trendB} trend of {slopeB} {unit} per decade (p = {pB}).",
+    "divergence": "Divergence rate: {diff} {unit} per decade",
+    "note": "Series {start}–{end} · season: {season} · same deterministic engine (Mann-Kendall + Sen) as the main analysis."
   },
   "detective": {
     "title": "Detective Mode",
@@ -299,8 +314,8 @@
   "upload": {
     "title": "Upload your series",
     "subtitle": "Contribute your own measurements — a homemade rain gauge, a school thermometer, a personal weather station. Your series runs through the exact same deterministic statistics as NASA data, and is always labeled as community data (unvalidated).",
-    "loginRequired": "Uploading data requires an account with a password. This protects the community database from bots and mass uploads.",
-    "loginCta": "Create account / log in",
+    "loginRequired": "To upload your series you need an account. Log in or create one with the “Log in” button in the header — just username and password.",
+    "loginCta": "Go to home",
     "labelField": "Series name",
     "variable": "Variable",
     "latitude": "Latitude (optional)",

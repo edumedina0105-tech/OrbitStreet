@@ -11,7 +11,10 @@ import type { ReportAnalysis } from './validation';
  *  - Si Gemini falla o tarda (timeout 15 s), el llamador cae al respaldo.
  */
 
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+// El modelo es configurable por GEMINI_MODEL (.env); el default sigue la
+// versión disponible para cuentas nuevas (gemini-2.5-flash fue retirado
+// para usuarios nuevos según la API, 2026-11).
+const DEFAULT_MODEL = 'gemini-3.8-flash';
 const TIMEOUT_MS = 15_000;
 
 export function isGeminiConfigured(): boolean {

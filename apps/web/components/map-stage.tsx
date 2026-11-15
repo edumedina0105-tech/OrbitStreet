@@ -192,6 +192,18 @@ export function MapStage() {
         }))
       );
       setShowPins(true);
+      // Volar hacia el dato más reciente: garantiza que los pines
+      // queden en el hemisferio visible del globo.
+      const first = (data.recent ?? [])[0];
+      if (first) {
+        setSelected({
+          lat: first.latitude,
+          lon: first.longitude,
+          name: t('community.pinName'),
+          country: ''
+        });
+        setFocusKey((key) => key + 1);
+      }
     } catch {
       setCommunityPins([]);
     } finally {
