@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { Satellite } from 'lucide-react';
+import { RadioTower, Satellite } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { SessionMenu } from '@/components/session-menu';
@@ -29,8 +29,17 @@ export async function SiteHeader() {
           </span>
         </Link>
 
-        {/* Zona 2: sesión (cuadro flotante) + idioma */}
+        {/* Zona 2: estación + sesión (cuadro flotante) + idioma */}
         <div className="flex shrink-0 items-center gap-3">
+          {/* Mi estación: pantalla única con flasheo, token y guía del nodo. */}
+          <Link
+            href="/station"
+            title={t('stationLink')}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-2.5 py-1.5 font-mono text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20"
+          >
+            <RadioTower className="h-3.5 w-3.5" aria-hidden />
+            {t('stationLink')}
+          </Link>
           <SessionMenu
             initialUser={
               user

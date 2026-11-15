@@ -14,7 +14,8 @@
     },
     "login": "Log in",
     "account": "Account",
-    "cta": "View analysis"
+    "cta": "View analysis",
+    "stationLink": "My station"
   },
   "languageSwitcher": {
     "label": "Language"
@@ -656,5 +657,37 @@
     "nodeTitle": "Ground node",
     "flashLink": "Flash ESP32",
     "guideLink": "Node guide"
+  },
+  "stationPage": {
+    "kicker": "Ground node · Everything in one screen",
+    "title": "My station",
+    "subtitle": "Turn an ESP32 into your science station in three steps: flash the firmware from the browser, register the station to get its token, and set up the sensor. Nothing to install.",
+    "step1": {
+      "title": "Flash your ESP32",
+      "subtitle": "Plug the board in over USB (a data cable) and press \"Connect & flash\". Works on desktop Chrome or Edge."
+    },
+    "step2": {
+      "title": "Register your station and copy the token",
+      "subtitle": "The token is your node's unique signature: it is shown only once and gets pasted into the ESP32 wizard.",
+      "loginNeeded": "Sign in to register your station",
+      "loginHint": "Open your account menu (profile button in the header), sign in or create an account, then come back: the form will appear here."
+    },
+    "step3": {
+      "title": "Wire the sensor and configure the node"
+    },
+    "wiring": {
+      "title": "Sensor wiring",
+      "note": "3-pin DHT modules connect directly. For a bare sensor, add a 10 kΩ pull-up resistor between VCC and DATA."
+    },
+    "wizard": {
+      "title": "Node wizard (first boot)",
+      "network": "On boot the ESP32 creates the \"OrbitStreet-Setup\" network (no password): join it from your phone or PC.",
+      "browser": "Open http://192.168.4.1 in your browser (captive portal).",
+      "fields": "Complete the wizard: your WiFi network, the sensor (DHT11/DHT22 on GPIO 4), your coordinates and the token from step 2.",
+      "done": "On save, the node joins your WiFi, downloads the NASA baseline and starts measuring and sending signed telemetry."
+    },
+    "moreGuide": "Full guide",
+    "moreFlash": "Advanced flashing",
+    "footerNote": "The node measures real temperature and humidity, compares them with the NASA monthly normal (historical reference) and uploads them signed with its token."
   }
 }

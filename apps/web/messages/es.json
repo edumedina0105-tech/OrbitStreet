@@ -14,7 +14,8 @@
     },
     "login": "Iniciar sesión",
     "account": "Cuenta",
-    "cta": "Ver análisis"
+    "cta": "Ver análisis",
+    "stationLink": "Mi estación"
   },
   "languageSwitcher": {
     "label": "Idioma"
@@ -656,5 +657,37 @@
     "nodeTitle": "Nodo en tierra",
     "flashLink": "Flashear ESP32",
     "guideLink": "Guía del nodo"
+  },
+  "stationPage": {
+    "kicker": "Nodo en tierra · Todo en una pantalla",
+    "title": "Mi estación",
+    "subtitle": "Convierte un ESP32 en tu estación científica en tres pasos: flashea el firmware desde el navegador, registra la estación para obtener su token y configura el sensor. Sin instalar nada.",
+    "step1": {
+      "title": "Flashea tu ESP32",
+      "subtitle": "Conecta la placa por USB (cable con datos) y pulsa «Conectar y flashear». Funciona en Chrome o Edge de escritorio."
+    },
+    "step2": {
+      "title": "Registra tu estación y copia el token",
+      "subtitle": "El token es la firma única de tu nodo: se muestra una sola vez y se pega en el asistente del ESP32.",
+      "loginNeeded": "Inicia sesión para registrar tu estación",
+      "loginHint": "Abre el menú de tu cuenta (botón de perfil en la cabecera), inicia sesión o crea una cuenta, y vuelve a esta pantalla: el formulario aparecerá aquí."
+    },
+    "step3": {
+      "title": "Conecta el sensor y configura el nodo"
+    },
+    "wiring": {
+      "title": "Cableado del sensor",
+      "note": "Los módulos DHT de 3 pines van directos. Si tu sensor es suelto, agrega una resistencia pull-up de 10 kΩ entre VCC y DATA."
+    },
+    "wizard": {
+      "title": "Asistente del nodo (primera vez)",
+      "network": "Al arrancar, el ESP32 crea la red «OrbitStreet-Setup» (sin contraseña): conéctate desde tu móvil o PC.",
+      "browser": "Abre http://192.168.4.1 en el navegador (portal cautivo).",
+      "fields": "Completa el asistente: tu red WiFi, el sensor (DHT11/DHT22 en GPIO 4), tus coordenadas y el token del paso 2.",
+      "done": "Al guardar, el nodo se conecta a tu WiFi, descarga la línea base NASA y comienza a medir y enviar telemetría firmada."
+    },
+    "moreGuide": "Guía completa",
+    "moreFlash": "Flasheo avanzado",
+    "footerNote": "El nodo mide temperatura y humedad reales, las compara con la normal mensual NASA (referencia histórica) y las sube firmadas con su token."
   }
 }
