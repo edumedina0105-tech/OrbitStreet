@@ -99,6 +99,21 @@ La configuración está fijada en código (`railway.json` en la raíz), así que
 
 > Nota: Railway escucha el puerto que define `PORT`; el contenedor ya arranca en `0.0.0.0`, requisito de la plataforma.
 
+### Probar la imagen Docker localmente
+
+El contenedor sirve una **instantánea congelada** del build: si cambias código y solo haces `docker run`, seguirás viendo la versión anterior. Tras cualquier cambio:
+
+```bash
+docker build -t orbitstreet-web:latest .
+docker rm -f orbitstreet-ci
+docker run -d --name orbitstreet-ci -p 3100:3000 \
+  -e DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/orbitstreet" \
+  -e NODE_ENV=production orbitstreet-web:latest
+# verificar: http://localhost:3100/api/health y http://localhost:3100/es
+```
+
+> Si ves el diseño o el contenido antiguo en el navegador, fuerza la recarga con `Ctrl+Shift+R` (los assets de Next llevan hash, pero el HTML puede quedar cacheado).
+
 ## Licencia
 
 Apache-2.0. Ver [LICENSE](./LICENSE).
