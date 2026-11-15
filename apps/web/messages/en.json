@@ -55,6 +55,7 @@
       "analyzing": "Querying NASA POWER…",
       "viewFull": "See full chart & report",
       "yearsNoteShort": "Local sensor: ~{years} yrs",
+      "yearsNoteWhy": "Why? A ground node installed here today would take those years to confirm the trend on its own: it measures when your street starts producing evidence.",
       "seeAnalysis": "See the 4 questions",
       "previewNote": "The analysis runs right here with the same deterministic engine (Mann-Kendall + Sen) as Detective Mode; never invented data.",
       "regions": {
@@ -119,6 +120,7 @@
   },
   "detective": {
     "title": "Detective Mode",
+    "backToMap": "Back to the map",
     "subtitle": "Pick a place and an Earth variable. OrbitStreet downloads decades of real NASA data, runs the statistical tests for you and answers the four detective questions. The URL is shareable: send your investigation to anyone.",
     "form": {
       "place": "Place",
@@ -199,6 +201,7 @@
       "yearsNeededTitle": "How long would a local sensor need?",
       "yearsNeededBody": "With the natural variability of this series, a new sensor in this location would need about {years} years of measurements before this trend becomes statistically detectable. Starting to measure today is exactly how those years get counted.",
       "yearsNeededInfinite": "This series is too noisy or too flat to estimate a horizon. Honestly, no promise is made here.",
+      "yearsNeededWhy": "Why does this number matter? It tells you with data whether a citizen node on this block can produce evidence within a human timescale, or whether only the satellite cell — with decades of history — can see this trend. The fewer years needed, the sooner your street counts as a scientific source.",
       "gridCell": "MERRA-2 grid 0.5° × 0.625° (~50 × 70 km)",
       "ciCrossesZero": "The interval crosses zero: uncertain magnitude",
       "ciSameSign": "The whole interval keeps the same sign",

@@ -278,13 +278,20 @@ export function MapStage() {
                 })}
               </div>
 
+              {/* CTA principal: analiza AQUÍ MISMO (sin salir del mapa).
+                  El informe completo (grafica + IA) queda en el panel derecho. */}
               <button
                 type="button"
-                onClick={() => router.push(detectiveUrl())}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-white/[0.12]"
+                onClick={handleConsult}
+                disabled={isFetching}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-400/40 bg-cyan-500/15 px-3 py-2 text-xs font-semibold text-cyan-100 transition-colors hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <Search className="h-3.5 w-3.5" />
-                {t('investigate')}
+                {isFetching ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Search className="h-3.5 w-3.5" />
+                )}
+                {isFetching ? t('analyzing') : t('investigate')}
               </button>
 
               {/* Franja de datos clave */}
@@ -478,11 +485,18 @@ export function MapStage() {
                           : td('results.significantNo')}
                       </span>
                       {Number.isFinite(analysis.years.years) && (
-                        <span className="rounded-md border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-slate-400">
+                        <span
+                          title={t('yearsNoteWhy')}
+                          className="cursor-help rounded-md border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-slate-400"
+                        >
                           {t('yearsNoteShort', { years: analysis.years.years })}
                         </span>
                       )}
                     </div>
+
+                    <p className="text-[10px] leading-relaxed text-slate-500">
+                      {t('yearsNoteWhy')}
+                    </p>
 
                     <button
                       type="button"

@@ -12,6 +12,7 @@ import {
 } from '@/lib/analysis/variables';
 import { parseCoordinate } from '@/lib/parse-coord';
 import {
+  ArrowLeft,
   CloudRain,
   Droplets,
   Flame,
@@ -24,6 +25,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { isGeminiConfigured } from '@/lib/ai/gemini';
+import { Link } from '@/i18n/navigation';
 import { TrendChart, type TrendChartDatum } from '@/components/trend-chart';
 import { DetectiveReport } from '@/components/detective-report';
 
@@ -187,7 +189,14 @@ export default async function DetectivePage({ params, searchParams }: Props) {
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       {/* Encabezado */}
-      <h1 className="text-3xl font-bold text-slate-50 md:text-4xl">
+      <Link
+        href="/"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-400 transition-colors hover:text-cyan-300"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        {t('backToMap')}
+      </Link>
+      <h1 className="mt-3 text-3xl font-bold text-slate-50 md:text-4xl">
         {t('title')}
       </h1>
       <p className="mt-3 max-w-3xl text-slate-400">{t('subtitle')}</p>
@@ -511,6 +520,9 @@ export default async function DetectivePage({ params, searchParams }: Props) {
                 {t('results.yearsNeededInfinite')}
               </p>
             )}
+            <p className="mt-2 border-t border-blue-500/20 pt-2 text-xs leading-relaxed text-slate-400">
+              {t('results.yearsNeededWhy')}
+            </p>
           </div>
 
           {/* Informe del detective: IA si hay clave; resumen local como alternativa */}
