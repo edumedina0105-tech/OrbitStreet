@@ -146,6 +146,17 @@
       }
     }
   },
+  "myData": {
+    "profile": "Profile",
+    "myData": "My data",
+    "loading": "Loading your data…",
+    "empty": "You haven't uploaded anything with these filters yet.",
+    "observations": "Observations",
+    "cases": "Cases",
+    "series": "Series",
+    "vsNASA": "vs NASA",
+    "delete": "Delete"
+  },
   "caseboard": {
     "boardTitle": "Community cases",
     "boardSubtitle": "Case files published by citizen detectives: every case starts from a local suspicion, is solved with deterministic statistics on real NASA data, and stays open for anyone's audit.",

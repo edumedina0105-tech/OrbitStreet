@@ -146,6 +146,17 @@
       }
     }
   },
+  "myData": {
+    "profile": "Perfil",
+    "myData": "Mis datos",
+    "loading": "Cargando tus datos…",
+    "empty": "Todavía no has subido nada con estos filtros.",
+    "observations": "Observaciones",
+    "cases": "Casos",
+    "series": "Series",
+    "vsNASA": "vs NASA",
+    "delete": "Eliminar"
+  },
   "caseboard": {
     "boardTitle": "Casos de la comunidad",
     "boardSubtitle": "Expedientes publicados por detectives ciudadanos: cada caso parte de una sospecha local, se resuelve con estadística determinista sobre datos reales de la NASA y queda abierto a la auditoría de cualquiera.",

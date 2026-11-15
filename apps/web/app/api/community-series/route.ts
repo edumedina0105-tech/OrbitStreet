@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@orbitstreet/database';
 import { getCurrentUser } from '@/lib/auth/session';
 import {
   listRecentCommunitySeries,
@@ -9,6 +10,7 @@ import { parseCoordinate } from '@/lib/parse-coord';
 /**
  * GET  /api/community-series — últimas series comunitarias (público).
  * POST /api/community-series — sube una serie (requiere sesión + cooldown).
+ * DELETE /api/community-series?id= — elimina una serie PROPIA.
  */
 export async function GET() {
   const series = await listRecentCommunitySeries(20);
@@ -98,4 +100,30 @@ export async function POST(request: NextRequest) {
     },
     { status: 201 }
   );
+}
+
+/**
+ * DELETE /api/community-series?id=<seriesId> — elimina una serie PROPIA.
+ * Filtro userId en la query: nadie borra datos ajenos (0 filas → 404).
+ */
+export async function DELETE(request: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ errorCode: 'unauthorized' }, { status: 401 });
+  }
+
+  const id = request.nextUrl.searchParams.get('id') ?? '';
+  if (!id) {
+    return NextResponse.json({ errorCode: 'invalid_format' }, { status: 400 });
+  }
+
+  const deleted = await prisma.communitySeries.deleteMany({
+    where: { id, userId: user.id }
+  });
+
+  if (deleted.count === 0) {
+    return NextResponse.json({ errorCode: 'not_found' }, { status: 404 });
+  }
+
+  return NextResponse.json({ ok: true });
 }
