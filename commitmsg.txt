@@ -1,0 +1,22 @@
+fix(firmware+web): dashboard del ESP32 con Content-Encoding gzip + /station estática (instantánea)
+
+Firmware — el navegador DESCARGABA el dashboard en vez de renderizarlo:
+- El serveStatic genérico servía index.html.gz sin garantizar la
+  cabecera Content-Encoding: gzip → el navegador lo trataba como
+  archivo descargable. Patrón correcto aplicado: handlers explícitos
+  para "/" y "/index.html" con beginResponse(LittleFS,
+  "index.html.gz", "text/html") + addHeader("Content-Encoding","gzip")
+- onNotFound y el caso "LittleFS vacío" comparten sendMissingDashboard
+  (HTML que explica causa y solución, sin HTML duplicado)
+- Rebuild + re-export de firmware/spiffs para ambas placas
+
+Web — /station tardaba segundos en entrar:
+- Era una página DINÁMICA (leía la sesión por cookies en el servidor) →
+  Next no puede precargarla → al hacer clic había que renderizarla en
+  el servidor y descargar el JS en ese momento
+- Ahora es 100 % ESTÁTICA: la sesión se consulta en el client
+  (StationGate → fetch /api/auth/me); la página queda prerendered
+  (○ SSG) y el botón del header la PRECARGA con prefetch →
+  navegación instantánea
+- Mismo contenido: con sesión muestra StationPanel (registro+token),
+  sin sesión el aviso ámbar con la indicación de login

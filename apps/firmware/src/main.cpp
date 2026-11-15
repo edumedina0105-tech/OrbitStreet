@@ -105,8 +105,48 @@ void sendTelemetry(uint32_t nowMs) {
     TelemetryClient::publish(g_lastReading);
 }
 
+// Página amigable cuando LittleFS está vacío (dashboard ausente): explica
+// la causa y la solución en HTML legible, nunca texto plano críptico.
+void sendMissingDashboard(AsyncWebServerRequest *req) {
+    const char* html =
+        "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<title>OrbitStreet</title></head>"
+        "<body style='background:#07090E;color:#e2e8f0;"
+        "font-family:system-ui,sans-serif;text-align:center;"
+        "padding:3rem 1rem'>"
+        "<h2 style='color:#22d3ee;margin:0 0 1rem'>OrbitStreet</h2>"
+        "<p style='max-width:32rem;margin:0 auto'>"
+        "El firmware esta instalado, pero la memoria LittleFS esta vacia: "
+        "falta el dashboard del nodo.</p>"
+        "<p style='max-width:32rem;margin:1rem auto'>"
+        "<b>Solucion:</b> vuelve a flashear desde "
+        "<code>orbitstreet.up.railway.app/es/flash</code> (la version "
+        "actual del instalador incluye la particion de datos), o con "
+        "PlatformIO: <code>pio run -e esp32dev -t uploadfs</code>.</p>"
+        "</body></html>";
+    req->send(200, "text/html", html);
+}
+
+// Dashboard comprimido servido con la cabecera correcta: sin
+// Content-Encoding: gzip el navegador DESCARGA el .gz en vez de
+// renderizarlo (servirlo por serveStatic genérico no garantiza la
+// cabecera; el patrón beginResponse + addHeader sí).
+void sendDashboard(AsyncWebServerRequest *req) {
+    if (LittleFS.exists("/index.html.gz")) {
+        AsyncWebServerResponse *res =
+            req->beginResponse(LittleFS, "/index.html.gz", "text/html");
+        res->addHeader("Content-Encoding", "gzip");
+        req->send(res);
+    } else {
+        sendMissingDashboard(req);
+    }
+}
+
 void setupRoutes() {
-    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html.gz");
+    // Rutas del dashboard: raíz y alias.
+    server.on("/", HTTP_GET, sendDashboard);
+    server.on("/index.html", HTTP_GET, sendDashboard);
 
     // GET: lecturas actuales
     server.on("/api/data", HTTP_GET, [](AsyncWebServerRequest *req) {
@@ -206,30 +246,13 @@ void setupRoutes() {
         ESP.restart();
     });
 
-    // 404 amigable: si el dashboard no está (LittleFS vacío), explicar la
-    // causa y la solución en HTML legible, nunca texto plano críptico.
+    // 404: si el dashboard no está, la página amigable lo explica;
+    // para cualquier otra ruta, 404 simple.
     server.onNotFound([](AsyncWebServerRequest *req) {
-        if (LittleFS.exists("/index.html.gz")) {
-            req->send(404, "text/plain", "Not found");
+        if (!LittleFS.exists("/index.html.gz")) {
+            sendMissingDashboard(req);
             return;
         }
-        const char* html =
-            "<!DOCTYPE html><html><head><meta charset='utf-8'>"
-            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-            "<title>OrbitStreet</title></head>"
-            "<body style='background:#07090E;color:#e2e8f0;"
-            "font-family:system-ui,sans-serif;text-align:center;"
-            "padding:3rem 1rem'>"
-            "<h2 style='color:#22d3ee;margin:0 0 1rem'>OrbitStreet</h2>"
-            "<p style='max-width:32rem;margin:0 auto'>"
-            "El firmware esta instalado, pero la memoria LittleFS esta vacia: "
-            "falta el dashboard del nodo.</p>"
-            "<p style='max-width:32rem;margin:1rem auto'>"
-            "<b>Solucion:</b> vuelve a flashear desde "
-            "<code>orbitstreet.up.railway.app/es/flash</code> (la version "
-            "actual del instalador incluye la particion de datos), o con "
-            "PlatformIO: <code>pio run -e esp32dev -t uploadfs</code>.</p>"
-            "</body></html>";
-        req->send(200, "text/html", html);
+        req->send(404, "text/plain", "Not found");
     });
 }

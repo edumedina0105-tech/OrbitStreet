@@ -1,9 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { BookOpen, Cpu, KeyRound, Wifi } from 'lucide-react';
-import { getCurrentUser } from '@/lib/auth/session';
+import { BookOpen, Cpu, Wifi } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { WebSerialFlasher } from '@/components/web-serial-flasher';
-import { StationPanel } from '@/components/station-panel';
+import { StationGate } from '@/components/station-gate';
 import { WiringDiagram } from '@/components/wiring-diagram';
 import type { Locale } from '@orbitstreet/shared-types';
 
@@ -16,7 +15,10 @@ type Props = {
  * paso a paso e intuitivo:
  *
  *   1. Flashea el ESP32 (Web Serial, sin instalar nada)
- *   2. Registra la estación y copia el token (requiere sesión)
+ *   2. Registra la estación y copia el token (sesión consultada en el
+ *      client vía StationGate → la página es 100 % ESTÁTICA y Next la
+ *      precarga con el prefetch del botón del header: navegación
+ *      instantánea, sin espera de SSR)
  *   3. Conecta el sensor y configura el nodo con el asistente cautivo
  *
  * La guía completa (/guide) y el flasheo avanzado (/flash) quedan a un
@@ -26,10 +28,7 @@ export default async function StationPage({ params }: Props) {
   const { locale: rawLocale } = await params;
   const locale = (rawLocale === 'en' ? 'en' : 'es') as Locale;
   setRequestLocale(locale);
-  const [user, t] = await Promise.all([
-    getCurrentUser(),
-    getTranslations({ locale, namespace: 'stationPage' })
-  ]);
+  const t = await getTranslations({ locale, namespace: 'stationPage' });
 
   const stepTitle = 'flex items-center gap-3 text-lg font-bold text-slate-100';
   const stepBadge =
@@ -70,19 +69,9 @@ export default async function StationPage({ params }: Props) {
         </p>
 
         <div className="mt-4">
-          {user ? (
-            <StationPanel />
-          ) : (
-            <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-6">
-              <p className="flex items-center gap-2 text-sm font-semibold text-amber-300">
-                <KeyRound className="h-4 w-4" aria-hidden />
-                {t('step2.loginNeeded')}
-              </p>
-              <p className="mt-2 text-xs text-amber-200/80">
-                {t('step2.loginHint')}
-              </p>
-            </div>
-          )}
+          {/* Sesión consultada en el client (StationGate) para que la
+              página sea estática y se precargue: navegación instantánea. */}
+          <StationGate />
         </div>
       </section>
 
