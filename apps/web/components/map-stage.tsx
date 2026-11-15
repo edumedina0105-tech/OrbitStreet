@@ -8,7 +8,7 @@ import {
   useTransform
 } from 'motion/react';
 import { ArrowDown, ChevronDown, Loader2, Radio, Search } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from '@/i18n/navigation';
 import type { MapCity } from '@/components/world-map';
@@ -18,6 +18,7 @@ import {
   type SeriesAnalysis
 } from '@/lib/analysis/analyze-series';
 import { VARIABLE_CONFIG, VARIABLE_IDS } from '@/lib/analysis/variables';
+import { YEARS_NEEDED_PRACTICAL_LIMIT } from '@orbitstreet/shared-types';
 import type {
   SeasonOrAnnual,
   TimePoint,
@@ -79,6 +80,7 @@ export function MapStage() {
   const t = useTranslations('home.map');
   const th = useTranslations('home');
   const td = useTranslations('detective');
+  const locale = useLocale();
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -100,6 +102,15 @@ export function MapStage() {
   const [analysis, setAnalysis] = useState<SeriesAnalysis | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [fetchError, setFetchError] = useState(false);
+
+  // Informe narrado por IA para el lugar analizado (aparece en el panel
+  // izquierdo; la IA solo redacta, las cifras ya están calculadas).
+  const [aiReport, setAiReport] = useState<{
+    text: string;
+    engine: 'gemini' | 'template';
+    fallback: boolean;
+  } | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
 
   // Ciudades con nombres localizados por i18n (los pines llevan texto visible).
   const cities: MapCity[] = useMemo(
@@ -149,6 +160,58 @@ export function MapStage() {
    * determinista (Mann-Kendall + Sen + IC) en el navegador: el resultado
    * se muestra dentro del panel, sin salir del mapa.
    */
+  /**
+   * Pide el informe narrado (Gemini si hay clave; resumen determinista si no)
+   * con las cifras ya calculadas. Silencioso: si falla, el análisis numérico
+   * del panel derecho ya está visible y eso es lo esencial.
+   */
+  const fetchAiReport = async (result: SeriesAnalysis) => {
+    setAiBusy(true);
+    setAiReport(null);
+    try {
+      const response = await fetch('/api/detective-report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          locale,
+          analysis: {
+            variableId: variable,
+            season,
+            periodStart: String(startYear),
+            periodEnd: String(endYear),
+            slopePerDecade: result.trend.senSlopePerDecade,
+            ciLow: result.trend.ci95PerDecade.lower,
+            ciHigh: result.trend.ci95PerDecade.upper,
+            pValue: result.trend.mannKendall.p,
+            n: result.trend.n,
+            significant: result.trend.significant,
+            // null = sin horizonte: infinito o absurdo (> 1000 años).
+            yearsNeeded:
+              Number.isFinite(result.years.years) &&
+              result.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT
+                ? result.years.years
+                : null
+          }
+        })
+      });
+      const data = (await response.json()) as {
+        text?: string;
+        engine?: 'gemini' | 'template';
+        fallback?: boolean;
+      };
+      if (!response.ok || !data.text || !data.engine) return;
+      setAiReport({
+        text: data.text,
+        engine: data.engine,
+        fallback: data.fallback === true
+      });
+    } catch {
+      // Silencioso a propósito: el análisis determinista sigue visible.
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
   const handleConsult = async () => {
     setIsFetching(true);
     setFetchError(false);
@@ -183,6 +246,8 @@ export function MapStage() {
       });
 
       setAnalysis(result);
+      // Con las cifras ya calculadas, pedimos la narración del caso.
+      void fetchAiReport(result);
     } catch {
       setFetchError(true);
     } finally {
@@ -293,6 +358,51 @@ export function MapStage() {
                 )}
                 {isFetching ? t('analyzing') : t('investigate')}
               </button>
+
+              {/* Informe del caso, narrado por IA sobre las cifras ya
+                  calculadas (o resumen determinista si no hay clave). */}
+              {(aiBusy || aiReport) && (
+                <div className="rounded-xl border border-white/15 bg-slate-950/70 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[10px] uppercase tracking-wide text-cyan-300">
+                      {td('report.title')}
+                    </span>
+                    {aiReport && (
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold ${
+                          aiReport.engine === 'gemini'
+                            ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300'
+                            : 'border-slate-600 bg-slate-800 text-slate-300'
+                        }`}
+                      >
+                        {aiReport.engine === 'gemini'
+                          ? td('report.badgeGemini')
+                          : aiReport.fallback
+                            ? td('report.badgeFallback')
+                            : td('report.badgeTemplate')}
+                      </span>
+                    )}
+                  </div>
+
+                  {aiBusy ? (
+                    <p className="mt-2 flex items-center gap-2 text-[11px] text-slate-400">
+                      <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                      {td('report.loading')}
+                    </p>
+                  ) : (
+                    <>
+                      <p className="mt-2 text-[11px] leading-relaxed text-slate-200">
+                        {aiReport?.text}
+                      </p>
+                      <p className="mt-2 text-[9px] leading-snug text-slate-500">
+                        {aiReport?.engine === 'gemini'
+                          ? td('report.aiDisclaimer')
+                          : td('report.templateDisclaimer')}
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Franja de datos clave */}
               <div className="grid grid-cols-3 gap-1.5 border-t border-white/10 pt-2.5">
@@ -484,14 +594,18 @@ export function MapStage() {
                           ? td('results.significantYes')
                           : td('results.significantNo')}
                       </span>
-                      {Number.isFinite(analysis.years.years) && (
+                      {Number.isFinite(analysis.years.years) ? (
                         <span
                           title={t('yearsNoteWhy')}
                           className="cursor-help rounded-md border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-slate-400"
                         >
-                          {t('yearsNoteShort', { years: analysis.years.years })}
+                          {analysis.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT
+                            ? t('yearsNoteShort', {
+                                years: analysis.years.years
+                              })
+                            : t('yearsNoteImpractical')}
                         </span>
-                      )}
+                      ) : null}
                     </div>
 
                     <p className="text-[10px] leading-relaxed text-slate-500">

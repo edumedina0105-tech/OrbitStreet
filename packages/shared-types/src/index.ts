@@ -78,7 +78,7 @@ export type SeriesSource = 'nasa-power' | 'community' | 'simulated';
 
 /**
  * ¿Cuántos años necesitaría un sensor local para confirmar la tendencia?
- * n ≈ ((z_{1-α/2} + z_{1-potencia}) · σ / |pendiente_anual|)²
+ * n ≈ (√12 · (z_{1-α/2} + z_{1-potencia}) · σ / |pendiente_anual|)^(2/3)
  */
 export interface YearsNeededResult {
   years: number;
@@ -90,3 +90,14 @@ export interface YearsNeededResult {
 
 /** Etiqueta obligatoria para datos de prueba. */
 export const SIMULATED_BADGE = '[DATOS SIMULADOS / TESTBED]';
+
+/**
+ * Límite práctico del horizonte "años que necesitaría un sensor local".
+ *
+ * n ≈ ((z_{1-α/2} + z_{1-potencia}) · σ / |pendiente_anual|)² puede dar
+ * millones de años cuando el ruido supera a la señal: matemáticamente
+ * correcto, pero sin sentido práctico. Por encima de este límite la
+ * interfaz muestra el mensaje honesto "no detectable en plazo humano"
+ * y al informe de IA no se le pasa la cifra (null = sin horizonte).
+ */
+export const YEARS_NEEDED_PRACTICAL_LIMIT = 1000;

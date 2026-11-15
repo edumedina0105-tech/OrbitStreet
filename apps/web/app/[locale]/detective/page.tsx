@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { YEARS_NEEDED_PRACTICAL_LIMIT } from '@orbitstreet/shared-types';
 import type { SeasonOrAnnual, VariableId } from '@orbitstreet/shared-types';
 import {
   analyzePowerLocation,
@@ -12,12 +13,12 @@ import {
 } from '@/lib/analysis/variables';
 import { parseCoordinate } from '@/lib/parse-coord';
 import {
-  ArrowLeft,
   CloudRain,
   Droplets,
   Flame,
   FlaskConical,
   Gauge,
+  Globe,
   MapPin,
   Snowflake,
   Sun,
@@ -188,15 +189,17 @@ export default async function DetectivePage({ params, searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      {/* Encabezado */}
+      {/* Botón flotante: siempre visible al hacer scroll */}
       <Link
         href="/"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-400 transition-colors hover:text-cyan-300"
+        className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-slate-900/90 px-4 py-2.5 text-sm font-semibold text-cyan-300 shadow-2xl shadow-black/50 backdrop-blur-md transition-colors hover:bg-slate-800 hover:text-cyan-200"
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden />
+        <Globe className="h-4 w-4" aria-hidden />
         {t('backToMap')}
       </Link>
-      <h1 className="mt-3 text-3xl font-bold text-slate-50 md:text-4xl">
+
+      {/* Encabezado */}
+      <h1 className="text-3xl font-bold text-slate-50 md:text-4xl">
         {t('title')}
       </h1>
       <p className="mt-3 max-w-3xl text-slate-400">{t('subtitle')}</p>
@@ -509,11 +512,16 @@ export default async function DetectivePage({ params, searchParams }: Props) {
             <p className="text-sm font-semibold text-blue-400">
               {t('results.yearsNeededTitle')}
             </p>
-            {Number.isFinite(result.years.years) ? (
+            {Number.isFinite(result.years.years) &&
+            result.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT ? (
               <p className="mt-2 text-sm text-slate-300">
                 {t('results.yearsNeededBody', {
                   years: fmt(result.years.years, locale, 0)
                 })}
+              </p>
+            ) : Number.isFinite(result.years.years) ? (
+              <p className="mt-2 text-sm text-slate-300">
+                {t('results.yearsNeededHuge')}
               </p>
             ) : (
               <p className="mt-2 text-sm text-slate-300">
@@ -539,9 +547,12 @@ export default async function DetectivePage({ params, searchParams }: Props) {
               pValue: result.trend.mannKendall.p,
               n: result.trend.n,
               significant: result.trend.significant,
-              yearsNeeded: Number.isFinite(result.years.years)
-                ? result.years.years
-                : null
+              // null = sin horizonte: infinito o absurdo (> 1000 años).
+              yearsNeeded:
+                Number.isFinite(result.years.years) &&
+                result.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT
+                  ? result.years.years
+                  : null
             }}
           />
 

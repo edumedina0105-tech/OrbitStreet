@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { VARIABLE_IDS } from '@/lib/analysis/variables';
 import { parseCoordinate } from '@/lib/parse-coord';
+import { YEARS_NEEDED_PRACTICAL_LIMIT } from '@orbitstreet/shared-types';
 import type { VariableId } from '@orbitstreet/shared-types';
 
 /**
@@ -225,9 +226,12 @@ export function UploadForm({ cooldownMinutes }: { cooldownMinutes: number }) {
               </span>
             )}
             <p className="rounded-lg border border-blue-500/30 bg-blue-500/5 px-3 py-2 text-sm text-slate-300">
-              {Number.isFinite(result.yearsNeeded)
+              {Number.isFinite(result.yearsNeeded) &&
+              result.yearsNeeded <= YEARS_NEEDED_PRACTICAL_LIMIT
                 ? t('yearsNeededBody', { years: String(result.yearsNeeded) })
-                : t('yearsNeededInfinite')}
+                : Number.isFinite(result.yearsNeeded)
+                  ? t('yearsNeededHuge')
+                  : t('yearsNeededInfinite')}
             </p>
             <p className="text-xs text-slate-500">{t('communityLabel')}</p>
           </div>
