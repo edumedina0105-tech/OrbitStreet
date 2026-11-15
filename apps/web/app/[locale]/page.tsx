@@ -1,6 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import {
-  ArrowRight,
   Clock,
   Database,
   FlaskConical,
@@ -9,7 +8,7 @@ import {
   Sun,
   TrendingUp
 } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
+import { MapStage } from '@/components/map-stage';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -31,61 +30,18 @@ const HONESTY_CARDS = [
   { key: 'simulated', Icon: FlaskConical }
 ] as const;
 
-/** Franja de datos clave del hero. */
-const HERO_STATS = ['statYears', 'statTests', 'statCI'] as const;
-
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('home');
 
   return (
-    <div className="mx-auto max-w-6xl px-6">
-      {/* Hero */}
-      <section className="py-20 text-center md:py-28">
-        <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-1.5 text-[11px] font-semibold tracking-wide text-cyan-300">
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-          {t('hero.badge')}
-        </span>
-        <h1 className="mx-auto mt-7 max-w-4xl text-balance text-4xl font-extrabold tracking-tight text-white md:text-6xl">
-          {t('hero.title')}
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-slate-300 md:text-lg">
-          {t('hero.subtitle')}
-        </p>
-        <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-          {/* Caso insignia: calor de primavera en Asunción, datos reales. */}
-          <Link
-            href="/detective?preset=asuncion&variable=T2M_MAX&season=SON"
-            className="inline-flex items-center gap-2 rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-cyan-300"
-          >
-            {t('hero.ctaQuestions')}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
-          <a
-            href="#honesty"
-            className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/[0.06] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/[0.12]"
-          >
-            {t('hero.ctaHonesty')}
-          </a>
-        </div>
+    <div>
+      {/* Hero a pantalla completa: globo 3D interactivo + paneles flotantes */}
+      <MapStage />
 
-        {/* Franja de datos clave del proyecto */}
-        <dl className="mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-          {HERO_STATS.map((key) => (
-            <div
-              key={key}
-              className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3"
-            >
-              <dd className="font-mono text-xs leading-relaxed text-cyan-300">
-                {t(`hero.${key}`)}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      {/* Las 4 preguntas */}
+      <div className="mx-auto max-w-[1360px] px-6">
+        {/* Las 4 preguntas */}
       <section id="questions" className="scroll-mt-24 pb-16">
         <header className="mb-6 border-b border-slate-800 pb-3">
           <h2 className="text-xl font-bold text-white md:text-2xl">
@@ -141,6 +97,7 @@ export default async function HomePage({ params }: Props) {
           ))}
         </div>
       </section>
+      </div>
     </div>
   );
 }

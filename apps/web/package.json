@@ -13,19 +13,25 @@
   "dependencies": {
     "@orbitstreet/database": "*",
     "@orbitstreet/shared-types": "*",
+    "d3-geo": "^3.1.2",
     "lucide-react": "^1.73.0",
+    "motion": "^14.14.0",
     "next": "15.5.29",
     "next-intl": "^4.15.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "recharts": "^3.10.1"
+    "recharts": "^3.10.1",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/d3-geo": "^3.1.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/topojson-client": "^3.1.5",
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
     "tailwindcss": "^4",
