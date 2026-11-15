@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, Loader2, Send } from 'lucide-react';
+import { Bot, Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
 /**

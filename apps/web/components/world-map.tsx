@@ -109,6 +109,16 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+/** Observación comunitaria pública para pines en el globo. */
+export interface CommunityPoint {
+  lat: number;
+  lon: number;
+  username: string;
+  variable: string;
+  value: number;
+  unit: string;
+}
+
 interface WorldMapProps {
   cities: MapCity[];
   selectedLat: number;
@@ -117,6 +127,8 @@ interface WorldMapProps {
   selectedCountry: string;
   /** Se incrementa para volar suavemente hacia el punto seleccionado. */
   focusKey?: number;
+  /** Pines de datos comunitarios (opcional; se muestran como esmeralda). */
+  communityPoints?: CommunityPoint[];
   onSelectLocation: (loc: {
     lat: number;
     lon: number;
@@ -133,6 +145,7 @@ export function WorldMap({
   selectedName,
   selectedCountry,
   focusKey = 0,
+  communityPoints = [],
   onSelectLocation
 }: WorldMapProps) {
   const t = useTranslations('home.map');
@@ -614,6 +627,29 @@ export function WorldMap({
             className="pointer-events-none"
           />
         )}
+
+        {/* Pines de datos comunitarios (esmeralda, con tooltip).
+            Ciencia ciudadana visible sobre el globo. */}
+        {communityPoints.map((obs, index) => {
+          if (!isVisibleOnFront(obs.lon, obs.lat)) return null;
+          const point = projection([obs.lon, obs.lat]);
+          if (!point) return null;
+          const [cx, cy] = point;
+          return (
+            <g key={`community-${index}`} transform={`translate(${cx}, ${cy})`}>
+              <title>
+                {`@${obs.username} · ${obs.value} ${obs.unit}`}
+              </title>
+              <circle r={5} fill="#10B981" fillOpacity={0.25} />
+              <circle
+                r={2.6}
+                fill="#34D399"
+                stroke="#050811"
+                strokeWidth={1.2}
+              />
+            </g>
+          );
+        })}
 
         {/* Pines de ciudades predefinidas (solo hemisferio frontal) */}
         {cities.map((city) => {

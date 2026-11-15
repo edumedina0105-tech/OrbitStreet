@@ -12,6 +12,7 @@
       "upload": "Sube tu serie",
       "account": "Cuenta"
     },
+    "login": "Iniciar sesión",
     "cta": "Ver análisis"
   },
   "languageSwitcher": {
@@ -53,6 +54,19 @@
       "endYear": "Año final",
       "consult": "Consultar NASA POWER",
       "resultClose": "Cerrar resultados",
+      "community": {
+        "title": "Datos de la comunidad",
+        "empty": "Sin observaciones comunitarias en esta celda todavía — sé el primero.",
+        "showPins": "Ver en el mapa",
+        "hidePins": "Ocultar del mapa",
+        "cellTitle": "Datos comunitarios en esta celda ({count})",
+        "verdictPlausible": "coincide con la celda NASA",
+        "verdictDoubtful": "sesgo dudoso vs celda",
+        "verdictSuspicious": "sesgo sospechoso vs celda",
+        "verdictNoReference": "sin celda de referencia",
+        "meanBias": "Sesgo medio vs celda NASA: {bias} {unit}",
+        "comparedNote": "Cada observación se comparó en código determinista contra la celda MERRA-2 de su día. Datos comunitarios: no validados."
+      },
       "analyzing": "Consultando NASA POWER…",
       "viewFull": "Ver gráfico e informe completo",
       "yearsNoteShort": "Sensor local: ~{years} años",
@@ -263,6 +277,7 @@
     "registerTab": "Crear cuenta",
     "username": "Usuario",
     "password": "Contraseña",
+    "showPassword": "Mostrar contraseña",
     "passwordHint": "Mínimo 8 caracteres. Se guarda solo como hash scrypt, nunca en texto claro.",
     "loginSubmit": "Iniciar sesión",
     "registerSubmit": "Crear cuenta e iniciar sesión",
@@ -332,7 +347,7 @@
       "loginTab": "Iniciar sesión",
       "username": "Usuario",
       "password": "Contraseña",
-      "passwordHint": "Mínimo 8 caracteres. Solo guardamos el hash scrypt.",
+      "showPassword": "Mostrar contraseña",
       "createSubmit": "Crear cuenta y continuar",
       "loginSubmit": "Iniciar sesión y continuar",
       "busy": "Procesando…",
@@ -364,7 +379,6 @@
       "value": "Valor medido",
       "date": "Fecha de la medición",
       "location": "Ubicación del dato",
-      "locationMap": "Punto del mapa",
       "locationExif": "GPS de la foto",
       "locationGps": "Mi ubicación (navegador)",
       "gpsDenied": "Permiso de ubicación denegado o no disponible.",

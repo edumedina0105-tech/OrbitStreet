@@ -84,6 +84,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : '';
+    console.error(
+      '[api/extract-observation] Gemini falló:',
+      message || error
+    );
     if (message.includes('ilegible')) {
       // La IA no vio una lectura legible: no es error del servidor.
       return NextResponse.json({ errorCode: 'no_readout' }, { status: 422 });

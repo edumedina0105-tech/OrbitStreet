@@ -13,7 +13,7 @@ type Props = {
  * progreso; investigar con datos de la NASA sigue abierto para todos.
  */
 export default async function AccountPage({ params }: Props) {
-  const { locale } = await params;
+  await params;
   const [user, t] = await Promise.all([
     getCurrentUser(),
     getTranslations('account')

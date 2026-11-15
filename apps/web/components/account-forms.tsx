@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Eye, EyeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 /**
@@ -27,6 +28,7 @@ export function AccountForms() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -112,19 +114,30 @@ export function AccountForms() {
 
         <label className="block text-sm text-slate-300">
           {t('password')}
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            minLength={8}
-            maxLength={200}
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-            required
-            className={inputClass}
-          />
-          {mode === 'register' && (
-            <p className="mt-1 text-xs text-slate-500">{t('passwordHint')}</p>
-          )}
+          <span className="relative mt-1 block">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={8}
+              maxLength={200}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              required
+              className={`${inputClass} pr-10`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={t('showPassword')}
+              className="absolute inset-y-0 right-2 flex items-center rounded p-1 text-slate-400 transition-colors hover:text-white"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" aria-hidden />
+              ) : (
+                <Eye className="h-4 w-4" aria-hidden />
+              )}
+            </button>
+          </span>
         </label>
 
         {error && (

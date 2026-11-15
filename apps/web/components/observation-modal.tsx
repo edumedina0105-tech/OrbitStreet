@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Camera,
   Crosshair,
+  Eye,
+  EyeOff,
   ImagePlus,
   Loader2,
-  MapPin,
   PenLine,
   ShieldCheck,
   X
@@ -24,8 +25,8 @@ import { getBrowserLocation } from '@/lib/location';
  *  1. Requiere cuenta (anti-bots): si no hay sesión se ofrece crearla.
  *  2. Foto → la IA de visión SOLO extrae el valor (el usuario confirma/edita)
  *     o Manual → el usuario escribe el valor.
- *  3. Ubicación: EXIF de la foto > GPS del navegador > punto del mapa.
- *     La IP nunca es fuente de verdad (una VPN la derriba).
+ *  3. Ubicación: GPS del navegador (por defecto y obligatorio) o EXIF de
+ *     la foto. La IP nunca es fuente de verdad (una VPN la derriba).
  *  4. Al guardar, el sesgo contra la celda MERRA-2 del día lo calcula
  *     CÓDIGO determinista; la IA jamás adjudica verdad.
  *  5. Insignia permanente: "dato comunitario · no validado".
@@ -69,12 +70,10 @@ async function resizeImage(file: File, maxSide = 1024): Promise<Blob> {
 
 export function ObservationModal({
   open,
-  onClose,
-  selected
+  onClose
 }: {
   open: boolean;
   onClose: () => void;
-  selected: { lat: number; lon: number; name: string };
 }) {
   const t = useTranslations('observation');
   const td = useTranslations('detective');
@@ -92,7 +91,8 @@ export function ObservationModal({
   const [observedAt, setObservedAt] = useState(todayIso());
   const [extraction, setExtraction] = useState<ExtractionMeta | null>(null);
   const [exifGps, setExifGps] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationChoice, setLocationChoice] = useState<LocationChoice>('MAP');
+  // Ubicación obligatoria: GPS del navegador por defecto (o EXIF de la foto).
+  const [locationChoice, setLocationChoice] = useState<LocationChoice>('GPS');
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lon: number; accuracy: number } | null>(null);
   const [gpsBusy, setGpsBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -107,6 +107,7 @@ export function ObservationModal({
   const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
   const [authUser, setAuthUser] = useState('');
   const [authPassword, setAuthPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -168,7 +169,7 @@ export function ObservationModal({
     setObservedAt(todayIso());
     setExtraction(null);
     setExifGps(null);
-    setLocationChoice('MAP');
+    setLocationChoice('GPS');
     setGpsCoords(null);
     setSaveError(null);
     setSaved(null);
@@ -211,6 +212,24 @@ export function ObservationModal({
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [open, onClose]);
+
+  // Ubicación obligatoria: al entrar al formulario se pide el GPS del
+  // navegador automáticamente (el usuario ya dio clic en "Sube tu dato").
+  useEffect(() => {
+    if (!open || stage !== 'form') return;
+    if (gpsCoords || gpsBusy || exifGps) return;
+    setGpsBusy(true);
+    getBrowserLocation().then((result) => {
+      setGpsBusy(false);
+      if (result.ok) {
+        setGpsCoords(result.location);
+        setLocationChoice('GPS');
+      } else {
+        setPhotoError(t('form.gpsDenied'));
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, stage]);
 
   if (!open) return null;
 
@@ -285,14 +304,21 @@ export function ObservationModal({
   const saveObservation = async () => {
     setSaveError(null);
     const value = parseCoordinate(valueRaw);
+    // Ubicación OBLIGATORIA: GPS del navegador o EXIF de la foto.
+    const hasLocation =
+      (locationChoice === 'GPS' && gpsCoords) ||
+      (locationChoice === 'EXIF' && exifGps);
     const location =
-      locationChoice === 'MAP'
-        ? { lat: selected.lat, lon: selected.lon }
-        : locationChoice === 'EXIF' && exifGps
-          ? { lat: exifGps.latitude, lon: exifGps.longitude }
-          : gpsCoords
-            ? { lat: gpsCoords.lat, lon: gpsCoords.lon }
-            : { lat: selected.lat, lon: selected.lon };
+      locationChoice === 'EXIF' && exifGps
+        ? { lat: exifGps.latitude, lon: exifGps.longitude }
+        : gpsCoords
+          ? { lat: gpsCoords.lat, lon: gpsCoords.lon }
+          : null;
+
+    if (!location || !hasLocation) {
+      setSaveError(t('form.gpsDenied'));
+      return;
+    }
 
     setStage('saving');
     try {
@@ -344,10 +370,15 @@ export function ObservationModal({
   };
 
   const value = parseCoordinate(valueRaw);
+  const hasLocation = Boolean(
+    (locationChoice === 'GPS' && gpsCoords) ||
+      (locationChoice === 'EXIF' && exifGps)
+  );
   const canSave =
     stage === 'form' &&
     Number.isFinite(value) &&
-    /^\d{4}-\d{2}-\d{2}$/.test(observedAt);
+    /^\d{4}-\d{2}-\d{2}$/.test(observedAt) &&
+    hasLocation;
 
   const verdictText = (check: NasaCheck) => {
     const unit = VARIABLE_CONFIG[variable as keyof typeof VARIABLE_CONFIG]?.unit ?? '';
@@ -462,23 +493,34 @@ export function ObservationModal({
                 <span className="mb-1 block text-[11px] font-medium text-slate-400">
                   {t('auth.password')}
                 </span>
-                <input
-                  type="password"
-                  value={authPassword}
-                  onChange={(event) => setAuthPassword(event.target.value)}
-                  minLength={8}
-                  maxLength={200}
-                  autoComplete={
-                    authMode === 'register' ? 'new-password' : 'current-password'
-                  }
-                  required
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:outline-none"
-                />
-                {authMode === 'register' && (
-                  <span className="mt-1 block text-[10px] text-slate-500">
-                    {t('auth.passwordHint')}
-                  </span>
-                )}
+                <span className="relative block">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={authPassword}
+                    onChange={(event) => setAuthPassword(event.target.value)}
+                    minLength={8}
+                    maxLength={200}
+                    autoComplete={
+                      authMode === 'register'
+                        ? 'new-password'
+                        : 'current-password'
+                    }
+                    required
+                    className="w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 pr-10 text-sm text-slate-100 focus:border-cyan-400 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={t('auth.showPassword')}
+                    className="absolute inset-y-0 right-2 flex items-center rounded p-1 text-slate-400 transition-colors hover:text-white"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" aria-hidden />
+                    ) : (
+                      <Eye className="h-4 w-4" aria-hidden />
+                    )}
+                  </button>
+                </span>
               </label>
 
               {authError && (
@@ -637,30 +679,14 @@ export function ObservationModal({
                   />
                 </label>
 
-                {/* Ubicación: EXIF > GPS del navegador > punto del mapa */}
+                {/* Ubicación obligatoria: GPS del navegador (por defecto,
+                    se pide automáticamente) o EXIF de la foto. Sin punto
+                    del mapa: el dato debe ser de DONDE está el usuario. */}
                 <div>
                   <span className="mb-1.5 block text-[11px] font-medium text-slate-400">
                     {t('form.location')}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setLocationChoice('MAP')}
-                      className={locationButtonClass(locationChoice === 'MAP')}
-                    >
-                      <MapPin className="h-3 w-3" aria-hidden />
-                      {t('form.locationMap')}
-                    </button>
-                    {exifGps && (
-                      <button
-                        type="button"
-                        onClick={() => setLocationChoice('EXIF')}
-                        className={locationButtonClass(locationChoice === 'EXIF')}
-                      >
-                        <ImagePlus className="h-3 w-3" aria-hidden />
-                        {t('form.locationExif')}
-                      </button>
-                    )}
                     <button
                       type="button"
                       onClick={() => void requestGps()}
@@ -678,6 +704,16 @@ export function ObservationModal({
                           })
                         : t('form.locationGps')}
                     </button>
+                    {exifGps && (
+                      <button
+                        type="button"
+                        onClick={() => setLocationChoice('EXIF')}
+                        className={locationButtonClass(locationChoice === 'EXIF')}
+                      >
+                        <ImagePlus className="h-3 w-3" aria-hidden />
+                        {t('form.locationExif')}
+                      </button>
+                    )}
                   </div>
                 </div>
 

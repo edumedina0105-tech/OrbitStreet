@@ -59,8 +59,13 @@ export async function POST(request: NextRequest) {
   try {
     const text = await generateDetectiveReport(analysis, locale);
     return NextResponse.json({ engine: 'gemini', aiAvailable: true, text });
-  } catch {
-    // Clave configurada pero Gemini falló: respaldo honesto.
+  } catch (error) {
+    // Clave configurada pero Gemini falló: registrar el MOTIVO en los logs
+    // del deploy (Railway) y caer al respaldo honesto.
+    console.error(
+      '[api/detective-report] Gemini falló, usando resumen local:',
+      error instanceof Error ? error.message : error
+    );
     return NextResponse.json({
       engine: 'template',
       aiAvailable: true,

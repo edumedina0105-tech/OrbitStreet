@@ -43,8 +43,12 @@ export async function POST(request: NextRequest) {
     try {
       const text = await answerProjectQuestion(question, locale);
       return NextResponse.json({ engine: 'gemini', aiAvailable: true, text });
-    } catch {
-      // Clave configurada pero Gemini falló: respaldo honesto abajo.
+    } catch (error) {
+      // Registrar el motivo del fallo en los logs del deploy.
+      console.error(
+        '[api/project-ask] Gemini falló, usando glosario local:',
+        error instanceof Error ? error.message : error
+      );
     }
   }
 

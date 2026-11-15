@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   motion,
   useReducedMotion,
   useScroll,
   useTransform
 } from 'motion/react';
-import { ArrowDown, ChevronDown, Loader2, Radio, Search, Upload, X } from 'lucide-react';
+import { ArrowDown, ChevronDown, Loader2, MapPin, Radio, Search, Upload, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import type { MapCity } from '@/components/world-map';
@@ -111,6 +111,98 @@ export function MapStage() {
   // Panel grande de resultados (izquierda) + corrimiento animado del mapa:
   // se abre al consultar y se cierra al tocar el mapa (que se re-centra).
   const [resultsOpen, setResultsOpen] = useState(false);
+
+  // Datos comunitarios públicos: cercanos a la celda seleccionada y
+  // pines globales para el globo (ciencia ciudadana visible).
+  const [communityNearby, setCommunityNearby] = useState<
+    Array<{
+      username: string;
+      variable: string;
+      value: number;
+      unit: string;
+      observedAt: string;
+      verdict: string;
+      bias: number | null;
+    }>
+  >([]);
+  const [communityPins, setCommunityPins] = useState<
+    Array<{
+      lat: number;
+      lon: number;
+      username: string;
+      variable: string;
+      value: number;
+      unit: string;
+    }>
+  >([]);
+  const [showPins, setShowPins] = useState(false);
+  const [communityBusy, setCommunityBusy] = useState(false);
+
+  const fetchCommunityNearby = useCallback(
+    async (lat: number, lon: number) => {
+      try {
+        const response = await fetch(
+          `/api/observations/public?lat=${lat}&lon=${lon}`
+        );
+        const data = (await response.json()) as {
+          nearby?: Array<{
+            username: string;
+            variable: string;
+            value: number;
+            unit: string;
+            observedAt: string;
+            verdict: string;
+            bias: number | null;
+          }>;
+        };
+        setCommunityNearby(data.nearby ?? []);
+      } catch {
+        setCommunityNearby([]);
+      }
+    },
+    []
+  );
+
+  const togglePins = async () => {
+    if (showPins) {
+      setShowPins(false);
+      return;
+    }
+    setCommunityBusy(true);
+    try {
+      const response = await fetch('/api/observations/public');
+      const data = (await response.json()) as {
+        recent?: Array<{
+          latitude: number;
+          longitude: number;
+          username: string;
+          variable: string;
+          value: number;
+          unit: string;
+        }>;
+      };
+      setCommunityPins(
+        (data.recent ?? []).map((obs) => ({
+          lat: obs.latitude,
+          lon: obs.longitude,
+          username: obs.username,
+          variable: obs.variable,
+          value: obs.value,
+          unit: obs.unit
+        }))
+      );
+      setShowPins(true);
+    } catch {
+      setCommunityPins([]);
+    } finally {
+      setCommunityBusy(false);
+    }
+  };
+
+  // Al cambiar el punto seleccionado, consultar la comunidad de esa celda.
+  useEffect(() => {
+    void fetchCommunityNearby(selected.lat, selected.lon);
+  }, [selected.lat, selected.lon, fetchCommunityNearby]);
 
   // ¿Hay IA (Gemini) configurada? Lo responde /api/auth/me (flag público);
   // el informe de la sección de resultados lo necesita.
@@ -324,23 +416,16 @@ export function MapStage() {
           style={{ opacity: mapOpacity, scale: mapScale }}
           className="absolute inset-0 origin-center"
         >
-          {/* Al abrir los resultados el globo se desplaza a la derecha
-              (animado); al tocar el mapa se re-centra. */}
-          <div
-            className={`h-full w-full transition-transform duration-700 ease-out ${
-              resultsOpen ? 'md:translate-x-[16%]' : ''
-            }`}
-          >
-            <WorldMap
-              cities={cities}
-              selectedLat={selected.lat}
-              selectedLon={selected.lon}
-              selectedName={selected.name}
-              selectedCountry={selected.country}
-              focusKey={focusKey}
-              onSelectLocation={handleSelectLocation}
-            />
-          </div>
+          <WorldMap
+            cities={cities}
+            selectedLat={selected.lat}
+            selectedLon={selected.lon}
+            selectedName={selected.name}
+            selectedCountry={selected.country}
+            focusKey={focusKey}
+            communityPoints={showPins ? communityPins : []}
+            onSelectLocation={handleSelectLocation}
+          />
         </motion.div>
 
         {/* Capa HUD: paneles flotantes translúcidos */}
@@ -423,6 +508,54 @@ export function MapStage() {
                 {th('uploadButton')}
               </button>
 
+              {/* Datos de la comunidad en la celda seleccionada (públicos) */}
+              <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] p-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-mono text-[10px] uppercase tracking-wide text-emerald-300">
+                    {t('community.title')}
+                  </p>
+                  <span className="font-mono text-[10px] tabular-nums text-emerald-200/80">
+                    {communityNearby.length}
+                  </span>
+                </div>
+
+                {communityNearby.length > 0 ? (
+                  <ul className="mt-1.5 space-y-1">
+                    {communityNearby.slice(0, 4).map((obs, index) => (
+                      <li
+                        key={`${obs.username}-${obs.observedAt}-${index}`}
+                        className="flex items-baseline justify-between gap-2 font-mono text-[10px] leading-snug text-slate-300"
+                      >
+                        <span className="truncate text-emerald-200">
+                          @{obs.username}
+                        </span>
+                        <span className="shrink-0 tabular-nums">
+                          {obs.value} {obs.unit} · {obs.observedAt}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-1 text-[10px] leading-snug text-slate-400">
+                    {t('community.empty')}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => void togglePins()}
+                  disabled={communityBusy}
+                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-2 py-1.5 text-[10px] font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+                >
+                  {communityBusy ? (
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                  ) : (
+                    <MapPin className="h-3 w-3" aria-hidden />
+                  )}
+                  {showPins ? t('community.hidePins') : t('community.showPins')}
+                </button>
+              </div>
+
               {/* Informe del caso, narrado por IA sobre las cifras ya
                   calculadas (o resumen determinista si no hay clave). */}
               {(aiBusy || aiReport) && (
@@ -482,8 +615,16 @@ export function MapStage() {
             </div>
           </div>
 
-          {/* Panel derecho: variables y periodo */}
-          <div className="pointer-events-auto absolute right-4 top-20 w-[calc(100%-2rem)] max-h-[calc(100vh-12rem)] overflow-y-auto sm:right-6 sm:w-[360px]">
+          {/* Panel derecho: variables y periodo. Al consultar, este MISMO
+              cuadro se expande hacia la izquierda (anclado a la derecha)
+              mostrando los resultados dentro. El mapa queda centrado. */}
+          <div
+            className={`pointer-events-auto absolute right-4 top-20 max-h-[calc(100vh-12rem)] w-[calc(100%-2rem)] overflow-y-auto transition-[width] duration-500 ease-out sm:right-6 ${
+              analysis && resultsOpen
+                ? 'sm:w-[620px]'
+                : 'sm:w-[360px]'
+            }`}
+          >
             <div className="flex flex-col gap-3.5 rounded-2xl border border-white/15 bg-slate-950/75 p-4 text-slate-100 shadow-2xl backdrop-blur-md sm:p-5">
               <div className="flex items-center justify-between gap-2">
                 <div>
@@ -629,13 +770,98 @@ export function MapStage() {
                   {isFetching ? t('analyzing') : t('consult')}
                 </button>
 
-                {/* Los resultados en grande viven ahora en el panel
-                    flotante izquierdo (legibles) y en la sección completa
-                    bajo el mapa (id="questions"). */}
                 {fetchError && !isFetching && (
                   <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-[11px] leading-snug text-amber-300">
                     {td('errors.apiFailed')}
                   </p>
+                )}
+
+                {/* Resultados DENTRO de este panel (el cuadro se expandió
+                    hacia la izquierda): legibles y con botón para el
+                    informe completo. Se cierran con la X o tocando el mapa. */}
+                {analysis && resultsOpen && !isFetching && (
+                  <div className="space-y-3 rounded-xl border border-cyan-400/30 bg-slate-950/70 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-mono text-[11px] uppercase leading-snug tracking-wide text-cyan-300">
+                        {td(`variables.${analysis.trend.variable}.label`)} ·{' '}
+                        {td(`seasons.${analysis.trend.season}`)} · {startYear}–
+                        {endYear}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setResultsOpen(false)}
+                        aria-label={t('resultClose')}
+                        className="shrink-0 rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                      >
+                        <X className="h-4 w-4" aria-hidden />
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-slate-400">
+                      {selected.name} · {selected.lat.toFixed(2)}°,{' '}
+                      {selected.lon.toFixed(2)}°
+                    </p>
+
+                    {/* Pendiente de Sen: número grande y legible */}
+                    <div className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="font-mono text-3xl font-bold tabular-nums text-white">
+                        {analysis.trend.senSlopePerDecade > 0 ? '+' : ''}
+                        {analysis.trend.senSlopePerDecade.toFixed(2)}
+                      </span>
+                      <span className="font-mono text-sm text-slate-400">
+                        {VARIABLE_CONFIG[analysis.trend.variable].unit} /{' '}
+                        {td('results.perDecade')}
+                      </span>
+                    </div>
+
+                    <p className="font-mono text-sm tabular-nums text-cyan-300">
+                      {td('results.confidenceInterval')}:{' '}
+                      [{analysis.trend.ci95PerDecade.lower.toFixed(2)},{' '}
+                      {analysis.trend.ci95PerDecade.upper.toFixed(2)}]
+                    </p>
+
+                    <p className="font-mono text-sm tabular-nums text-slate-300">
+                      {td('results.pValue')} ={' '}
+                      {analysis.trend.mannKendall.p.toExponential(1)}
+                      {' · '}
+                      {td('results.yearsAnalyzed')} = {analysis.trend.n}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-lg border px-3 py-1 font-mono text-sm font-semibold ${
+                          analysis.trend.significant
+                            ? 'border-amber-400/50 bg-amber-500/15 text-amber-300'
+                            : 'border-white/20 bg-white/5 text-slate-300'
+                        }`}
+                      >
+                        {analysis.trend.significant
+                          ? td('results.significantYes')
+                          : td('results.significantNo')}
+                      </span>
+                      {Number.isFinite(analysis.years.years) && (
+                        <span
+                          title={t('yearsNoteWhy')}
+                          className="cursor-help rounded-lg border border-white/20 bg-white/5 px-3 py-1 font-mono text-xs text-slate-400"
+                        >
+                          {analysis.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT
+                            ? t('yearsNoteShort', {
+                                years: analysis.years.years
+                              })
+                            : t('yearsNoteImpractical')}
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={scrollToResults}
+                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-cyan-500/20"
+                    >
+                      <span>{t('viewFull')}</span>
+                      <ArrowDown className="h-3.5 w-3.5" aria-hidden />
+                    </button>
+                  </div>
                 )}
 
                 <p className="text-[11px] leading-snug text-slate-400">
@@ -645,98 +871,6 @@ export function MapStage() {
             </div>
           </div>
         </motion.div>
-
-        {/* Panel grande de resultados (izquierda): legible y animado.
-            Tocar el mapa (o la X) lo cierra y el globo se re-centra. */}
-        {analysis && resultsOpen && !isFetching && (
-          <motion.div
-            initial={{ opacity: 0, x: prefersReducedMotion ? 0 : -32 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="absolute bottom-8 left-4 right-4 z-30 md:left-6 md:right-auto md:w-[440px]"
-          >
-            <div className="space-y-3 rounded-2xl border border-cyan-400/40 bg-slate-950/85 p-5 shadow-2xl backdrop-blur-md">
-              <div className="flex items-start justify-between gap-3">
-                <p className="font-mono text-[11px] uppercase leading-snug tracking-wide text-cyan-300">
-                  {td(`variables.${analysis.trend.variable}.label`)} ·{' '}
-                  {td(`seasons.${analysis.trend.season}`)} · {startYear}–
-                  {endYear}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setResultsOpen(false)}
-                  aria-label={t('resultClose')}
-                  className="shrink-0 rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  <X className="h-4 w-4" aria-hidden />
-                </button>
-              </div>
-
-              <p className="text-sm text-slate-300">
-                {selected.name} · {selected.lat.toFixed(2)}°,{' '}
-                {selected.lon.toFixed(2)}°
-              </p>
-
-              {/* Pendiente de Sen: número grande y legible */}
-              <div className="flex flex-wrap items-baseline gap-x-2">
-                <span className="font-mono text-4xl font-bold tabular-nums text-white">
-                  {analysis.trend.senSlopePerDecade > 0 ? '+' : ''}
-                  {analysis.trend.senSlopePerDecade.toFixed(2)}
-                </span>
-                <span className="font-mono text-sm text-slate-400">
-                  {VARIABLE_CONFIG[analysis.trend.variable].unit} /{' '}
-                  {td('results.perDecade')}
-                </span>
-              </div>
-
-              <p className="font-mono text-sm tabular-nums text-cyan-300">
-                {td('results.confidenceInterval')}:{' '}
-                [{analysis.trend.ci95PerDecade.lower.toFixed(2)},{' '}
-                {analysis.trend.ci95PerDecade.upper.toFixed(2)}]
-              </p>
-
-              <p className="font-mono text-sm tabular-nums text-slate-300">
-                {td('results.pValue')} ={' '}
-                {analysis.trend.mannKendall.p.toExponential(1)}
-                {' · '}
-                {td('results.yearsAnalyzed')} = {analysis.trend.n}
-              </p>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`rounded-lg border px-3 py-1 font-mono text-sm font-semibold ${
-                    analysis.trend.significant
-                      ? 'border-amber-400/50 bg-amber-500/15 text-amber-300'
-                      : 'border-white/20 bg-white/5 text-slate-300'
-                  }`}
-                >
-                  {analysis.trend.significant
-                    ? td('results.significantYes')
-                    : td('results.significantNo')}
-                </span>
-                {Number.isFinite(analysis.years.years) && (
-                  <span
-                    title={t('yearsNoteWhy')}
-                    className="cursor-help rounded-lg border border-white/20 bg-white/5 px-3 py-1 font-mono text-xs text-slate-400"
-                  >
-                    {analysis.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT
-                      ? t('yearsNoteShort', { years: analysis.years.years })
-                      : t('yearsNoteImpractical')}
-                  </span>
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={scrollToResults}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-2.5 text-sm font-semibold text-cyan-200 transition-colors hover:bg-cyan-500/20"
-              >
-                <span>{t('viewFull')}</span>
-                <ArrowDown className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-          </motion.div>
-        )}
 
         {/* Indicador de scroll */}
         <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-slate-400">
@@ -954,6 +1088,77 @@ export function MapStage() {
               </p>
             </div>
 
+            {/* Datos comunitarios en esta celda: comparados contra la celda
+                NASA en paralelo (sesgo calculado en código determinista). */}
+            {communityNearby.length > 0 && (
+              <div className="mt-6 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-6">
+                <p className="text-sm font-semibold text-emerald-400">
+                  {t('community.cellTitle', {
+                    count: communityNearby.length
+                  })}
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {communityNearby.slice(0, 10).map((obs, index) => (
+                    <li
+                      key={`${obs.username}-${obs.observedAt}-${index}`}
+                      className="flex flex-wrap items-baseline gap-x-2 border-b border-emerald-500/10 pb-1.5 text-xs text-slate-300 last:border-b-0"
+                    >
+                      <span className="font-semibold text-emerald-300">
+                        @{obs.username}
+                      </span>
+                      <span className="font-mono tabular-nums">
+                        {obs.value} {obs.unit}
+                      </span>
+                      <span className="text-slate-500">·</span>
+                      <span>{obs.observedAt}</span>
+                      {obs.bias !== null && (
+                        <>
+                          <span className="text-slate-500">·</span>
+                          <span
+                            className={
+                              obs.verdict === 'plausible'
+                                ? 'text-emerald-300'
+                                : obs.verdict === 'suspicious'
+                                  ? 'text-amber-400'
+                                  : 'text-slate-400'
+                            }
+                          >
+                            {obs.verdict === 'plausible' &&
+                              t('community.verdictPlausible')}
+                            {obs.verdict === 'doubtful' &&
+                              t('community.verdictDoubtful')}
+                            {obs.verdict === 'suspicious' &&
+                              t('community.verdictSuspicious')}
+                            {obs.verdict === 'no_reference' &&
+                              t('community.verdictNoReference')}
+                          </span>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                {(() => {
+                  const biases = communityNearby
+                    .map((obs) => obs.bias)
+                    .filter((bias): bias is number => bias !== null);
+                  if (biases.length === 0) return null;
+                  const mean =
+                    biases.reduce((sum, bias) => sum + bias, 0) / biases.length;
+                  return (
+                    <p className="mt-3 border-t border-emerald-500/20 pt-2 font-mono text-xs text-slate-300">
+                      {t('community.meanBias', {
+                        bias: mean.toFixed(2),
+                        unit: VARIABLE_CONFIG[analysis.trend.variable].unit
+                      })}
+                    </p>
+                  );
+                })()}
+                <p className="mt-1 text-[10px] leading-snug text-slate-500">
+                  {t('community.comparedNote')}
+                </p>
+              </div>
+            )}
+
             {/* Informe del detective: IA si hay clave; resumen local si no.
                 Se genera solo al montar; la IA solo redacta cifras ya calculadas. */}
             <DetectiveReport
@@ -995,11 +1200,7 @@ export function MapStage() {
 
       {/* Modal "Sube tu dato": observación comunitaria con evidencia.
           Flota sobre el globo; el usuario no sale del mapa. */}
-      <ObservationModal
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        selected={selected}
-      />
+      <ObservationModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
     </div>
   );
 }

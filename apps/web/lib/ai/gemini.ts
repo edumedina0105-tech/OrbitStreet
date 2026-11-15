@@ -77,7 +77,15 @@ export async function generateDetectiveReport(
   );
 
   if (!response.ok) {
-    throw new Error(`Gemini respondió ${response.status}`);
+    // El cuerpo de error de Gemini explica el motivo (clave inválida,
+    // cuota, modelo sin acceso...): se registra para los logs del deploy.
+    let detail = '';
+    try {
+      detail = (await response.text()).slice(0, 500);
+    } catch {
+      // sin cuerpo legible
+    }
+    throw new Error(`Gemini respondió ${response.status}: ${detail}`);
   }
 
   const data = (await response.json()) as {

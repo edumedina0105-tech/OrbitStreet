@@ -12,6 +12,7 @@
       "upload": "Upload your series",
       "account": "Account"
     },
+    "login": "Log in",
     "cta": "View analysis"
   },
   "languageSwitcher": {
@@ -53,6 +54,19 @@
       "endYear": "End year",
       "consult": "Query NASA POWER",
       "resultClose": "Close results",
+      "community": {
+        "title": "Community data",
+        "empty": "No community observations in this cell yet — be the first one.",
+        "showPins": "Show on map",
+        "hidePins": "Hide from map",
+        "cellTitle": "Community observations in this cell ({count})",
+        "verdictPlausible": "matches the NASA cell",
+        "verdictDoubtful": "doubtful bias vs cell",
+        "verdictSuspicious": "suspicious bias vs cell",
+        "verdictNoReference": "no reference cell",
+        "meanBias": "Mean bias vs NASA cell: {bias} {unit}",
+        "comparedNote": "Each observation was compared in deterministic code against that day's MERRA-2 cell. Community data: unvalidated."
+      },
       "analyzing": "Querying NASA POWER…",
       "viewFull": "See full chart & report",
       "yearsNoteShort": "Local sensor: ~{years} yrs",
@@ -263,6 +277,7 @@
     "registerTab": "Create account",
     "username": "Username",
     "password": "Password",
+    "showPassword": "Show password",
     "passwordHint": "At least 8 characters. Stored only as a scrypt hash, never in clear text.",
     "loginSubmit": "Log in",
     "registerSubmit": "Create account and log in",
@@ -332,7 +347,7 @@
       "loginTab": "Log in",
       "username": "Username",
       "password": "Password",
-      "passwordHint": "At least 8 characters. We only store the scrypt hash.",
+      "showPassword": "Show password",
       "createSubmit": "Create account and continue",
       "loginSubmit": "Log in and continue",
       "busy": "Working…",
@@ -364,7 +379,6 @@
       "value": "Measured value",
       "date": "Date of the measurement",
       "location": "Location of the data",
-      "locationMap": "Map point",
       "locationExif": "Photo GPS",
       "locationGps": "My location (browser)",
       "gpsDenied": "Location permission denied or unavailable.",

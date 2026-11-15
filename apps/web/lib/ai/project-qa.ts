@@ -77,7 +77,14 @@ export async function answerProjectQuestion(
   );
 
   if (!response.ok) {
-    throw new Error(`Gemini respondió ${response.status}`);
+    // Motivo del fallo visible en los logs (clave, cuota, modelo...).
+    let detail = '';
+    try {
+      detail = (await response.text()).slice(0, 500);
+    } catch {
+      // sin cuerpo legible
+    }
+    throw new Error(`Gemini respondió ${response.status}: ${detail}`);
   }
 
   const data = (await response.json()) as {
