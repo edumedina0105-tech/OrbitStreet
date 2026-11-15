@@ -28,12 +28,6 @@ export async function SiteHeader() {
         <nav className="hidden items-center gap-6 text-xs font-medium text-slate-300 lg:flex">
           <Link
             className="whitespace-nowrap transition-colors hover:text-white"
-            href="/detective"
-          >
-            {t('nav.detective')}
-          </Link>
-          <Link
-            className="whitespace-nowrap transition-colors hover:text-white"
             href="/upload"
           >
             {t('nav.upload')}

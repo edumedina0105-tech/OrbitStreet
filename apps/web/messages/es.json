@@ -9,7 +9,6 @@
     "nav": {
       "questions": "Las 4 preguntas",
       "honesty": "Nuestra honestidad",
-      "detective": "Modo Detective",
       "upload": "Sube tu serie",
       "account": "Cuenta"
     },
@@ -57,7 +56,30 @@
       "yearsNoteShort": "Sensor local: ~{years} años",
       "yearsNoteImpractical": "Sensor local: inviable en plazo humano",
       "yearsNoteWhy": "¿Para qué? Un nodo en tierra instalado aquí hoy tardaría esos años en confirmar la tendencia por sí solo: es la medida de cuándo tu calle empieza a aportar evidencia.",
-      "seeAnalysis": "Ver las 4 preguntas",
+      "askAi": "Preguntar a la IA",
+      "qaHint": "Pregunta sobre la metodología del proyecto: estadística, fuentes de datos, cómo funciona. No consulta datos de lugares específicos.",
+      "qaSuggestion1": "¿Qué es la prueba de Mann-Kendall?",
+      "qaSuggestion2": "¿Qué es la celda MERRA-2?",
+      "qaSuggestion3": "¿Por qué mi calle no coincide con la celda?",
+      "qaPlaceholder": "Escribe tu pregunta…",
+      "qaError": "La IA no pudo responder en este momento. Inténtalo de nuevo en un momento.",
+      "seasonLegend": "DJF: dic–feb · MAM: mar–may · JJA: jun–ago · SON: sep–nov · Año: los 12 meses",
+      "seasonHint": {
+        "ALL": "Los 12 meses del año, sin filtrar por estación",
+        "DJF": "Diciembre, enero y febrero — invierno del hemisferio norte",
+        "MAM": "Marzo, abril y mayo — primavera del hemisferio norte",
+        "JJA": "Junio, julio y agosto — verano del hemisferio norte",
+        "SON": "Septiembre, octubre y noviembre — otoño del hemisferio norte (primavera en el sur)"
+      },
+      "qa": {
+        "answerMannKendall": "La prueba de Mann-Kendall es un test estadístico no paramétrico que detecta si una serie de años muestra una tendencia consistente (que sube o baja) sin asumir nada sobre su distribución. Aquí se aplica a los valores anuales agregados; si su valor p es menor que 0.05, la tendencia es estadísticamente significativa: muy improbable que sea casualidad.",
+        "answerSen": "La pendiente de Sen es una forma robusta de medir CUÁNTO cambia la tendencia por año: toma la mediana de todas las pendientes posibles entre pares de años, así un año rarísimo no la distorsiona. En OrbitStreet la expresamos por década con un intervalo de confianza del 95% calculado por bootstrap determinista.",
+        "answerMerra": "MERRA-2 es un reanálisis de la NASA: un modelo que integra décadas de observaciones satelitales y de superficie para reconstruir el clima pasado. NASA POWER lo sirve por celdas de 0.5° de latitud × 0.625° de longitud (unos 50 × 70 km), con datos diarios desde 1981. Por eso el dato del satélite es de una celda, no de tu calle.",
+        "answerPValue": "El valor p dice qué tan sorprendente sería observar esa tendencia si en realidad no hubiera ninguna. Un valor p menor que 0.05 (nuestro umbral) significa que la tendencia es estadísticamente significativa; por encima, la variabilidad natural todavía puede explicarla.",
+        "answerCI": "El intervalo de confianza del 95% indica el rango donde probablemente está la verdadera pendiente de la tendencia. Lo calculamos con bootstrap determinista (semilla fija): el mismo dato da siempre el mismo intervalo. Si el intervalo cruza el cero, la magnitud del cambio es incierta.",
+        "answerYears": "Es el horizonte honesto: cuántos años de mediciones necesitaría UN sensor local instalado hoy para confirmar esta tendencia por sí solo, dada la variabilidad natural del lugar (n ≈ (√12·(zα+zβ)·σ/|pendiente|)^(2/3)). Una red de N nodos independientes lo acorta ≈ N veces. Mientras tanto, tu nodo valida la celda satelital comparando el sesgo día a día.",
+        "answerDefault": "No tengo una entrada del glosario para esa pregunta. Prueba con: la prueba de Mann-Kendall, la pendiente de Sen, la celda MERRA-2, el valor p, el intervalo de confianza o los años que necesitaría un sensor local. Configura GEMINI_API_KEY para respuestas conversacionales de la IA."
+      },
       "previewNote": "El análisis se calcula aquí mismo con el mismo motor determinista (Mann-Kendall + Sen) del Modo Detective; nunca datos inventados.",
       "regions": {
         "world": "Mundo",

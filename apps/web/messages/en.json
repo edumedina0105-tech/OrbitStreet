@@ -9,7 +9,6 @@
     "nav": {
       "questions": "The 4 questions",
       "honesty": "Our honesty",
-      "detective": "Detective Mode",
       "upload": "Upload your series",
       "account": "Account"
     },
@@ -57,7 +56,30 @@
       "yearsNoteShort": "Local sensor: ~{years} yrs",
       "yearsNoteImpractical": "Local sensor: not viable in a lifetime",
       "yearsNoteWhy": "Why? A ground node installed here today would take those years to confirm the trend on its own: it measures when your street starts producing evidence.",
-      "seeAnalysis": "See the 4 questions",
+      "askAi": "Ask the AI",
+      "qaHint": "Ask about the project's methodology: statistics, data sources, how it works. It does not look up data for specific places.",
+      "qaSuggestion1": "What is the Mann-Kendall test?",
+      "qaSuggestion2": "What is the MERRA-2 grid cell?",
+      "qaSuggestion3": "Why doesn't my street match the cell?",
+      "qaPlaceholder": "Type your question…",
+      "qaError": "The AI couldn't answer right now. Please try again in a moment.",
+      "seasonLegend": "DJF: Dec–Feb · MAM: Mar–May · JJA: Jun–Aug · SON: Sep–Nov · Year: all 12 months",
+      "seasonHint": {
+        "ALL": "All 12 months of the year, no season filter",
+        "DJF": "December, January and February — northern winter",
+        "MAM": "March, April and May — northern spring",
+        "JJA": "June, July and August — northern summer",
+        "SON": "September, October and November — northern autumn (southern spring)"
+      },
+      "qa": {
+        "answerMannKendall": "The Mann-Kendall test is a non-parametric statistical test that detects whether a series of yearly values shows a consistent trend (up or down) without assuming anything about its distribution. Here it runs on the aggregated annual values; if its p-value is below 0.05, the trend is statistically significant: very unlikely to be chance.",
+        "answerSen": "Sen's slope is a robust way to measure HOW MUCH the trend changes per year: it takes the median of all possible slopes between pairs of years, so one freak year cannot distort it. OrbitStreet expresses it per decade with a 95% confidence interval computed by deterministic bootstrap.",
+        "answerMerra": "MERRA-2 is a NASA reanalysis: a model that assimilates decades of satellite and surface observations to reconstruct past climate. NASA POWER serves it in cells of 0.5° latitude × 0.625° longitude (about 50 × 70 km), with daily data since 1981. That's why the satellite figure describes a cell, not your street.",
+        "answerPValue": "The p-value says how surprising this trend would be if there were actually no trend at all. A p-value below 0.05 (our threshold) means the trend is statistically significant; above it, natural variability can still explain it.",
+        "answerCI": "The 95% confidence interval is the range where the true trend slope probably lies. We compute it with deterministic bootstrap (fixed seed): the same data always yields the same interval. If the interval crosses zero, the size of the change is uncertain.",
+        "answerYears": "It's the honest horizon: how many years of measurements ONE local sensor installed today would need to confirm this trend on its own, given the place's natural variability (n ≈ (√12·(zα+zβ)·σ/|slope|)^(2/3)). A network of N independent nodes shortens it ≈ N-fold. Meanwhile, your node validates the satellite cell by comparing the bias day by day.",
+        "answerDefault": "I don't have a glossary entry for that question. Try: the Mann-Kendall test, Sen's slope, the MERRA-2 grid cell, the p-value, the confidence interval, or the years a local sensor would need. Configure GEMINI_API_KEY for conversational AI answers."
+      },
       "previewNote": "The analysis runs right here with the same deterministic engine (Mann-Kendall + Sen) as Detective Mode; never invented data.",
       "regions": {
         "world": "World",

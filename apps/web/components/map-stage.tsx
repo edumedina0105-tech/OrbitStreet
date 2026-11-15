@@ -7,7 +7,7 @@ import {
   useScroll,
   useTransform
 } from 'motion/react';
-import { ArrowDown, ChevronDown, Loader2, Radio, Search } from 'lucide-react';
+import { ArrowDown, Bot, ChevronDown, Loader2, Radio, Search, Send } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from '@/i18n/navigation';
@@ -64,8 +64,11 @@ const CITY_COORDS: Record<(typeof CITY_IDS)[number], { lat: number; lon: number 
 };
 
 const SEASONS: SeasonOrAnnual[] = ['ALL', 'DJF', 'MAM', 'JJA', 'SON'];
-const START_YEARS = [1981, 1990, 2001] as const;
-const END_YEARS = [2010, 2020, 2025] as const;
+/** Todos los años disponibles en NASA POWER: 1981..2025, uno por opción. */
+const YEAR_OPTIONS = Array.from(
+  { length: 2025 - 1981 + 1 },
+  (_, i) => 1981 + i
+);
 
 /** Punto seleccionado en el globo (presetId opcional: clic libre no trae preset). */
 interface SelectedLocation {
@@ -111,6 +114,18 @@ export function MapStage() {
     fallback: boolean;
   } | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+
+  // "Preguntar a la IA": tutor de metodología del proyecto (no consulta
+  // datos de lugares; responde Mann-Kendall, MERRA-2, Sen, p-value...).
+  const [qaOpen, setQaOpen] = useState(false);
+  const [qaQuestion, setQaQuestion] = useState('');
+  const [qaBusy, setQaBusy] = useState(false);
+  const [qaError, setQaError] = useState(false);
+  const [qaAnswer, setQaAnswer] = useState<{
+    text: string;
+    engine: 'gemini' | 'template';
+    fallback: boolean;
+  } | null>(null);
 
   // Ciudades con nombres localizados por i18n (los pines llevan texto visible).
   const cities: MapCity[] = useMemo(
@@ -212,7 +227,12 @@ export function MapStage() {
     }
   };
 
-  const handleConsult = async () => {
+  /**
+   * Núcleo compartido: consulta /api/power/daily y corre el MISMO motor
+   * determinista (Mann-Kendall + Sen + IC) en el navegador. Devuelve el
+   * análisis o null; NO dispara la IA (eso lo decide cada botón).
+   */
+  const runAnalysis = async (): Promise<SeriesAnalysis | null> => {
     setIsFetching(true);
     setFetchError(false);
     setAnalysis(null);
@@ -246,12 +266,59 @@ export function MapStage() {
       });
 
       setAnalysis(result);
-      // Con las cifras ya calculadas, pedimos la narración del caso.
-      void fetchAiReport(result);
+      return result;
     } catch {
       setFetchError(true);
+      return null;
     } finally {
       setIsFetching(false);
+    }
+  };
+
+  // Botón del panel derecho ("Consultar NASA POWER en vivo"): SOLO cifras.
+  const handleConsult = async () => {
+    setAiReport(null);
+    await runAnalysis();
+  };
+
+  // Botón del panel izquierdo ("Investigar este lugar"): cifras + informe
+  // narrado. Acción independiente de la anterior.
+  const handleInvestigate = async () => {
+    const result = await runAnalysis();
+    if (result) void fetchAiReport(result);
+  };
+
+  /** Pregunta al tutor de IA sobre la metodología del proyecto. */
+  const askProjectQuestion = async (question: string) => {
+    const trimmed = question.trim();
+    if (trimmed.length < 3 || qaBusy) return;
+    setQaBusy(true);
+    setQaError(false);
+    setQaAnswer(null);
+    try {
+      const response = await fetch('/api/project-ask', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ question: trimmed, locale })
+      });
+      const data = (await response.json()) as {
+        text?: string;
+        engine?: 'gemini' | 'template';
+        fallback?: boolean;
+      };
+      if (!response.ok || !data.text || !data.engine) {
+        setQaError(true);
+        return;
+      }
+      setQaAnswer({
+        text: data.text,
+        engine: data.engine,
+        fallback: data.fallback === true
+      });
+    } catch {
+      setQaError(true);
+    } finally {
+      setQaBusy(false);
     }
   };
 
@@ -343,11 +410,12 @@ export function MapStage() {
                 })}
               </div>
 
-              {/* CTA principal: analiza AQUÍ MISMO (sin salir del mapa).
-                  El informe completo (grafica + IA) queda en el panel derecho. */}
+              {/* CTA principal: analiza AQUÍ MISMO (sin salir del mapa) y
+                  narra el caso con IA. Acción independiente del botón
+                  "Consultar" del panel derecho (solo cifras). */}
               <button
                 type="button"
-                onClick={handleConsult}
+                onClick={handleInvestigate}
                 disabled={isFetching}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-400/40 bg-cyan-500/15 px-3 py-2 text-xs font-semibold text-cyan-100 transition-colors hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
               >
@@ -479,6 +547,7 @@ export function MapStage() {
                     <button
                       key={seasonId}
                       type="button"
+                      title={t(`seasonHint.${seasonId}`)}
                       onClick={() => setSeason(seasonId)}
                       className={`rounded-lg border px-1 py-1.5 text-[10px] font-semibold transition-colors ${
                         season === seasonId
@@ -490,6 +559,9 @@ export function MapStage() {
                     </button>
                   ))}
                 </div>
+                <p className="mt-1.5 font-mono text-[9px] leading-snug text-slate-500">
+                  {t('seasonLegend')}
+                </p>
               </div>
 
               {/* Años */}
@@ -511,7 +583,7 @@ export function MapStage() {
                     }}
                     className="w-full rounded-lg border border-white/15 bg-slate-900/90 px-2.5 py-1.5 font-mono text-xs tabular-nums text-slate-100 focus:border-cyan-400 focus:outline-none"
                   >
-                    {START_YEARS.map((year) => (
+                    {YEAR_OPTIONS.map((year) => (
                       <option key={year} value={year}>
                         {year}
                       </option>
@@ -528,10 +600,15 @@ export function MapStage() {
                   <select
                     id="map-end-year"
                     value={endYear}
-                    onChange={(event) => setEndYear(Number(event.target.value))}
+                    onChange={(event) => {
+                      const value = Number(event.target.value);
+                      // Ajuste simétrico: nunca dejar fin <= inicio.
+                      if (value <= startYear) setStartYear(1981);
+                      setEndYear(value);
+                    }}
                     className="w-full rounded-lg border border-white/15 bg-slate-900/90 px-2.5 py-1.5 font-mono text-xs tabular-nums text-slate-100 focus:border-cyan-400 focus:outline-none"
                   >
-                    {END_YEARS.map((year) => (
+                    {YEAR_OPTIONS.map((year) => (
                       <option key={year} value={year}>
                         {year}
                       </option>
@@ -629,18 +706,103 @@ export function MapStage() {
                   </p>
                 )}
 
+                {/* Tutor de IA: preguntas sobre el proyecto y su metodología */}
                 <button
                   type="button"
-                  onClick={() =>
-                    document
-                      .getElementById('questions')
-                      ?.scrollIntoView({ behavior: 'smooth' })
-                  }
+                  onClick={() => setQaOpen(!qaOpen)}
                   className="flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/15"
                 >
-                  <span>{t('seeAnalysis')}</span>
-                  <ArrowDown className="h-3.5 w-3.5" />
+                  <Bot className="h-3.5 w-3.5" aria-hidden />
+                  <span>{t('askAi')}</span>
                 </button>
+
+                {qaOpen && (
+                  <div className="space-y-2 rounded-xl border border-white/15 bg-slate-950/70 p-3">
+                    <p className="text-[10px] leading-snug text-slate-400">
+                      {t('qaHint')}
+                    </p>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {([1, 2, 3] as const).map((n) => {
+                        const suggestion = t(`qaSuggestion${n}`);
+                        return (
+                          <button
+                            key={n}
+                            type="button"
+                            disabled={qaBusy}
+                            onClick={() => {
+                              setQaQuestion(suggestion);
+                              void askProjectQuestion(suggestion);
+                            }}
+                            className="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-2 py-1 text-[10px] font-medium text-cyan-200 transition-colors hover:bg-cyan-500/20 disabled:opacity-50"
+                          >
+                            {suggestion}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <form
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        void askProjectQuestion(qaQuestion);
+                      }}
+                      className="flex gap-1.5"
+                    >
+                      <input
+                        type="text"
+                        value={qaQuestion}
+                        maxLength={300}
+                        onChange={(event) => setQaQuestion(event.target.value)}
+                        placeholder={t('qaPlaceholder')}
+                        aria-label={t('qaPlaceholder')}
+                        className="min-w-0 flex-1 rounded-lg border border-white/15 bg-slate-900/90 px-2.5 py-1.5 text-[11px] text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={qaBusy || qaQuestion.trim().length < 3}
+                        aria-label={t('askAi')}
+                        className="shrink-0 rounded-lg bg-cyan-600 px-2.5 py-1.5 text-slate-950 transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Send className="h-3.5 w-3.5" aria-hidden />
+                      </button>
+                    </form>
+
+                    {qaBusy && (
+                      <p className="flex items-center gap-2 text-[11px] text-slate-400">
+                        <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                        {td('report.loading')}
+                      </p>
+                    )}
+
+                    {qaError && (
+                      <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-[10px] leading-snug text-amber-300">
+                        {t('qaError')}
+                      </p>
+                    )}
+
+                    {qaAnswer && (
+                      <div className="space-y-1.5">
+                        <span
+                          className={`inline-flex rounded-full border px-2 py-0.5 text-[9px] font-semibold ${
+                            qaAnswer.engine === 'gemini'
+                              ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300'
+                              : 'border-slate-600 bg-slate-800 text-slate-300'
+                          }`}
+                        >
+                          {qaAnswer.engine === 'gemini'
+                            ? td('report.badgeGemini')
+                            : qaAnswer.fallback
+                              ? td('report.badgeFallback')
+                              : td('report.badgeTemplate')}
+                        </span>
+                        <p className="text-[11px] leading-relaxed text-slate-200">
+                          {qaAnswer.text}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <p className="text-[11px] leading-snug text-slate-400">
                   {t('previewNote')}
