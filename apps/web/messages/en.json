@@ -165,7 +165,8 @@
         "title": "No fake data in disguise",
         "description": "Any simulated or test data is always clearly labeled [SIMULATED DATA / TESTBED]."
       }
-    }
+    },
+    "dossierLink": "Scientific dossier (PDF)"
   },
   "myData": {
     "profile": "Profile",
@@ -211,7 +212,8 @@
       "cooldown": "You must wait {seconds} s before the next publication.",
       "needsLogin": "You need an account: open it with the “Log in” button in the header (just username and password).",
       "load": "The cases could not be loaded. Please try again."
-    }
+    },
+    "dossierLink": "Dossier"
   },
   "comparator": {
     "title": "Compare regions",
@@ -591,6 +593,60 @@
       "anomaly": "It computes ΔT = temperature − NASA monthly normal: a difference against a historical reference (not a strict climate anomaly nor proof of local warming)."
     },
     "flashCta": "Go to flashing"
+  },
+  "dossier": {
+    "title": "Scientific dossier",
+    "defaultPlace": "Investigated point",
+    "print": "Print / Save as PDF",
+    "generated": "Generated on",
+    "verdict": "Verdict",
+    "slopeTitle": "Magnitude of change",
+    "perDecade": "decade",
+    "years": "complete years analyzed",
+    "significant": "Statistically significant trend: {slope} {unit}/decade",
+    "notSignificant": "No statistically significant trend at this point and period — an honest answer, just as valuable.",
+    "metaTitle": "Exact analysis metadata",
+    "coverageNote": "Only years with a closed window and ≥ 90 % coverage enter the analysis; the period shown is the one actually analyzed. The Mann-Kendall p-value includes tie and autocorrelation (Hamed-Rao) corrections where applicable.",
+    "seasons": {
+      "ALL": "Full year",
+      "DJF": "Winter (DJF)",
+      "MAM": "Spring (MAM)",
+      "JJA": "Boreal summer (JJA)",
+      "SON": "Autumn (SON)"
+    },
+    "meta": {
+      "source": "Source",
+      "parameter": "POWER parameter",
+      "variable": "Variable",
+      "season": "Time window",
+      "coordinates": "Coordinates",
+      "grid": "Grid cell",
+      "period": "Period analyzed",
+      "p": "p-value (Mann-Kendall)"
+    },
+    "chart": {
+      "value": "Annual series",
+      "fit": "Sen fit",
+      "band": "95 % CI",
+      "year": "Year"
+    },
+    "validation": {
+      "title": "Independent validation",
+      "body": "OrbitStreet's statistical engine is verified against independent reference implementations (pymannkendall 1.4.2 and SciPy) on the same data and methodology: S, variance, z and p agree to 8 decimal places. This dossier's result (p = {p}, slope {slope}) comes from the same validated engine.",
+      "item1": "Mann-Kendall and Hamed-Rao: exact agreement with pymannkendall (tests in apps/web/lib/stats/__tests__/reference.test.ts).",
+      "item2": "Sen's slope and its classic CI: consistent with scipy.stats.theilslopes.",
+      "item3": "Full methodology, conventions and limitations: docs/METHODOLOGY.md."
+    },
+    "limits": {
+      "title": "Declared limitations",
+      "reanalysis": "NASA POWER is a reanalysis (MERRA-2), not a direct satellite measurement: it represents the grid cell, not a point reading.",
+      "grid": "The grid is 0.5° × 0.5° (~50 km): these results do NOT describe a specific street, but the cell containing it.",
+      "coverage": "Incomplete or low-coverage years are excluded; a \"no trend\" result is a valid answer, not a failure.",
+      "sensor": "The ground nodes' ΔT compares an instantaneous reading with the NASA monthly normal (historical reference): not a strict climate anomaly."
+    },
+    "reproducibility": "Reproducible: this URL recomputes the dossier server-side with the identical result (deterministic):",
+    "invalidTitle": "Incomplete parameters",
+    "invalidBody": "The dossier needs valid coordinates and variable in the URL: lat, lon, variable, season, startYear, endYear. Generate one from a map investigation or a case on the board."
   },
   "footer": {
     "challenge": "Built for the NASA Space Apps Challenge 2026 — “Be An Earth System Trend Detective!”",

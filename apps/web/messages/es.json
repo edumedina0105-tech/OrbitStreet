@@ -165,7 +165,8 @@
         "title": "Nada de datos falsos disfrazados",
         "description": "Todo dato simulado o de prueba se etiqueta siempre como [DATOS SIMULADOS / TESTBED]."
       }
-    }
+    },
+    "dossierLink": "Expediente científico (PDF)"
   },
   "myData": {
     "profile": "Perfil",
@@ -211,7 +212,8 @@
       "cooldown": "Debes esperar {seconds} s antes de la próxima publicación.",
       "needsLogin": "Necesitas una cuenta: ábrela con el botón «Iniciar sesión» del encabezado (solo usuario y contraseña).",
       "load": "No se pudieron cargar los casos. Inténtalo de nuevo."
-    }
+    },
+    "dossierLink": "Expediente"
   },
   "comparator": {
     "title": "Comparar regiones",
@@ -591,6 +593,60 @@
       "anomaly": "Calcula ΔT = temperatura − normal mensual NASA: una diferencia frente a una referencia histórica (no una anomalía climática estricta ni una prueba de calentamiento local)."
     },
     "flashCta": "Ir al flasheo"
+  },
+  "dossier": {
+    "title": "Expediente científico",
+    "defaultPlace": "Punto investigado",
+    "print": "Imprimir / Guardar PDF",
+    "generated": "Generado el",
+    "verdict": "Veredicto",
+    "slopeTitle": "Magnitud del cambio",
+    "perDecade": "década",
+    "years": "años completos analizados",
+    "significant": "Tendencia estadísticamente significativa: {slope} {unit}/década",
+    "notSignificant": "Sin tendencia estadísticamente significativa en este punto y periodo — un resultado honesto e igual de valioso.",
+    "metaTitle": "Datos exactos del análisis",
+    "coverageNote": "Solo años con ventana cerrada y ≥ 90 % de cobertura entran al análisis; el periodo mostrado es el efectivamente analizado. El p de Mann-Kendall incluye corrección por empates y por autocorrelación (Hamed-Rao) cuando corresponde.",
+    "seasons": {
+      "ALL": "Todo el año",
+      "DJF": "Invierno (DJF)",
+      "MAM": "Otoño (MAM)",
+      "JJA": "Invierno boreal (JJA)",
+      "SON": "Primavera (SON)"
+    },
+    "meta": {
+      "source": "Fuente",
+      "parameter": "Parámetro POWER",
+      "variable": "Variable",
+      "season": "Ventana temporal",
+      "coordinates": "Coordenadas",
+      "grid": "Celda",
+      "period": "Periodo analizado",
+      "p": "Valor p (Mann-Kendall)"
+    },
+    "chart": {
+      "value": "Serie anual",
+      "fit": "Recta de Sen",
+      "band": "IC 95 %",
+      "year": "Año"
+    },
+    "validation": {
+      "title": "Validación independiente",
+      "body": "El motor estadístico de OrbitStreet está verificado contra implementaciones de referencia independientes (pymannkendall 1.4.2 y SciPy) sobre los mismos datos y metodología: S, varianza, z y p coinciden a 8 decimales. El resultado de este expediente (p = {p}, pendiente {slope}) proviene del mismo motor validado.",
+      "item1": "Mann-Kendall y Hamed-Rao: coincidencia exacta con pymannkendall (tests en apps/web/lib/stats/__tests__/reference.test.ts).",
+      "item2": "Pendiente de Sen y su IC clásico: coherentes con scipy.stats.theilslopes.",
+      "item3": "Metodología completa, convenciones y limitaciones: docs/METHODOLOGY.md (en inglés)."
+    },
+    "limits": {
+      "title": "Limitaciones declaradas",
+      "reanalysis": "NASA POWER es un reanálisis (MERRA-2), no una medición satelital directa: representa la celda de la rejilla, no una lectura puntual.",
+      "grid": "La rejilla es de 0,5° × 0,5° (~50 km): estos resultados NO describen una calle específica, sino la celda que la contiene.",
+      "coverage": "Los años incompletos o con poca cobertura quedan fuera; un resultado «sin tendencia» es una respuesta válida, no un fallo.",
+      "sensor": "El ΔT de las estaciones en tierra compara una lectura instantánea con la normal mensual NASA (referencia histórica): no es una anomalía climática estricta."
+    },
+    "reproducibility": "Reproducible: esta URL recalcula el expediente en el servidor con el mismo resultado (determinista):",
+    "invalidTitle": "Parámetros incompletos",
+    "invalidBody": "El expediente necesita coordenadas y variable válidas en la URL: lat, lon, variable, season, startYear, endYear. Genéralo desde una investigación en el mapa o desde un caso del tablón."
   },
   "footer": {
     "challenge": "Creado para el NASA Space Apps Challenge 2026 — «¡Sé un detective de tendencias del sistema Tierra!»",

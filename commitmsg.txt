@@ -1,0 +1,33 @@
+feat(web): expediente científico descargable (/dossier) + caso real Paraguay verificado
+
+V1 — Expediente científico (responde "¿cómo sabemos que este resultado
+es correcto?"):
+- app/[locale]/dossier: documento imprimible (Print / Save as PDF) que
+  RECALCULA el análisis en el servidor desde los parámetros de la URL —
+  reproducible por definición: el enlace compartido ES el documento
+- Contenido: fuente exacta (NASA POWER/MERRA-2, parámetro, celda 0.5°,
+  periodo efectivo con años completos), veredicto con insignias, Sen
+  /década + IC 95% clásico, Mann-Kendall p con Hamed-Rao, gráfica con
+  banda de confianza, metadatos, sección "Validación independiente"
+  (motor verificado contra pymannkendall 1.4.2 y SciPy a 8 decimales),
+  limitaciones declaradas y URL reproducible al pie
+- Enlaces al expediente: botón en los resultados del detective y en
+  cada tarjeta del tablón de casos ("Expediente")
+- i18n 1:1 es/en (namespace dossier + claves home/caseboard)
+
+V2 — Caso real Paraguay (docs/CASE_PARAGUAY.md):
+- 3 preguntas reales publicadas en el tablón (T2M Asunción, días >35 °C
+  Asunción, Chaco vs Asunción): respuesta honesta = SIN tendencia
+  significativa 1981–2025 en estas celdas
+- Titular verificado INDEPENDIENTEMENTE con pymannkendall sobre datos
+  crudos de POWER: días>35 °C → −2.775 días/década, p=0.4511 (idéntico
+  al motor); scripts conservados como artefactos:
+  apps/web/scripts/verify-real-data.py + verify-days-above35.py
+- README: sección del caso de estudio + layout de docs actualizado
+
+Verificación en vivo (contenedor Docker 3100, producción):
+- /es/dossier Asunción T2M: 200, veredicto honesto, MERRA-2, Hamed-Rao,
+  pymannkendall, limitaciones, URL reproducible — todo visible
+- /es/dossier días>35: 200 OK | /en/dossier Laponia: 200, calentamiento
+  significativo detectado (control positivo)
+- Tests: 147/147 | tsc limpio | build EXIT=0, 0 MISSING_MESSAGE

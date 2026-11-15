@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { CircleCheckBig, Eye, Loader2, Search, ThumbsUp } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { CircleCheckBig, Eye, FileText, Loader2, Search, ThumbsUp } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { VARIABLE_IDS } from '@/lib/analysis/variables';
 
@@ -40,6 +40,7 @@ type VerdictFilter = 'all' | 'confirmed' | 'inconclusive';
 export function CaseBoard() {
   const t = useTranslations('caseboard');
   const td = useTranslations('detective');
+  const locale = useLocale();
 
   const [cases, setCases] = useState<CaseCard[]>([]);
   const [verdict, setVerdict] = useState<VerdictFilter>('all');
@@ -109,6 +110,11 @@ export function CaseBoard() {
   /** URL de auditoría: la calculadora con los parámetros exactos del caso. */
   const evidenceUrl = (c: CaseCard) =>
     `/detective?preset=custom&lat=${c.latitude}&lon=${c.longitude}&variable=${c.variable}&season=${c.season}&start=${c.periodStart}-01-01&end=${c.periodEnd}-12-31`;
+
+  /** URL del expediente científico: documento imprimible recalculado
+   *  en el servidor con los parámetros exactos del caso. */
+  const dossierUrl = (c: CaseCard) =>
+    `/${locale}/dossier?lat=${c.latitude}&lon=${c.longitude}&variable=${c.variable}&season=${c.season}&startYear=${c.periodStart}&endYear=${c.periodEnd}&place=${encodeURIComponent(c.placeName)}`;
 
   const formatP = (p: number | null) =>
     p === null ? '—' : p < 0.001 ? '< 0.001' : p.toFixed(3);
@@ -277,6 +283,14 @@ export function CaseBoard() {
               >
                 <Eye className="h-3 w-3" aria-hidden />
                 {t('reviewEvidence')}
+              </Link>
+              <Link
+                href={dossierUrl(c)}
+                title={t('dossierLink')}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-600 bg-slate-800/80 px-2.5 py-1.5 text-[11px] font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:text-white"
+              >
+                <FileText className="h-3 w-3" aria-hidden />
+                {t('dossierLink')}
               </Link>
             </div>
           </article>

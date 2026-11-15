@@ -49,6 +49,14 @@ Flash it straight from the browser with Web Serial — no toolchain needed:
 Full methodology, formulas and limitations:
 **[docs/METHODOLOGY.md](./docs/METHODOLOGY.md)**.
 
+## Case study: "Is extreme heat increasing in Paraguay?"
+
+A real, fully reproducible investigation answering three questions
+(mean temperature, days > 35 °C, Chaco vs Asunción) on real NASA POWER data
+— with an honest null result and every number independently verified
+against pymannkendall/SciPy:
+**[docs/CASE_PARAGUAY.md](./docs/CASE_PARAGUAY.md)**.
+
 ## Stack
 
 | Part | Technology |
@@ -70,6 +78,7 @@ OrbitStreet/
 │   └── shared-types/ # Types shared by web and firmware docs
 └── docs/
     ├── METHODOLOGY.md          # Statistics, conventions, limitations (transparency)
+    ├── CASE_PARAGUAY.md        # Real reproducible investigation on Paraguay heat
     └── PLAN_IMPLEMENTACION.md  # Internal implementation notes (Spanish)
 ```
 

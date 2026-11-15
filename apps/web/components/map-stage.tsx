@@ -7,7 +7,7 @@ import {
   useScroll,
   useTransform
 } from 'motion/react';
-import { ArrowDown, ChevronDown, FolderArchive, GitCompareArrows, Loader2, MapPin, Radio, Search, Upload, X } from 'lucide-react';
+import { ArrowDown, ChevronDown, FileText, FolderArchive, GitCompareArrows, Loader2, MapPin, Radio, Search, Upload, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import type { MapCity } from '@/components/world-map';
@@ -1564,6 +1564,21 @@ export function MapStage() {
                 <FolderArchive className="h-4 w-4" aria-hidden />
                 {th('archiveCase')}
               </button>
+            )}
+
+            {/* Expediente científico: documento imprimible (PDF) con fuente
+                exacta, método, IC, validación y limitaciones. Compartible
+                por URL: recalcula el mismo resultado en el servidor. */}
+            {analysis && (
+              <a
+                href={`/${locale}/dossier?lat=${selected.lat}&lon=${selected.lon}&variable=${analysis.trend.variable}&season=${analysis.trend.season}&startYear=${startYear}&endYear=${endYear}&place=${encodeURIComponent(selected.name)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-600 bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:text-white"
+              >
+                <FileText className="h-4 w-4" aria-hidden />
+                {th('dossierLink')}
+              </a>
             )}
 
             {/* Informe del detective: IA si hay clave; resumen local si no.
