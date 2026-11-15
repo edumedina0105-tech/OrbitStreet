@@ -9,6 +9,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { MapStage } from '@/components/map-stage';
+import { ProjectQaBox } from '@/components/project-qa-box';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -70,6 +71,9 @@ export default async function HomePage({ params }: Props) {
             </div>
           ))}
         </div>
+
+        {/* Tutor de IA: preguntas sobre la metodología del proyecto */}
+        <ProjectQaBox />
       </section>
 
       {/* Honestidad */}

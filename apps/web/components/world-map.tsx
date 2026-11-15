@@ -23,6 +23,15 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 
 /**
+ * Rango de zoom del globo. El máximo alto (64x) permite acercarse hasta la
+ * escala de calle DENTRO de la celda MERRA-2: la celda en sí no puede ser
+ * más pequeña (es la resolución real de los datos de la NASA, ~50 x 70 km),
+ * pero así el usuario ve que su calle cabe dentro de ella.
+ */
+const MIN_ZOOM = 0.85;
+const MAX_ZOOM = 64;
+
+/**
  * Globo terráqueo 3D interactivo (proyección ortográfica con d3-geo).
  * Portado del prototipo de referencia "Calle vs. Cielo" y adaptado a
  * Next.js con i18n: arrastra para rotar, lupas/rueda (con clic presionado)
@@ -214,7 +223,7 @@ export function WorldMap({
       setAutoSpin(false);
       const factor = event.deltaY < 0 ? 1.15 : 0.87;
       setZoom((current) =>
-        clamp(Number((current * factor).toFixed(2)), 0.85, 12)
+        clamp(Number((current * factor).toFixed(2)), MIN_ZOOM, MAX_ZOOM)
       );
     };
     svg.addEventListener('wheel', handleWheel, { passive: false });
@@ -726,7 +735,7 @@ export function WorldMap({
               onClick={() => {
                 setAutoSpin(false);
                 setZoom((current) =>
-                  clamp(Number((current * 1.45).toFixed(2)), 0.85, 12)
+                  clamp(Number((current * 1.45).toFixed(2)), MIN_ZOOM, MAX_ZOOM)
                 );
               }}
               className="rounded-lg p-1.5 text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
@@ -743,7 +752,7 @@ export function WorldMap({
               onClick={() => {
                 setAutoSpin(false);
                 setZoom((current) =>
-                  clamp(Number((current / 1.45).toFixed(2)), 0.85, 12)
+                  clamp(Number((current / 1.45).toFixed(2)), MIN_ZOOM, MAX_ZOOM)
                 );
               }}
               className="rounded-lg p-1.5 text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
