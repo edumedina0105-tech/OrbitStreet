@@ -1,9 +1,10 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { BookOpen, Cable, Cpu, KeyRound, Wifi } from 'lucide-react';
+import { BookOpen, Cpu, KeyRound, Wifi } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth/session';
 import { Link } from '@/i18n/navigation';
 import { WebSerialFlasher } from '@/components/web-serial-flasher';
 import { StationPanel } from '@/components/station-panel';
+import { WiringDiagram } from '@/components/wiring-diagram';
 import type { Locale } from '@orbitstreet/shared-types';
 
 type Props = {
@@ -92,61 +93,37 @@ export default async function StationPage({ params }: Props) {
           {t('step3.title')}
         </h2>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {/* Cableado */}
-          <div className={card}>
-            <p className="flex items-center gap-2 text-sm font-semibold text-cyan-200">
-              <Cable className="h-4 w-4" aria-hidden />
-              {t('wiring.title')}
-            </p>
-            <table className="mt-3 w-full text-sm">
-              <tbody className="divide-y divide-slate-800">
-                <tr>
-                  <td className="py-2 font-mono text-slate-300">VCC</td>
-                  <td className="py-2 text-right text-slate-400">3.3V</td>
-                </tr>
-                <tr>
-                  <td className="py-2 font-mono text-slate-300">DATA</td>
-                  <td className="py-2 text-right font-mono text-amber-300">
-                    GPIO 4
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-2 font-mono text-slate-300">GND</td>
-                  <td className="py-2 text-right text-slate-400">GND</td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">
-              {t('wiring.note')}
-            </p>
-          </div>
+        {/* Diagrama interactivo de conexiones ESP32 ↔ sensor: elige sensor
+            y pin y el cable de señal se redibuja animado. Guía con pasos
+            y precauciones específicas de cada sensor. */}
+        <div className="mt-4">
+          <WiringDiagram />
+        </div>
 
-          {/* Asistente cautivo */}
-          <div className={card}>
-            <p className="flex items-center gap-2 text-sm font-semibold text-cyan-200">
-              <Wifi className="h-4 w-4" aria-hidden />
-              {t('wizard.title')}
-            </p>
-            <ol className="mt-3 space-y-2 text-xs leading-relaxed text-slate-400">
-              <li className="flex gap-2">
-                <span className="text-cyan-400">1.</span>
-                {t('wizard.network')}
-              </li>
-              <li className="flex gap-2">
-                <span className="text-cyan-400">2.</span>
-                {t('wizard.browser')}
-              </li>
-              <li className="flex gap-2">
-                <span className="text-cyan-400">3.</span>
-                {t('wizard.fields')}
-              </li>
-              <li className="flex gap-2">
-                <span className="text-cyan-400">4.</span>
-                {t('wizard.done')}
-              </li>
-            </ol>
-          </div>
+        {/* Asistente cautivo del nodo (primera configuración) */}
+        <div className={`${card} mt-4`}>
+          <p className="flex items-center gap-2 text-sm font-semibold text-cyan-200">
+            <Wifi className="h-4 w-4" aria-hidden />
+            {t('wizard.title')}
+          </p>
+          <ol className="mt-3 grid gap-2 text-xs leading-relaxed text-slate-400 md:grid-cols-2">
+            <li className="flex gap-2">
+              <span className="text-cyan-400">1.</span>
+              {t('wizard.network')}
+            </li>
+            <li className="flex gap-2">
+              <span className="text-cyan-400">2.</span>
+              {t('wizard.browser')}
+            </li>
+            <li className="flex gap-2">
+              <span className="text-cyan-400">3.</span>
+              {t('wizard.fields')}
+            </li>
+            <li className="flex gap-2">
+              <span className="text-cyan-400">4.</span>
+              {t('wizard.done')}
+            </li>
+          </ol>
         </div>
       </section>
 

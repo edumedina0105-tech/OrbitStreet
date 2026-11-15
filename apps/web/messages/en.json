@@ -677,8 +677,61 @@
       "title": "Wire the sensor and configure the node"
     },
     "wiring": {
-      "title": "Sensor wiring",
-      "note": "3-pin DHT modules connect directly. For a bare sensor, add a 10 kΩ pull-up resistor between VCC and DATA."
+      "sensorPicker": "Pick your sensor — the diagram redraws itself",
+      "diagramAria": "Animated wiring diagram between the ESP32 board and the {sensor} sensor",
+      "dividerTitle": "NTC voltage divider",
+      "digitalPinLabel": "Data GPIO pin (wired in the diagram)",
+      "adcPinLabel": "ADC pin wired in the diagram",
+      "recommended": "recommended",
+      "pullUpLabel": "Show 10 kΩ pull-up resistor (bare sensor)",
+      "i2cFixed": "Fixed I2C bus: SDA → GPIO 21 · SCL → GPIO 22",
+      "cautionTitle": "Caution",
+      "cautionShade": "Also mount the sensor under ventilated shade (e.g. stacked white plates) to avoid direct-sun bias.",
+      "legendVcc": "3.3 V (power)",
+      "legendGnd": "GND (ground)",
+      "legendSignal": "Animated signal to the chosen pin",
+      "sensors": {
+        "dht22": {
+          "short": "DHT22",
+          "name": "DHT22 / AM2302 (recommended)",
+          "precision": "±0.5 °C · ±2 % RH",
+          "pins": "3 wires: 3V3, GND and 1 digital GPIO pin",
+          "step1": "Connect the DHT22 VCC (+) pin to the ESP32 3V3 pin.",
+          "step2": "Connect the DHT22 GND (−) pin to an ESP32 GND pin.",
+          "step3": "Connect the DATA (OUT) pin to the chosen GPIO (GPIO 4 by default). For a bare sensor without a breakout board, add a 10 kΩ pull-up between DATA and 3V3.",
+          "caution": "Never power it at 5 V if your module has no regulator: ESP32 pins run at 3.3 V logic."
+        },
+        "dht11": {
+          "short": "DHT11",
+          "name": "DHT11 (quick start)",
+          "precision": "±2 °C · ±5 % RH",
+          "pins": "3 wires: 3V3, GND and 1 digital GPIO pin",
+          "step1": "Connect the blue DHT11 module VCC (+) to the ESP32 3V3 pin.",
+          "step2": "Connect the DHT11 GND (−) to an ESP32 GND pin.",
+          "step3": "Connect the DATA pin to the chosen digital GPIO (GPIO 4 by default).",
+          "caution": "Its ±2 °C resolution only catches large thermal anomalies; great for initial testing."
+        },
+        "b3950": {
+          "short": "B3950",
+          "name": "NTC B3950 thermistor (10 kΩ)",
+          "precision": "±0.5–1 °C (calibrated)",
+          "pins": "NTC + 10 kΩ fixed resistor into an ADC1 pin (GPIO 34/35/32)",
+          "step1": "Connect one leg of the 10 kΩ fixed resistor to 3V3 and the other to the center node.",
+          "step2": "Connect one leg of the NTC thermistor to the center node and the other to GND.",
+          "step3": "Connect the center node (NTC–resistor junction) to the chosen ADC1 pin (e.g. GPIO 34) and type that pin into the node wizard.",
+          "caution": "Always use ADC1 block pins (GPIO 32–39): ADC2 pins fail while the ESP32 Wi-Fi is on."
+        },
+        "bme280": {
+          "short": "BME280",
+          "name": "BME280 / BMP280 (I²C)",
+          "precision": "±0.5 °C · ±1 hPa",
+          "pins": "4 wires: 3V3, GND, SDA (GPIO 21) and SCL (GPIO 22)",
+          "step1": "Connect the BME280 VIN/VCC to the ESP32 3V3 pin.",
+          "step2": "Connect GND to an ESP32 GND pin.",
+          "step3": "Connect SDA to GPIO 21 and SCL to GPIO 22 (the ESP32 standard I²C bus).",
+          "caution": "Make sure it is the 3.3 V version (or 3.3–5 V tolerant): besides temperature and humidity it measures atmospheric pressure."
+        }
+      }
     },
     "wizard": {
       "title": "Node wizard (first boot)",

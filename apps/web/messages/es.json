@@ -677,8 +677,61 @@
       "title": "Conecta el sensor y configura el nodo"
     },
     "wiring": {
-      "title": "Cableado del sensor",
-      "note": "Los módulos DHT de 3 pines van directos. Si tu sensor es suelto, agrega una resistencia pull-up de 10 kΩ entre VCC y DATA."
+      "sensorPicker": "Elige tu sensor — el diagrama se redibuja solo",
+      "diagramAria": "Diagrama animado de conexión entre la placa ESP32 y el sensor {sensor}",
+      "dividerTitle": "Divisor de tensión NTC",
+      "digitalPinLabel": "Pin GPIO de datos (conectado en el diagrama)",
+      "adcPinLabel": "Pin ADC conectado en el diagrama",
+      "recommended": "recomendado",
+      "pullUpLabel": "Mostrar resistencia pull-up 10 kΩ (sensor suelto)",
+      "i2cFixed": "Bus I2C fijo: SDA → GPIO 21 · SCL → GPIO 22",
+      "cautionTitle": "Precaución",
+      "cautionShade": "Además, instala el sensor bajo sombra ventilada (p. ej. platos blancos apilados) para evitar el sesgo del sol directo.",
+      "legendVcc": "3.3 V (alimentación)",
+      "legendGnd": "GND (tierra)",
+      "legendSignal": "Señal animada al pin elegido",
+      "sensors": {
+        "dht22": {
+          "short": "DHT22",
+          "name": "DHT22 / AM2302 (recomendado)",
+          "precision": "±0.5 °C · ±2 % HR",
+          "pins": "3 cables: 3V3, GND y 1 pin GPIO digital",
+          "step1": "Conecta el pin VCC (+) del DHT22 al pin 3V3 del ESP32.",
+          "step2": "Conecta el pin GND (−) del DHT22 a un pin GND del ESP32.",
+          "step3": "Conecta el pin DATA (OUT) al GPIO elegido (por defecto GPIO 4). Si el sensor va suelto sin placa, añade una pull-up de 10 kΩ entre DATA y 3V3.",
+          "caution": "Nunca lo alimentes a 5 V si tu módulo no tiene regulador: los pines del ESP32 trabajan a lógica de 3.3 V."
+        },
+        "dht11": {
+          "short": "DHT11",
+          "name": "DHT11 (arranque rápido)",
+          "precision": "±2 °C · ±5 % HR",
+          "pins": "3 cables: 3V3, GND y 1 pin GPIO digital",
+          "step1": "Conecta VCC (+) del módulo azul DHT11 al pin 3V3 del ESP32.",
+          "step2": "Conecta GND (−) del DHT11 a un pin GND del ESP32.",
+          "step3": "Conecta el pin DATA al GPIO digital elegido (por defecto GPIO 4).",
+          "caution": "Su resolución (±2 °C) solo permite detectar anomalías térmicas grandes; ideal para pruebas iniciales."
+        },
+        "b3950": {
+          "short": "B3950",
+          "name": "Termistor NTC B3950 (10 kΩ)",
+          "precision": "±0.5–1 °C (calibrado)",
+          "pins": "NTC + resistencia fija 10 kΩ hacia un pin ADC1 (GPIO 34/35/32)",
+          "step1": "Conecta una pata de la resistencia fija de 10 kΩ a 3V3 y la otra al nodo central.",
+          "step2": "Conecta una pata del termistor NTC al nodo central y la otra a GND.",
+          "step3": "Conecta el nodo central (unión NTC–resistencia) al pin ADC1 elegido (p. ej. GPIO 34) y escribe ese pin en el asistente del nodo.",
+          "caution": "Usa siempre pines del bloque ADC1 (GPIO 32–39): los pines ADC2 fallan cuando el Wi-Fi del ESP32 está encendido."
+        },
+        "bme280": {
+          "short": "BME280",
+          "name": "BME280 / BMP280 (I²C)",
+          "precision": "±0.5 °C · ±1 hPa",
+          "pins": "4 cables: 3V3, GND, SDA (GPIO 21) y SCL (GPIO 22)",
+          "step1": "Conecta VIN/VCC de la placa BME280 al pin 3V3 del ESP32.",
+          "step2": "Conecta GND a GND del ESP32.",
+          "step3": "Conecta SDA al GPIO 21 y SCL al GPIO 22 (bus I²C estándar del ESP32).",
+          "caution": "Verifica que sea la versión de 3.3 V (o compatible 3.3–5 V): además de temperatura y humedad mide presión atmosférica."
+        }
+      }
     },
     "wizard": {
       "title": "Asistente del nodo (primera vez)",
