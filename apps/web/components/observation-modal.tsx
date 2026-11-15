@@ -11,8 +11,7 @@ import {
   ShieldCheck,
   X
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { VARIABLE_CONFIG } from '@/lib/analysis/variables';
 import { OBSERVABLE_VARIABLES } from '@/lib/observations/plausibility';
 import { parseCoordinate } from '@/lib/parse-coord';
@@ -79,6 +78,7 @@ export function ObservationModal({
 }) {
   const t = useTranslations('observation');
   const td = useTranslations('detective');
+  const locale = useLocale();
 
   const [stage, setStage] = useState<Stage>('checking');
   const [mode, setMode] = useState<'photo' | 'manual'>('photo');
@@ -101,6 +101,66 @@ export function ObservationModal({
     progress: { count: number; goal: number };
   } | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
+  // Registro / inicio de sesión EN LÍNEA (sin salir del mapa):
+  // solo usuario + contraseña, en el mismo cuadro flotante.
+  const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
+  const [authUser, setAuthUser] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const AUTH_ERROR_KEYS: Record<string, string> = {
+    invalid_username: 'auth.errors.invalid_username',
+    username_taken: 'auth.errors.username_taken',
+    weak_password: 'auth.errors.weak_password',
+    invalid_credentials: 'auth.errors.invalid_credentials'
+  };
+
+  const authErrorText = (code: string | null) =>
+    code && AUTH_ERROR_KEYS[code]
+      ? t(AUTH_ERROR_KEYS[code])
+      : t('auth.errors.generic');
+
+  const submitAuth = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setAuthBusy(true);
+    setAuthError(null);
+    try {
+      const response = await fetch(
+        authMode === 'register' ? '/api/auth/register' : '/api/auth/login',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(
+            authMode === 'register'
+              ? { username: authUser, password: authPassword, locale }
+              : { identifier: authUser, password: authPassword }
+          )
+        }
+      );
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({}))) as {
+          errorCode?: string;
+        };
+        setAuthError(data.errorCode ?? 'generic');
+        return;
+      }
+      // Sesión creada por la cookie: re-verificar y pasar al formulario.
+      const me = await (await fetch('/api/auth/me')).json();
+      if (me.user) {
+        setAiAvailable(Boolean(me.aiAvailable));
+        if (!me.aiAvailable) setMode('manual');
+        setStage('form');
+      } else {
+        setAuthError('generic');
+      }
+    } catch {
+      setAuthError('generic');
+    } finally {
+      setAuthBusy(false);
+    }
+  };
 
   const resetForm = () => {
     setVariable('T2M');
@@ -321,7 +381,7 @@ export function ObservationModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl sm:p-6">
+      <div className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-600/50 bg-slate-900/80 p-5 shadow-2xl shadow-black/40 backdrop-blur-md sm:p-6">
         {/* Cabecera */}
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -348,16 +408,97 @@ export function ObservationModal({
         )}
 
         {stage === 'requiresAccount' && (
-          <div className="mt-6 space-y-4">
-            <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm text-amber-300">
-              {t('requiresAccount')}
-            </p>
-            <Link
-              href="/account"
-              className="inline-flex rounded-lg bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 transition-colors hover:bg-cyan-400"
-            >
-              {t('loginCta')}
-            </Link>
+          <div className="mt-5 space-y-4">
+            {/* Pestañas crear cuenta / iniciar sesión */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('register');
+                  setAuthError(null);
+                }}
+                className={`flex-1 rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${
+                  authMode === 'register'
+                    ? 'border-cyan-400/60 bg-cyan-500/20 text-cyan-200'
+                    : 'border-white/15 bg-white/5 text-slate-300 hover:bg-white/10'
+                }`}
+              >
+                {t('auth.createTab')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('login');
+                  setAuthError(null);
+                }}
+                className={`flex-1 rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${
+                  authMode === 'login'
+                    ? 'border-cyan-400/60 bg-cyan-500/20 text-cyan-200'
+                    : 'border-white/15 bg-white/5 text-slate-300 hover:bg-white/10'
+                }`}
+              >
+                {t('auth.loginTab')}
+              </button>
+            </div>
+
+            {/* Solo usuario + contraseña: registro/inicio de sesión simple */}
+            <form onSubmit={submitAuth} className="space-y-3">
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-medium text-slate-400">
+                  {t('auth.username')}
+                </span>
+                <input
+                  type="text"
+                  value={authUser}
+                  onChange={(event) => setAuthUser(event.target.value)}
+                  minLength={3}
+                  maxLength={30}
+                  autoComplete="username"
+                  required
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:outline-none"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-medium text-slate-400">
+                  {t('auth.password')}
+                </span>
+                <input
+                  type="password"
+                  value={authPassword}
+                  onChange={(event) => setAuthPassword(event.target.value)}
+                  minLength={8}
+                  maxLength={200}
+                  autoComplete={
+                    authMode === 'register' ? 'new-password' : 'current-password'
+                  }
+                  required
+                  className="w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:outline-none"
+                />
+                {authMode === 'register' && (
+                  <span className="mt-1 block text-[10px] text-slate-500">
+                    {t('auth.passwordHint')}
+                  </span>
+                )}
+              </label>
+
+              {authError && (
+                <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-300">
+                  {authErrorText(authError)}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={authBusy}
+                className="w-full rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-cyan-400 disabled:opacity-50"
+              >
+                {authBusy
+                  ? t('auth.busy')
+                  : authMode === 'register'
+                    ? t('auth.createSubmit')
+                    : t('auth.loginSubmit')}
+              </button>
+            </form>
           </div>
         )}
 

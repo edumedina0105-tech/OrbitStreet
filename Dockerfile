@@ -56,5 +56,8 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget -qO- http://127.0.0.1:${PORT}/api/health || exit 1
 
 # 1) Asegura el esquema (CREATE TABLE si no existen) y 2) arranca el servidor.
+#    El primer intento es sin --accept-data-loss (bloquea cambios destructivos);
+#    si Prisma solo ADVIERTE (p. ej. añadir un índice único sobre una columna
+#    nueva vacía), se reintenta aceptándolo para no dejar la app caída.
 # exec: node reemplaza a sh para recibir SIGTERM correctamente (Railway).
-CMD ["sh", "-c", "node /prisma-cli/node_modules/prisma/build/index.js db push --schema /prisma-cli/schema/schema.prisma --skip-generate && exec node apps/web/server.js"]
+CMD ["sh", "-c", "node /prisma-cli/node_modules/prisma/build/index.js db push --schema /prisma-cli/schema/schema.prisma --skip-generate || node /prisma-cli/node_modules/prisma/build/index.js db push --schema /prisma-cli/schema/schema.prisma --skip-generate --accept-data-loss; exec node apps/web/server.js"]

@@ -34,7 +34,9 @@ export default async function AccountPage({ params }: Props) {
           <p className="mt-2 text-lg font-semibold text-slate-100">
             {user.displayName}
           </p>
-          <p className="text-sm text-slate-400">{user.email}</p>
+          {user.username && (
+            <p className="font-mono text-sm text-slate-400">@{user.username}</p>
+          )}
           <p className="mt-4 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-400">
             {t('cooldownNote', {
               minutes: String(user.uploadCooldownMinutes)

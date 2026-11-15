@@ -17,7 +17,9 @@ const SESSION_DAYS = 30;
 
 export interface SessionUser {
   id: string;
-  email: string;
+  /** Identidad simple: usuario; el email es opcional/heredado. */
+  username: string | null;
+  email: string | null;
   displayName: string;
   locale: string;
   uploadCooldownMinutes: number;
@@ -52,6 +54,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
       user: {
         select: {
           id: true,
+          username: true,
           email: true,
           displayName: true,
           locale: true,

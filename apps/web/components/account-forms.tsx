@@ -5,13 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 /**
- * Formularios de login/registro. Todas las respuestas de error viajan como
- * errorCode y se traducen aquí: nunca texto crudo del servidor.
+ * Formularios de login/registro: usuario + contraseña (sin correo).
+ * Todas las respuestas de error viajan como errorCode y se traducen
+ * aquí: nunca texto crudo del servidor.
  */
 
 const ERROR_KEYS: Record<string, string> = {
+  invalid_username: 'errors.invalid_username',
+  username_taken: 'errors.username_taken',
   invalid_email: 'errors.invalid_email',
-  email_taken: 'errors.email_taken',
+  email_taken: 'errors.username_taken',
   weak_password: 'errors.weak_password',
   invalid_name: 'errors.invalid_name',
   invalid_credentials: 'errors.invalid_credentials'
@@ -22,9 +25,8 @@ export function AccountForms() {
   const router = useRouter();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -40,8 +42,8 @@ export function AccountForms() {
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(
             mode === 'login'
-              ? { email, password }
-              : { email, password, displayName }
+              ? { identifier, password }
+              : { username: identifier, password, locale: 'es' }
           )
         }
       );
@@ -94,28 +96,15 @@ export function AccountForms() {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        {mode === 'register' && (
-          <label className="block text-sm text-slate-300">
-            {t('displayName')}
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              maxLength={40}
-              required
-              className={inputClass}
-            />
-          </label>
-        )}
-
         <label className="block text-sm text-slate-300">
-          {t('email')}
+          {t('username')}
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            maxLength={120}
-            autoComplete="email"
+            type="text"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            maxLength={30}
+            minLength={3}
+            autoComplete="username"
             required
             className={inputClass}
           />

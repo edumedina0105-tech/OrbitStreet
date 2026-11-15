@@ -9,7 +9,7 @@ export async function GET() {
     user: user
       ? {
           id: user.id,
-          email: user.email,
+          username: user.username,
           displayName: user.displayName,
           uploadCooldownMinutes: user.uploadCooldownMinutes
         }

@@ -275,8 +275,7 @@
     "subtitle": "Investigating NASA data is open to everyone. An account is only needed to upload your own measurements and save your progress — it protects the community data from bots.",
     "loginTab": "Log in",
     "registerTab": "Create account",
-    "displayName": "Display name",
-    "email": "Email",
+    "username": "Username",
     "password": "Password",
     "passwordHint": "At least 8 characters. Stored only as a scrypt hash, never in clear text.",
     "loginSubmit": "Log in",
@@ -285,14 +284,15 @@
     "logout": "Log out",
     "loggedInAs": "Logged in as",
     "cooldownNote": "You can upload one series every {minutes} minutes.",
-    "privacyNote": "We only store your email, display name and password hash. Nothing else. No trackers.",
+    "privacyNote": "We only store your username and your password hash. Nothing else. No trackers.",
     "errors": {
       "generic": "Something went wrong. Please try again.",
+      "invalid_username": "Username must be 3–30 characters: letters, numbers, dot, hyphen or underscore.",
+      "username_taken": "That username already exists. Try logging in or pick another name.",
       "invalid_email": "Enter a valid email address.",
-      "email_taken": "That email is already registered. Try logging in.",
       "weak_password": "Password must be at least 8 characters long.",
       "invalid_name": "Display name must be 1 to 40 characters.",
-      "invalid_credentials": "Incorrect email or password."
+      "invalid_credentials": "Incorrect username or password."
     }
   },
   "upload": {
@@ -341,8 +341,23 @@
     "title": "Upload your observation",
     "subtitle": "One data point from your street, with evidence. The AI only reads the photo; you confirm; the bias against the NASA cell is computed by deterministic code.",
     "checking": "Checking your session…",
-    "requiresAccount": "To upload observations you need an account: it blocks bots and keeps your observation history.",
-    "loginCta": "Create account / sign in",
+    "auth": {
+      "createTab": "Create account",
+      "loginTab": "Log in",
+      "username": "Username",
+      "password": "Password",
+      "passwordHint": "At least 8 characters. We only store the scrypt hash.",
+      "createSubmit": "Create account and continue",
+      "loginSubmit": "Log in and continue",
+      "busy": "Working…",
+      "errors": {
+        "generic": "Something went wrong. Please try again.",
+        "invalid_username": "Username must be 3–30 characters: letters, numbers, dot, hyphen or underscore.",
+        "username_taken": "That username already exists. Try logging in or pick another name.",
+        "weak_password": "Password must be at least 8 characters long.",
+        "invalid_credentials": "Incorrect username or password."
+      }
+    },
     "close": "Close",
     "tabs": {
       "photo": "Photo",

@@ -93,12 +93,17 @@ model PowerCache {
 
 /// Usuario registrado: necesario para subir datos comunitarios y guardar progreso.
 /// El análisis público sigue abierto para todos; solo la subida exige cuenta.
+/// Identidad simple: usuario + contraseña (sin correo obligatorio). El email
+/// queda opcional como identificador heredado de cuentas previas.
 model User {
   id        String   @id @default(cuid())
-  /// Email normalizado (minúsculas), único.
-  email     String   @unique
+  /// Nombre de usuario (minúsculas): único. Registro simple sin correo.
+  username  String?  @unique
+  /// Email opcional (cuentas heredadas pueden iniciar sesión con él).
+  email     String?  @unique
   /// Hash scrypt con sal aleatoria (formato: scrypt$salt$hash). NUNCA en claro.
   passwordHash String
+  /// Por defecto coincide con el username; editable más adelante.
   displayName String
   locale    String   @default("es")
   /// Cooldown de subidas, en minutos, flexible por cuenta (default 10).

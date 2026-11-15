@@ -275,8 +275,7 @@
     "subtitle": "Investigar los datos de la NASA está abierto para todos. La cuenta solo hace falta para subir tus propias mediciones y guardar tu progreso — protege los datos comunitarios de los bots.",
     "loginTab": "Iniciar sesión",
     "registerTab": "Crear cuenta",
-    "displayName": "Nombre visible",
-    "email": "Correo electrónico",
+    "username": "Usuario",
     "password": "Contraseña",
     "passwordHint": "Mínimo 8 caracteres. Se guarda solo como hash scrypt, nunca en texto claro.",
     "loginSubmit": "Iniciar sesión",
@@ -285,14 +284,15 @@
     "logout": "Cerrar sesión",
     "loggedInAs": "Sesión iniciada como",
     "cooldownNote": "Puedes subir una serie cada {minutes} minutos.",
-    "privacyNote": "Solo guardamos tu correo, tu nombre visible y el hash de tu contraseña. Nada más. Sin rastreadores.",
+    "privacyNote": "Solo guardamos tu usuario y el hash de tu contraseña. Nada más. Sin rastreadores.",
     "errors": {
       "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "invalid_username": "El usuario debe tener 3–30 caracteres: letras, números, punto, guion o guion bajo.",
+      "username_taken": "Ese usuario ya existe. Prueba iniciar sesión u otro nombre.",
       "invalid_email": "Ingresa un correo electrónico válido.",
-      "email_taken": "Ese correo ya está registrado. Prueba iniciar sesión.",
       "weak_password": "La contraseña debe tener al menos 8 caracteres.",
       "invalid_name": "El nombre visible debe tener entre 1 y 40 caracteres.",
-      "invalid_credentials": "Correo o contraseña incorrectos."
+      "invalid_credentials": "Usuario o contraseña incorrectos."
     }
   },
   "upload": {
@@ -341,8 +341,23 @@
     "title": "Sube tu observación",
     "subtitle": "Un dato de tu calle, con evidencia. La IA solo lee la foto; tú confirmas; el sesgo contra la celda NASA lo calcula código determinista.",
     "checking": "Verificando tu sesión…",
-    "requiresAccount": "Para subir observaciones necesitas una cuenta: bloquea bots y acumula tu historial de observaciones.",
-    "loginCta": "Crear cuenta / iniciar sesión",
+    "auth": {
+      "createTab": "Crear cuenta",
+      "loginTab": "Iniciar sesión",
+      "username": "Usuario",
+      "password": "Contraseña",
+      "passwordHint": "Mínimo 8 caracteres. Solo guardamos el hash scrypt.",
+      "createSubmit": "Crear cuenta y continuar",
+      "loginSubmit": "Iniciar sesión y continuar",
+      "busy": "Procesando…",
+      "errors": {
+        "generic": "Algo salió mal. Inténtalo de nuevo.",
+        "invalid_username": "El usuario debe tener 3–30 caracteres: letras, números, punto, guion o guion bajo.",
+        "username_taken": "Ese usuario ya existe. Prueba iniciar sesión u otro nombre.",
+        "weak_password": "La contraseña debe tener al menos 8 caracteres.",
+        "invalid_credentials": "Usuario o contraseña incorrectos."
+      }
+    },
     "close": "Cerrar",
     "tabs": {
       "photo": "Foto",
