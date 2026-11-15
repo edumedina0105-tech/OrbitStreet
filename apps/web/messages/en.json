@@ -51,14 +51,15 @@
       "allSeasons": "Year",
       "startYear": "Start year",
       "endYear": "End year",
-      "consult": "Query live NASA POWER",
+      "consult": "Query NASA POWER",
+      "resultClose": "Close results",
       "analyzing": "Querying NASA POWER…",
       "viewFull": "See full chart & report",
       "yearsNoteShort": "Local sensor: ~{years} yrs",
       "yearsNoteImpractical": "Local sensor: not viable in a lifetime",
       "yearsNoteWhy": "Why? A ground node installed here today would take those years to confirm the trend on its own: it measures when your street starts producing evidence.",
       "askAi": "Ask",
-      "qaTitle": "Ask the AI about the project",
+      "qaTitle": "Ask about the data",
       "qaHint": "Ask about the project's methodology: statistics, data sources, how it works. It does not look up data for specific places.",
       "qaSuggestion1": "What is the Mann-Kendall test?",
       "qaSuggestion2": "What is the MERRA-2 grid cell?",
@@ -105,22 +106,7 @@
     "questions": {
       "title": "Every good detective asks four questions",
       "subtitle": "OrbitStreet answers all of them with decades of real NASA data and mathematics — never guesses.",
-      "what": {
-        "title": "What is changing?",
-        "description": "Temperature highs, days above 35 °C, rainfall, humidity: real variables measured by NASA Earth science missions and models."
-      },
-      "where": {
-        "title": "Where is it changing?",
-        "description": "Any place on Earth you choose — your city, your region — at NASA grid-cell scale, and later at street level with our open-hardware node."
-      },
-      "howMuch": {
-        "title": "How much is it changing?",
-        "description": "The rate of change in real units, such as °C per decade, with confidence intervals — not just a line going up."
-      },
-      "significant": {
-        "title": "Is it significant?",
-        "description": "A rising line may be just natural noise. We apply the same statistical tests scientists use (Mann-Kendall, Sen's slope) before calling a change real."
-      }
+      "emptyHint": "Pick a point on the globe, a variable and a period, then press “Query NASA POWER”: these four questions will be answered right here with the real data of the cell you choose."
     },
     "honesty": {
       "title": "Honest by design",

@@ -51,14 +51,15 @@
       "allSeasons": "Año",
       "startYear": "Año inicial",
       "endYear": "Año final",
-      "consult": "Consultar NASA POWER en vivo",
+      "consult": "Consultar NASA POWER",
+      "resultClose": "Cerrar resultados",
       "analyzing": "Consultando NASA POWER…",
       "viewFull": "Ver gráfico e informe completo",
       "yearsNoteShort": "Sensor local: ~{years} años",
       "yearsNoteImpractical": "Sensor local: inviable en plazo humano",
       "yearsNoteWhy": "¿Para qué? Un nodo en tierra instalado aquí hoy tardaría esos años en confirmar la tendencia por sí solo: es la medida de cuándo tu calle empieza a aportar evidencia.",
       "askAi": "Preguntar",
-      "qaTitle": "Pregunta a la IA sobre el proyecto",
+      "qaTitle": "Pregunta sobre los datos",
       "qaHint": "Pregunta sobre la metodología del proyecto: estadística, fuentes de datos, cómo funciona. No consulta datos de lugares específicos.",
       "qaSuggestion1": "¿Qué es la prueba de Mann-Kendall?",
       "qaSuggestion2": "¿Qué es la celda MERRA-2?",
@@ -105,22 +106,7 @@
     "questions": {
       "title": "Todo buen detective hace cuatro preguntas",
       "subtitle": "OrbitStreet responde todas con décadas de datos reales de la NASA y matemáticas — nunca suposiciones.",
-      "what": {
-        "title": "¿Qué está cambiando?",
-        "description": "Temperaturas máximas, días sobre 35 °C, lluvia, humedad: variables reales medidas por misiones y modelos de ciencias de la Tierra de la NASA."
-      },
-      "where": {
-        "title": "¿Dónde está cambiando?",
-        "description": "Cualquier lugar del planeta que elijas — tu ciudad, tu región — a escala de la celda de la NASA y, más adelante, a escala de calle con nuestro nodo de hardware abierto."
-      },
-      "howMuch": {
-        "title": "¿Cuánto está cambiando?",
-        "description": "La tasa de cambio en unidades reales, como °C por década, con intervalos de confianza — no solo una línea que sube."
-      },
-      "significant": {
-        "title": "¿Es significativo?",
-        "description": "Una línea que sube puede ser solo ruido natural. Aplicamos las mismas pruebas estadísticas que usan los científicos (Mann-Kendall, pendiente de Sen) antes de llamar real a un cambio."
-      }
+      "emptyHint": "Elige un punto en el globo, una variable y un periodo, y presiona «Consultar NASA POWER»: estas cuatro preguntas se responderán aquí mismo, con los datos reales de la celda que elijas."
     },
     "honesty": {
       "title": "Honesto por diseño",

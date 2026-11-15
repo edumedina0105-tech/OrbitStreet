@@ -1,21 +1,23 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   motion,
   useReducedMotion,
   useScroll,
   useTransform
 } from 'motion/react';
-import { ArrowDown, ChevronDown, Loader2, Radio, Search, Upload } from 'lucide-react';
+import { ArrowDown, ChevronDown, Loader2, Radio, Search, Upload, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useRouter } from '@/i18n/navigation';
 import type { MapCity } from '@/components/world-map';
 import { ObservationModal } from '@/components/observation-modal';
+import { TrendChart, type TrendChartDatum } from '@/components/trend-chart';
+import { DetectiveReport } from '@/components/detective-report';
 import { VARIABLE_ICONS } from '@/components/variable-icons';
 import {
   analyzeDailySeries,
+  senFit,
   type SeriesAnalysis
 } from '@/lib/analysis/analyze-series';
 import { VARIABLE_CONFIG, VARIABLE_IDS } from '@/lib/analysis/variables';
@@ -85,7 +87,6 @@ export function MapStage() {
   const th = useTranslations('home');
   const td = useTranslations('detective');
   const locale = useLocale();
-  const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   const stageRef = useRef<HTMLDivElement | null>(null);
 
@@ -106,6 +107,29 @@ export function MapStage() {
   const [analysis, setAnalysis] = useState<SeriesAnalysis | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [fetchError, setFetchError] = useState(false);
+
+  // Panel grande de resultados (izquierda) + corrimiento animado del mapa:
+  // se abre al consultar y se cierra al tocar el mapa (que se re-centra).
+  const [resultsOpen, setResultsOpen] = useState(false);
+
+  // ¿Hay IA (Gemini) configurada? Lo responde /api/auth/me (flag público);
+  // el informe de la sección de resultados lo necesita.
+  const [aiAvailable, setAiAvailable] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        const data = (await response.json()) as { aiAvailable: boolean };
+        if (!cancelled) setAiAvailable(Boolean(data.aiAvailable));
+      } catch {
+        if (!cancelled) setAiAvailable(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Informe narrado por IA para el lugar analizado (aparece en el panel
   // izquierdo; la IA solo redacta, las cifras ya están calculadas).
@@ -159,6 +183,8 @@ export function MapStage() {
     presetId?: string;
   }) => {
     setSelected(loc);
+    // Tocar el mapa cierra el panel de resultados: el globo se re-centra.
+    setResultsOpen(false);
   };
 
   /** URL del Modo Detective con todo el estado del escenario. */
@@ -258,6 +284,8 @@ export function MapStage() {
       });
 
       setAnalysis(result);
+      // Abre el panel grande de resultados (izquierda) y desplaza el mapa.
+      setResultsOpen(true);
       return result;
     } catch {
       setFetchError(true);
@@ -267,7 +295,7 @@ export function MapStage() {
     }
   };
 
-  // Botón del panel derecho ("Consultar NASA POWER en vivo"): SOLO cifras.
+  // Botón del panel derecho ("Consultar NASA POWER"): SOLO cifras.
   const handleConsult = async () => {
     setAiReport(null);
     await runAnalysis();
@@ -280,40 +308,39 @@ export function MapStage() {
     if (result) void fetchAiReport(result);
   };
 
-  const detectiveUrl = () => {
-    const params = new URLSearchParams({
-      variable,
-      season,
-      start: `${startYear}-01-01`,
-      end: `${endYear}-12-31`
-    });
-    if (selected.presetId) {
-      params.set('preset', selected.presetId);
-    } else {
-      params.set('preset', 'custom');
-      params.set('lat', String(selected.lat));
-      params.set('lon', String(selected.lon));
-    }
-    return `/detective?${params.toString()}`;
+  /** Scroll suave a la sección de resultados completa (bajo el mapa). */
+  const scrollToResults = () => {
+    document
+      .getElementById('questions')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <div ref={stageRef} className="relative h-[135vh] w-full">
+    <div>
+      <div ref={stageRef} className="relative h-[135vh] w-full">
       {/* Pantalla completa fija mientras dura el hero */}
       <div className="sticky top-14 h-[calc(100vh-3.5rem)] w-full overflow-hidden">
         <motion.div
           style={{ opacity: mapOpacity, scale: mapScale }}
           className="absolute inset-0 origin-center"
         >
-          <WorldMap
-            cities={cities}
-            selectedLat={selected.lat}
-            selectedLon={selected.lon}
-            selectedName={selected.name}
-            selectedCountry={selected.country}
-            focusKey={focusKey}
-            onSelectLocation={handleSelectLocation}
-          />
+          {/* Al abrir los resultados el globo se desplaza a la derecha
+              (animado); al tocar el mapa se re-centra. */}
+          <div
+            className={`h-full w-full transition-transform duration-700 ease-out ${
+              resultsOpen ? 'md:translate-x-[16%]' : ''
+            }`}
+          >
+            <WorldMap
+              cities={cities}
+              selectedLat={selected.lat}
+              selectedLon={selected.lon}
+              selectedName={selected.name}
+              selectedCountry={selected.country}
+              focusKey={focusKey}
+              onSelectLocation={handleSelectLocation}
+            />
+          </div>
         </motion.div>
 
         {/* Capa HUD: paneles flotantes translúcidos */}
@@ -602,81 +629,14 @@ export function MapStage() {
                   {isFetching ? t('analyzing') : t('consult')}
                 </button>
 
-                {/* Resultado en línea: mismo motor determinista del Detective */}
-                {analysis && !isFetching && (
-                  <div className="space-y-2 rounded-xl border border-cyan-400/30 bg-slate-950/80 p-3">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-mono text-xl font-bold tabular-nums text-cyan-300">
-                        {analysis.trend.senSlopePerDecade > 0 ? '+' : ''}
-                        {analysis.trend.senSlopePerDecade.toFixed(2)}
-                      </span>
-                      <span className="font-mono text-[10px] text-slate-400">
-                        {VARIABLE_CONFIG[variable].unit} / {td('results.perDecade')}
-                      </span>
-                    </div>
-
-                    <p className="font-mono text-[11px] tabular-nums text-slate-300">
-                      {td('results.confidenceInterval')}:{' '}
-                      [{analysis.trend.ci95PerDecade.lower.toFixed(2)},{' '}
-                      {analysis.trend.ci95PerDecade.upper.toFixed(2)}]
-                    </p>
-
-                    <p className="font-mono text-[11px] tabular-nums text-slate-400">
-                      {td('results.pValue')} ={' '}
-                      {analysis.trend.mannKendall.p.toExponential(1)}
-                      {' · '}
-                      {td('results.yearsAnalyzed')} = {analysis.trend.n}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span
-                        className={`rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold ${
-                          analysis.trend.significant
-                            ? 'border-amber-400/40 bg-amber-500/15 text-amber-300'
-                            : 'border-white/15 bg-white/5 text-slate-400'
-                        }`}
-                      >
-                        {analysis.trend.significant
-                          ? td('results.significantYes')
-                          : td('results.significantNo')}
-                      </span>
-                      {Number.isFinite(analysis.years.years) ? (
-                        <span
-                          title={t('yearsNoteWhy')}
-                          className="cursor-help rounded-md border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-slate-400"
-                        >
-                          {analysis.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT
-                            ? t('yearsNoteShort', {
-                                years: analysis.years.years
-                              })
-                            : t('yearsNoteImpractical')}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <p className="text-[10px] leading-relaxed text-slate-500">
-                      {t('yearsNoteWhy')}
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={() => router.push(detectiveUrl())}
-                      className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-1.5 text-[11px] font-semibold text-cyan-200 transition-colors hover:bg-cyan-500/20"
-                    >
-                      <span>{t('viewFull')}</span>
-                      <ArrowDown className="h-3 w-3 -rotate-90" aria-hidden />
-                    </button>
-                  </div>
-                )}
-
+                {/* Los resultados en grande viven ahora en el panel
+                    flotante izquierdo (legibles) y en la sección completa
+                    bajo el mapa (id="questions"). */}
                 {fetchError && !isFetching && (
                   <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-[11px] leading-snug text-amber-300">
                     {td('errors.apiFailed')}
                   </p>
                 )}
-
-                {/* El tutor de preguntas ("Preguntar") vive ahora bajo las
-                    4 tarjetas de preguntas, en la sección #questions. */}
 
                 <p className="text-[11px] leading-snug text-slate-400">
                   {t('previewNote')}
@@ -686,12 +646,352 @@ export function MapStage() {
           </div>
         </motion.div>
 
+        {/* Panel grande de resultados (izquierda): legible y animado.
+            Tocar el mapa (o la X) lo cierra y el globo se re-centra. */}
+        {analysis && resultsOpen && !isFetching && (
+          <motion.div
+            initial={{ opacity: 0, x: prefersReducedMotion ? 0 : -32 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="absolute bottom-8 left-4 right-4 z-30 md:left-6 md:right-auto md:w-[440px]"
+          >
+            <div className="space-y-3 rounded-2xl border border-cyan-400/40 bg-slate-950/85 p-5 shadow-2xl backdrop-blur-md">
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-mono text-[11px] uppercase leading-snug tracking-wide text-cyan-300">
+                  {td(`variables.${analysis.trend.variable}.label`)} ·{' '}
+                  {td(`seasons.${analysis.trend.season}`)} · {startYear}–
+                  {endYear}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setResultsOpen(false)}
+                  aria-label={t('resultClose')}
+                  className="shrink-0 rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+
+              <p className="text-sm text-slate-300">
+                {selected.name} · {selected.lat.toFixed(2)}°,{' '}
+                {selected.lon.toFixed(2)}°
+              </p>
+
+              {/* Pendiente de Sen: número grande y legible */}
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <span className="font-mono text-4xl font-bold tabular-nums text-white">
+                  {analysis.trend.senSlopePerDecade > 0 ? '+' : ''}
+                  {analysis.trend.senSlopePerDecade.toFixed(2)}
+                </span>
+                <span className="font-mono text-sm text-slate-400">
+                  {VARIABLE_CONFIG[analysis.trend.variable].unit} /{' '}
+                  {td('results.perDecade')}
+                </span>
+              </div>
+
+              <p className="font-mono text-sm tabular-nums text-cyan-300">
+                {td('results.confidenceInterval')}:{' '}
+                [{analysis.trend.ci95PerDecade.lower.toFixed(2)},{' '}
+                {analysis.trend.ci95PerDecade.upper.toFixed(2)}]
+              </p>
+
+              <p className="font-mono text-sm tabular-nums text-slate-300">
+                {td('results.pValue')} ={' '}
+                {analysis.trend.mannKendall.p.toExponential(1)}
+                {' · '}
+                {td('results.yearsAnalyzed')} = {analysis.trend.n}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`rounded-lg border px-3 py-1 font-mono text-sm font-semibold ${
+                    analysis.trend.significant
+                      ? 'border-amber-400/50 bg-amber-500/15 text-amber-300'
+                      : 'border-white/20 bg-white/5 text-slate-300'
+                  }`}
+                >
+                  {analysis.trend.significant
+                    ? td('results.significantYes')
+                    : td('results.significantNo')}
+                </span>
+                {Number.isFinite(analysis.years.years) && (
+                  <span
+                    title={t('yearsNoteWhy')}
+                    className="cursor-help rounded-lg border border-white/20 bg-white/5 px-3 py-1 font-mono text-xs text-slate-400"
+                  >
+                    {analysis.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT
+                      ? t('yearsNoteShort', { years: analysis.years.years })
+                      : t('yearsNoteImpractical')}
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={scrollToResults}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-2.5 text-sm font-semibold text-cyan-200 transition-colors hover:bg-cyan-500/20"
+              >
+                <span>{t('viewFull')}</span>
+                <ArrowDown className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Indicador de scroll */}
         <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-slate-400">
           <span className="text-[11px]">{t('scrollCue')}</span>
           <ChevronDown className="h-4 w-4 animate-bounce text-cyan-400" aria-hidden />
         </div>
       </div>
+      </div>
+
+      {/* ===== Resultados: MISMA RUTA, bajo el mapa. Las 4 preguntas se
+               responden con los datos reales obtenidos (motor determinista);
+               nunca texto pre-escrito. ===== */}
+      <section
+        id="questions"
+        className="mx-auto max-w-[1360px] scroll-mt-24 px-6 pb-16"
+      >
+        <header className="mb-6 border-b border-slate-800 pb-3">
+          <h2 className="text-xl font-bold text-white md:text-2xl">
+            {th('questions.title')}
+          </h2>
+          <p className="mt-1 text-xs text-slate-400">
+            {th('questions.subtitle')}
+          </p>
+        </header>
+
+        {!analysis && (
+          <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-6">
+            <p className="text-sm leading-relaxed text-slate-400">
+              {th('questions.emptyHint')}
+            </p>
+          </div>
+        )}
+
+        {analysis && (
+          <div>
+            {/* Línea de contexto de la investigación */}
+            <p className="mb-4 font-mono text-xs leading-relaxed text-slate-400">
+              {selected.name} · {selected.lat.toFixed(2)}°,{' '}
+              {selected.lon.toFixed(2)}° · {startYear}–{endYear} ·{' '}
+              {td('results.gridCell')}
+            </p>
+
+            {/* Las 4 respuestas con datos reales */}
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {/* 01. ¿Qué está cambiando? */}
+              <div className="flex flex-col justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/90 p-5">
+                <div>
+                  <span className="text-xs font-medium text-slate-400">
+                    01. {td('results.what')}
+                  </span>
+                  <div className="mt-3 flex items-center gap-2 text-sm font-bold text-white">
+                    {(() => {
+                      const Icon = VARIABLE_ICONS[analysis.trend.variable];
+                      return (
+                        <Icon
+                          className="h-4 w-4 shrink-0 text-cyan-400"
+                          aria-hidden
+                        />
+                      );
+                    })()}
+                    {td(`variables.${analysis.trend.variable}.label`)}
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {td(`seasons.${analysis.trend.season}`)} ·{' '}
+                    {analysis.trend.mannKendall.trend === 'increasing'
+                      ? td('results.trendIncreasing')
+                      : analysis.trend.mannKendall.trend === 'decreasing'
+                        ? td('results.trendDecreasing')
+                        : td('results.trendNone')}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-2 border-t border-slate-800 pt-2 text-[11px] text-slate-400">
+                  <span>{td('results.source')}: NASA POWER · MERRA-2</span>
+                </div>
+              </div>
+
+              {/* 02. ¿Dónde está cambiando? */}
+              <div className="flex flex-col justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/90 p-5">
+                <div>
+                  <span className="text-xs font-medium text-slate-400">
+                    02. {td('results.where')}
+                  </span>
+                  <p className="mt-3 text-sm font-bold text-white">
+                    {selected.name}
+                  </p>
+                  <p className="mt-1 font-mono text-xs text-cyan-300">
+                    {selected.lat.toFixed(2)}°, {selected.lon.toFixed(2)}°
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-2 border-t border-slate-800 pt-2 text-[11px] text-slate-400">
+                  <span>{td('results.whereNote')}</span>
+                </div>
+              </div>
+
+              {/* 03. ¿Cuánto está cambiando? */}
+              <div className="flex flex-col justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/90 p-5">
+                <div>
+                  <span className="text-xs font-medium text-slate-400">
+                    03. {td('results.howMuch')}
+                  </span>
+                  <p className="mt-3 font-mono text-2xl font-bold tabular-nums text-white">
+                    {analysis.trend.senSlopePerDecade > 0 ? '+' : ''}
+                    {analysis.trend.senSlopePerDecade.toFixed(2)}{' '}
+                    <span className="text-sm text-slate-400">
+                      {VARIABLE_CONFIG[analysis.trend.variable].unit}/
+                      {td('results.perDecade')}
+                    </span>
+                  </p>
+                  <p className="mt-1 font-mono text-xs tabular-nums text-cyan-300">
+                    {td('results.confidenceInterval')}:{' '}
+                    [{analysis.trend.ci95PerDecade.lower.toFixed(2)},{' '}
+                    {analysis.trend.ci95PerDecade.upper.toFixed(2)}]
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-2 border-t border-slate-800 pt-2 text-[11px] text-slate-400">
+                  <span>
+                    {analysis.trend.ci95PerDecade.lower *
+                      analysis.trend.ci95PerDecade.upper >
+                    0
+                      ? td('results.ciSameSign')
+                      : td('results.ciCrossesZero')}
+                  </span>
+                </div>
+              </div>
+
+              {/* 04. ¿Es significativo? */}
+              <div className="flex flex-col justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/90 p-5">
+                <div>
+                  <span className="text-xs font-medium text-slate-400">
+                    04. {td('results.significant')}
+                  </span>
+                  <p className="mt-3">
+                    <span
+                      className={`inline-flex rounded-lg border px-2.5 py-1 font-mono text-xs font-semibold ${
+                        analysis.trend.significant
+                          ? 'border-amber-400/50 bg-amber-500/15 text-amber-300'
+                          : 'border-white/20 bg-white/5 text-slate-300'
+                      }`}
+                    >
+                      {analysis.trend.significant
+                        ? td('results.significantYes')
+                        : td('results.significantNo')}
+                    </span>
+                  </p>
+                  <p className="mt-2 font-mono text-xs tabular-nums text-slate-300">
+                    {td('results.pValue')} ={' '}
+                    {analysis.trend.mannKendall.p.toExponential(1)} ·{' '}
+                    {td('results.yearsAnalyzed')} = {analysis.trend.n}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-2 border-t border-slate-800 pt-2 text-[11px] text-slate-400">
+                  <span>
+                    {analysis.trend.significant
+                      ? td('results.alphaNote')
+                      : td('results.validResultNote')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Gráfico: serie anual + recta de Sen + banda de confianza */}
+            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900/90 p-5">
+              <TrendChart
+                data={(() => {
+                  const values = analysis.annual.map((p) => p.value);
+                  const fit = senFit(
+                    values,
+                    analysis.trend.senSlopePerDecade / 10
+                  );
+                  const lowerSlope = analysis.trend.ci95PerDecade.lower / 10;
+                  const upperSlope = analysis.trend.ci95PerDecade.upper / 10;
+                  return analysis.annual.map((p, i) => ({
+                    year: Number(p.date.slice(0, 4)),
+                    value: p.value,
+                    fit: fit.fitAt(i),
+                    band: [
+                      fit.intercept + lowerSlope * i,
+                      fit.intercept + upperSlope * i
+                    ] as [number, number]
+                  }));
+                })()}
+                unit={VARIABLE_CONFIG[analysis.trend.variable].unit}
+                labels={{
+                  value: td('chart.value'),
+                  fit: td('chart.fit'),
+                  band: td('chart.band'),
+                  year: td('chart.year')
+                }}
+              />
+            </div>
+
+            {/* ¿Cuántos años necesitaría un sensor local? */}
+            <div className="mt-6 rounded-xl border border-blue-500/30 bg-blue-500/5 p-6">
+              <p className="text-sm font-semibold text-blue-400">
+                {td('results.yearsNeededTitle')}
+              </p>
+              {Number.isFinite(analysis.years.years) &&
+              analysis.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT ? (
+                <p className="mt-2 text-sm text-slate-300">
+                  {td('results.yearsNeededBody', {
+                    years: String(analysis.years.years)
+                  })}
+                </p>
+              ) : Number.isFinite(analysis.years.years) ? (
+                <p className="mt-2 text-sm text-slate-300">
+                  {td('results.yearsNeededHuge')}
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-slate-300">
+                  {td('results.yearsNeededInfinite')}
+                </p>
+              )}
+              <p className="mt-2 border-t border-blue-500/20 pt-2 text-xs leading-relaxed text-slate-400">
+                {td('results.yearsNeededWhy')}
+              </p>
+            </div>
+
+            {/* Informe del detective: IA si hay clave; resumen local si no.
+                Se genera solo al montar; la IA solo redacta cifras ya calculadas. */}
+            <DetectiveReport
+              geminiAvailable={aiAvailable}
+              analysisPayload={{
+                variableId: analysis.trend.variable,
+                season: analysis.trend.season,
+                periodStart: String(startYear),
+                periodEnd: String(endYear),
+                slopePerDecade: analysis.trend.senSlopePerDecade,
+                ciLow: analysis.trend.ci95PerDecade.lower,
+                ciHigh: analysis.trend.ci95PerDecade.upper,
+                pValue: analysis.trend.mannKendall.p,
+                n: analysis.trend.n,
+                significant: analysis.trend.significant,
+                // null = sin horizonte: infinito o absurdo (> 1000 años).
+                yearsNeeded:
+                  Number.isFinite(analysis.years.years) &&
+                  analysis.years.years <= YEARS_NEEDED_PRACTICAL_LIMIT
+                    ? analysis.years.years
+                    : null
+              }}
+            />
+
+            {/* Glosario */}
+            <details className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-5">
+              <summary className="cursor-pointer text-sm font-semibold text-slate-200">
+                {td('glossary.title')}
+              </summary>
+              <div className="mt-4 space-y-3 text-sm text-slate-400">
+                <p>{td('glossary.pValue')}</p>
+                <p>{td('glossary.senSlope')}</p>
+                <p>{td('glossary.confidenceInterval')}</p>
+              </div>
+            </details>
+          </div>
+        )}
+      </section>
 
       {/* Modal "Sube tu dato": observación comunitaria con evidencia.
           Flota sobre el globo; el usuario no sale del mapa. */}
