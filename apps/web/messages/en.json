@@ -111,13 +111,34 @@
         "asia": "Asia"
       },
       "cities": {
-        "asuncion": { "name": "Asunción", "country": "Paraguay" },
-        "chaco": { "name": "Chaco", "country": "Paraguay" },
-        "buenos_aires": { "name": "Buenos Aires", "country": "Argentina" },
-        "lima": { "name": "Lima", "country": "Peru" },
-        "ciudad_de_mexico": { "name": "Mexico City", "country": "Mexico" },
-        "madrid": { "name": "Madrid", "country": "Spain" },
-        "nueva_york": { "name": "New York", "country": "United States" }
+        "asuncion": {
+          "name": "Asunción",
+          "country": "Paraguay"
+        },
+        "chaco": {
+          "name": "Chaco",
+          "country": "Paraguay"
+        },
+        "buenos_aires": {
+          "name": "Buenos Aires",
+          "country": "Argentina"
+        },
+        "lima": {
+          "name": "Lima",
+          "country": "Peru"
+        },
+        "ciudad_de_mexico": {
+          "name": "Mexico City",
+          "country": "Mexico"
+        },
+        "madrid": {
+          "name": "Madrid",
+          "country": "Spain"
+        },
+        "nueva_york": {
+          "name": "New York",
+          "country": "United States"
+        }
       }
     },
     "questions": {
@@ -502,10 +523,66 @@
       "cooldown": "You must wait {seconds} s before the next upload."
     }
   },
+  "flash": {
+    "kicker": "Ground truth node · Web Serial",
+    "title": "Flash your node from the browser",
+    "subtitle": "Plug the ESP32 in over USB and burn OrbitStreet's firmware in one click: no need to install PlatformIO or any toolchain. The browser writes the bootloader, the partition table and the firmware straight onto the chip.",
+    "connectHint": "Connect the board via USB (a data cable) and press the button. Pick your board when the browser detects it: ESP32 Dev (WROOM-32) or ESP32-C3 Super Mini.",
+    "installButton": "Connect & flash",
+    "loading": "Loading the flasher…",
+    "step1": "The browser will ask for permission to use the serial port: accept it.",
+    "step2": "Pick your board: «ESP32» (Dev Module) or «ESP32-C3» (Super Mini).",
+    "step3": "Accept erasing the flash if you had other firmware on it.",
+    "step4": "When it finishes, join the «OrbitStreet-Setup» network and follow the wizard.",
+    "securityNote": "Flashing happens entirely inside your browser (Web Serial): the binaries are served from this very site and never pass through third-party servers.",
+    "unsupportedTitle": "This browser does not support Web Serial",
+    "unsupportedBody": "The Web Serial API is only available on Chromium-based browsers. Open this page in desktop Chrome or Edge, or flash with PlatformIO:",
+    "unsupportedChrome": "Google Chrome or Microsoft Edge desktop (version 89 or newer).",
+    "unsupportedDesktop": "Firefox and Safari do not support Web Serial; it is also unavailable on mobile.",
+    "flowTitle": "After flashing",
+    "flow.flash.title": "1 · Flash",
+    "flow.flash.body": "The firmware is burned from the browser with Web Serial. Binaries built by PlatformIO from the project's open source.",
+    "flow.setup.title": "2 · Configure",
+    "flow.setup.body": "On boot, the node creates the «OrbitStreet-Setup» network. Join it, open 192.168.4.1 and follow the wizard: WiFi, sensor, location and token.",
+    "flow.guide.title": "3 · Observe",
+    "flow.guide.body": "The node measures, compares against the NASA baseline and sends signed telemetry. Your street becomes certified scientific data.",
+    "guideCta": "See the full guide"
+  },
+  "guide": {
+    "kicker": "Ground truth node · Documentation",
+    "title": "Ground truth node guide",
+    "subtitle": "Turn a ~$5 ESP32 into a science station: measure temperature, humidity and pressure on your street, compare them with the NASA baseline and feed citizen science with certified data.",
+    "whatTitle": "What is the node?",
+    "whatBody": "It is OrbitStreet's «ground witness»: while satellites measure ~50 km cells, the node measures exactly where you live. Its readings are compared with the NASA climatology (MERRA-2) of the same point to compute the local anomaly, and uploaded signed with a unique station token.",
+    "assemblyTitle": "Assembly",
+    "assembly.step1": "An ESP32 Dev Module (WROOM-32) or ESP32-C3 Super Mini plus a USB data cable.",
+    "assembly.step2": "Optional sensor: BME280 over I²C (SDA=GPIO21, SCL=GPIO22) or DHT11/DHT22/B3950 on any free GPIO.",
+    "assembly.step3": "Power it over USB or 5V; the node draws less than 0.5 W.",
+    "sensorsTitle": "Supported sensors",
+    "sensors.bme280": "I²C, temperature + humidity + pressure. The most complete; its self-heating is compensated with a software offset.",
+    "sensors.dht11": "Digital, temperature + humidity. The cheapest (±2 °C): perfect to get started.",
+    "sensors.dht22": "Digital, temperature + humidity with better accuracy (±0.5 °C).",
+    "sensors.b3950": "Analog thermistor (ADC): temperature only, Steinhart-Hart math. Great for junk-drawer parts.",
+    "setupTitle": "Flashing and first setup",
+    "setup.step1": "Flash the firmware from /flash (Chrome/Edge, Web Serial) or with PlatformIO (pio run -e esp32dev -t upload).",
+    "setup.step2": "Upload the dashboard to LittleFS with -t uploadfs (if you flashed from the browser, it is already included).",
+    "setup.step3": "Join the «OrbitStreet-Setup» network, open 192.168.4.1 and complete the wizard: WiFi, sensor, pins, coordinates and station token.",
+    "tokenTitle": "Station token",
+    "tokenBody": "In your account menu → «Station» you register the node and receive an ingest token. It is shown only ONCE (the server keeps just its SHA-256 hash) and gets pasted into the ESP32 wizard. If you lose it, re-register the station to rotate it.",
+    "telemetryTitle": "How it sends its data",
+    "telemetry.ntp": "It syncs its clock over NTP: with no valid time it sends nothing (better to lose a point than to lie about its date).",
+    "telemetry.buffer": "If WiFi drops, readings sit in a reconnect buffer (64 in RAM) and are re-sent on reconnect.",
+    "telemetry.baseline": "It downloads the NASA baseline (monthly normals) and stores it in flash memory: it works even offline.",
+    "telemetry.anomaly": "It computes the local anomaly ΔT = temperature − monthly normal, visible on its dashboard.",
+    "flashCta": "Go to flashing"
+  },
   "footer": {
     "challenge": "Built for the NASA Space Apps Challenge 2026 — “Be An Earth System Trend Detective!”",
     "source": "Climate source: NASA POWER (MERRA-2 reanalysis)",
     "license": "Open source under Apache-2.0.",
-    "notForecast": "Not a weather forecast: long-term change detection."
+    "notForecast": "Not a weather forecast: long-term change detection.",
+    "nodeTitle": "Ground node",
+    "flashLink": "Flash ESP32",
+    "guideLink": "Node guide"
   }
 }

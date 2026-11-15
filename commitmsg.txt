@@ -1,0 +1,32 @@
+feat(web): F5 flasheo Web Serial del ESP32 desde el navegador + guia del nodo
+
+/flash (es/en) — ESP Web Tools (Web Serial API):
+- Deteccion de soporte del navegador (solo Chromium: Chrome/Edge de
+  escritorio); mensaje claro con alternativas si no esta disponible
+- <esp-web-install-button> con manifest /firmware/manifest.json
+- Boton «Conectar y flashear», pasos guiados y nota de seguridad
+  (todo ocurre en el navegador, binarios servidos por este sitio)
+- Flujo posterior: Flashear -> Configurar -> Observar
+
+/guide (es/en) — documentacion del nodo:
+- Que es el nodo (testigo en tierra vs celdas de ~50 km del satelite)
+- Montaje, sensores soportados (BME280/DHT11/DHT22/B3950), flasheo,
+  token de estacion y como envia telemetria (NTP, buffer, baseline
+  NASA, anomalia dT)
+
+Exportacion de binarios:
+- apps/firmware/scripts/export_web.py copia bootloader/partitions/
+  boot_app0/firmware de ambas builds de PlatformIO a
+  apps/web/public/firmware/<board>/ y genera manifest.json con offsets
+  correctos (ESP32: bootloader 0x1000; C3: 0x0)
+- Binarios commiteados (ruta publica) para que Railway los sirva sin
+  compilar PlatformIO en el deploy
+
+Footer: enlaces «Flashear ESP32» y «Guia del nodo». i18n 1:1 es/en
+(namespaces flash + guide + claves del footer).
+
+Verificado en servidor de produccion local:
+- /es/flash /en/flash /es/guide /en/guide -> 200
+- /firmware/manifest.json -> 200 (builds ESP32 + ESP32-C3, v0.2.0)
+- /firmware/esp32dev/firmware.bin -> 200 (1097248 bytes, coincide con
+  la build de PlatformIO)
