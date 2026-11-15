@@ -12,7 +12,8 @@
       "detective": "Modo Detective",
       "upload": "Sube tu serie",
       "account": "Cuenta"
-    }
+    },
+    "cta": "Ver análisis"
   },
   "languageSwitcher": {
     "label": "Idioma"
@@ -23,7 +24,10 @@
       "title": "¿Está cambiando realmente tu rincón del planeta?",
       "subtitle": "OrbitStreet convierte a cualquier persona en detective de tendencias del sistema Tierra. Elige un lugar y una variable — temperatura, lluvia, humedad — y descubre qué está cambiando, dónde, cuánto y si el cambio es estadísticamente significativo.",
       "ctaQuestions": "Empezar a investigar",
-      "ctaHonesty": "Por qué confiar"
+      "ctaHonesty": "Por qué confiar",
+      "statYears": "45 años de reanálisis NASA (1981–2025)",
+      "statTests": "Mann-Kendall + pendiente de Sen",
+      "statCI": "Intervalos de confianza del 95%"
     },
     "questions": {
       "title": "Todo buen detective hace cuatro preguntas",
@@ -147,7 +151,12 @@
       "cached": "servido desde caché local",
       "yearsNeededTitle": "¿Cuánto tardaría un sensor local en confirmarlo?",
       "yearsNeededBody": "Con la variabilidad natural de esta serie, un sensor nuevo en este lugar necesitaría unos {years} años de mediciones antes de que esta tendencia sea estadísticamente detectable. Empezar a medir hoy es justamente la forma de que esos años se cuenten.",
-      "yearsNeededInfinite": "Esta serie es demasiado ruidosa o plana para estimar un horizonte. Con honestidad: aquí no se promete nada."
+      "yearsNeededInfinite": "Esta serie es demasiado ruidosa o plana para estimar un horizonte. Con honestidad: aquí no se promete nada.",
+      "gridCell": "Rejilla MERRA-2 0.5° × 0.625° (~50 × 70 km)",
+      "ciCrossesZero": "El intervalo cruza el cero: magnitud incierta",
+      "ciSameSign": "El intervalo completo mantiene el mismo signo",
+      "alphaNote": "Supera el umbral α = 0.05 del test de Mann-Kendall",
+      "validResultNote": "Resultado válido: la variabilidad natural explica esta oscilación"
     },
     "chart": {
       "value": "Valor anual observado",
@@ -253,6 +262,7 @@
   },
   "footer": {
     "challenge": "Creado para el NASA Space Apps Challenge 2026 — «¡Sé un detective de tendencias del sistema Tierra!»",
+    "source": "Fuente climática: NASA POWER (reanálisis MERRA-2)",
     "license": "Código abierto bajo Apache-2.0.",
     "notForecast": "No es un pronóstico del tiempo: detección de cambios de largo plazo."
   }

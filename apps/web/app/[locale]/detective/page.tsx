@@ -10,6 +10,18 @@ import {
   VARIABLE_CONFIG,
   VARIABLE_IDS
 } from '@/lib/analysis/variables';
+import {
+  CloudRain,
+  Droplets,
+  Flame,
+  FlaskConical,
+  Gauge,
+  MapPin,
+  Snowflake,
+  Sun,
+  Thermometer,
+  TrendingUp
+} from 'lucide-react';
 import { isGeminiConfigured } from '@/lib/ai/gemini';
 import { TrendChart, type TrendChartDatum } from '@/components/trend-chart';
 import { DetectiveReport } from '@/components/detective-report';
@@ -34,6 +46,17 @@ const PLACE_PRESETS: Record<string, { lat: number; lon: number }> = {
 };
 
 const SEASONS: SeasonOrAnnual[] = ['ALL', 'DJF', 'MAM', 'JJA', 'SON'];
+
+/** Icono por variable: refuerza la lectura visual de cada tarjeta de respuesta. */
+const VARIABLE_ICONS = {
+  T2M: Thermometer,
+  T2M_MAX: Sun,
+  T2M_MIN: Snowflake,
+  RH2M: Droplets,
+  PRECTOTCORR: CloudRain,
+  PS: Gauge,
+  DAYS_ABOVE_THRESHOLD: Flame
+} as const;
 
 function firstParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -148,9 +171,16 @@ export default async function DetectivePage({ params, searchParams }: Props) {
     }));
   }
 
+  /** Icono de la variable analizada (fallback seguro si no hay resultado). */
+  const VariableIcon = result ? VARIABLE_ICONS[result.trend.variable] : Sun;
+
   const inputClass =
-    'mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-cyan-500 focus:outline-none';
-  const cardClass = 'rounded-xl border border-slate-800 bg-slate-900 p-5';
+    'mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-cyan-400 focus:outline-none';
+  const cardClass = 'rounded-xl border border-slate-800 bg-slate-900/90 p-5';
+  const answerCardClass =
+    'flex flex-col justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/90 p-5';
+  const answerFootClass =
+    'flex items-center justify-between gap-2 border-t border-slate-800 pt-2 text-[11px] text-slate-400';
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -291,76 +321,161 @@ export default async function DetectivePage({ params, searchParams }: Props) {
       {/* Resultados: las 4 preguntas del desafío, en pantalla */}
       {result && (
         <section className="mt-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-2xl font-bold text-slate-50">
-              {t('results.title')}
-            </h2>
-            <p className="text-xs text-slate-500">
-              {t('results.source')}: {result.source}
-              {result.cached ? ` · ${t('results.cached')}` : ''}
-            </p>
-          </div>
-
-          <div className="mt-6 grid gap-5 md:grid-cols-2">
-            <div className={cardClass}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400">
-                {t('results.what')}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-slate-100">
-                {t(`variables.${result.trend.variable}.label`)}
-              </p>
-              <p className="mt-1 text-sm text-slate-400">
-                {t(`variables.${result.trend.variable}.description`)}
-              </p>
+          <header className="mb-4 border-b border-slate-800 pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-xl font-bold text-white md:text-2xl">
+                {t('results.title')}
+              </h2>
+              <span className="font-mono text-[11px] tabular-nums text-cyan-300">
+                {VARIABLE_CONFIG[result.trend.variable].unit}
+              </span>
             </div>
-
-            <div className={cardClass}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400">
-                {t('results.where')}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-slate-100">
-                {fmt(latitude, locale, 4)}°, {fmt(longitude, locale, 4)}°
-              </p>
-              <p className="mt-1 text-sm text-slate-400">
-                {t('results.whereNote')}
-              </p>
-            </div>
-
-            <div className={cardClass}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400">
-                {t('results.howMuch')}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-slate-100">
-                {fmt(result.trend.senSlopePerDecade, locale, 3)}{' '}
-                {VARIABLE_CONFIG[result.trend.variable].unit} /{' '}
-                {t('results.perDecade')}
-              </p>
-              <p className="mt-1 text-sm text-slate-400">
-                {t('results.confidenceInterval')}:{' '}
-                {fmt(result.trend.ci95PerDecade.lower, locale, 3)} —{' '}
-                {fmt(result.trend.ci95PerDecade.upper, locale, 3)}
-              </p>
-            </div>
-
-            <div className={cardClass}>
-              <p className="text-xs font-semibold uppercase tracking-wide text-cyan-400">
-                {t('results.significant')}
-              </p>
-              {result.trend.significant ? (
-                <span className="mt-2 inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-sm font-semibold text-emerald-400">
-                  ✔ {t('results.significantYes')}
-                </span>
-              ) : (
-                <span className="mt-2 inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-sm font-semibold text-amber-400">
-                  ○ {t('results.significantNo')}
-                </span>
+            {/* Franja de procedencia: fuente · rejilla · tamaño de muestra */}
+            <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slate-400">
+              <span className="font-semibold text-cyan-300">
+                {result.source}
+              </span>
+              <span aria-hidden className="text-slate-700">
+                ·
+              </span>
+              <span>{t('results.gridCell')}</span>
+              <span aria-hidden className="text-slate-700">
+                ·
+              </span>
+              <span className="font-mono tabular-nums text-slate-300">
+                n = {result.trend.n} ({result.trend.periodStart.slice(0, 4)}–
+                {result.trend.periodEnd.slice(0, 4)})
+              </span>
+              {result.cached && (
+                <>
+                  <span aria-hidden className="text-slate-700">
+                    ·
+                  </span>
+                  <span>{t('results.cached')}</span>
+                </>
               )}
-              <p className="mt-2 text-sm text-slate-400">
-                {t('results.pValue')}:{' '}
-                {fmtP(result.trend.mannKendall.p, locale)} ·{' '}
-                {t(trendLabelKey(result.trend.mannKendall.trend))} ·{' '}
-                {t('results.yearsAnalyzed')}: {result.trend.n}
-              </p>
+            </p>
+          </header>
+
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {/* 01 · Qué está cambiando */}
+            <div className={answerCardClass}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-medium text-slate-400">
+                  01. {t('results.what')}
+                </span>
+                <VariableIcon className="h-4 w-4 text-cyan-400" aria-hidden />
+              </div>
+              <div>
+                <p className="text-lg font-bold leading-snug text-white">
+                  {t(`variables.${result.trend.variable}.label`)}
+                </p>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-300">
+                  {t(`variables.${result.trend.variable}.description`)}
+                </p>
+              </div>
+              <div className={answerFootClass}>
+                <span>{t(`seasons.${result.trend.season}`)}</span>
+                <span className="font-mono tabular-nums text-slate-300">
+                  {result.trend.periodStart.slice(0, 4)}–
+                  {result.trend.periodEnd.slice(0, 4)}
+                </span>
+              </div>
+            </div>
+
+            {/* 02 · Dónde ocurre */}
+            <div className={answerCardClass}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-medium text-slate-400">
+                  02. {t('results.where')}
+                </span>
+                <MapPin className="h-4 w-4 text-cyan-400" aria-hidden />
+              </div>
+              <div>
+                <p className="font-mono text-lg font-bold tabular-nums leading-snug text-white">
+                  {fmt(latitude, locale, 4)}°, {fmt(longitude, locale, 4)}°
+                </p>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-300">
+                  {t('results.whereNote')}
+                </p>
+              </div>
+              <div className={answerFootClass}>
+                <span className="font-mono tabular-nums">
+                  {t('results.gridCell')}
+                </span>
+              </div>
+            </div>
+
+            {/* 03 · Cuánto cambia (pendiente de Sen) */}
+            <div className={answerCardClass}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-medium text-slate-400">
+                  03. {t('results.howMuch')}
+                </span>
+                <TrendingUp className="h-4 w-4 text-cyan-400" aria-hidden />
+              </div>
+              <div>
+                <p className="flex items-baseline gap-1.5">
+                  <span className="font-mono text-3xl font-bold tabular-nums text-white">
+                    {result.trend.senSlopePerDecade > 0 ? '+' : ''}
+                    {fmt(result.trend.senSlopePerDecade, locale, 2)}
+                  </span>
+                  <span className="font-mono text-xs text-slate-400">
+                    {VARIABLE_CONFIG[result.trend.variable].unit} /{' '}
+                    {t('results.perDecade')}
+                  </span>
+                </p>
+                <p className="mt-2 font-mono text-xs tabular-nums text-cyan-300">
+                  {t('results.confidenceInterval')}: [
+                  {fmt(result.trend.ci95PerDecade.lower, locale, 2)},{' '}
+                  {fmt(result.trend.ci95PerDecade.upper, locale, 2)}]
+                </p>
+              </div>
+              <div className={answerFootClass}>
+                <span>
+                  {result.trend.ci95PerDecade.lower <= 0 &&
+                  result.trend.ci95PerDecade.upper >= 0
+                    ? t('results.ciCrossesZero')
+                    : t('results.ciSameSign')}
+                </span>
+              </div>
+            </div>
+
+            {/* 04 · Significancia estadística */}
+            <div className={answerCardClass}>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-medium text-slate-400">
+                  04. {t('results.significant')}
+                </span>
+                <FlaskConical className="h-4 w-4 text-cyan-400" aria-hidden />
+              </div>
+              <div>
+                <p
+                  className={`text-lg font-bold leading-snug ${
+                    result.trend.significant
+                      ? 'text-amber-400'
+                      : 'text-slate-200'
+                  }`}
+                >
+                  {result.trend.significant ? '▲ ' : '○ '}
+                  {result.trend.significant
+                    ? t('results.significantYes')
+                    : t('results.significantNo')}
+                </p>
+                <p className="mt-2 font-mono text-xs tabular-nums text-slate-300">
+                  {t('results.pValue')}:{' '}
+                  {fmtP(result.trend.mannKendall.p, locale)} ·{' '}
+                  {t(trendLabelKey(result.trend.mannKendall.trend))} ·{' '}
+                  {t('results.yearsAnalyzed')}: {result.trend.n}
+                </p>
+              </div>
+              <div className={answerFootClass}>
+                <span>
+                  {result.trend.significant
+                    ? t('results.alphaNote')
+                    : t('results.validResultNote')}
+                </span>
+              </div>
             </div>
           </div>
           {/* RESULTS_PART_2 */}

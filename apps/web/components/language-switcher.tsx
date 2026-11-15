@@ -10,7 +10,7 @@ export function LanguageSwitcher() {
 
   return (
     <div
-      className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1"
+      className="flex items-center gap-1 rounded-lg border border-white/15 bg-white/[0.06] p-1"
       aria-label="Language / Idioma"
     >
       {routing.locales.map((item) =>
@@ -18,7 +18,7 @@ export function LanguageSwitcher() {
           <span
             key={item}
             aria-current="true"
-            className="rounded-md bg-cyan-500/15 px-2.5 py-1 text-xs font-semibold text-cyan-400"
+            className="rounded-md bg-cyan-400/20 px-2.5 py-1 text-xs font-bold text-cyan-200"
           >
             {item.toUpperCase()}
           </span>
@@ -27,7 +27,7 @@ export function LanguageSwitcher() {
             key={item}
             href={pathname}
             locale={item}
-            className="rounded-md px-2.5 py-1 text-xs font-medium text-slate-400 transition-colors hover:text-slate-200"
+            className="rounded-md px-2.5 py-1 text-xs font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
           >
             {item.toUpperCase()}
           </Link>

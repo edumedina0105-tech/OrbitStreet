@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { DM_Sans, IBM_Plex_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import {
@@ -12,14 +12,22 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import '../globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+/* Tipografías del sistema de diseño: display, cuerpo y cifras. */
+const jakarta = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
+  subsets: ['latin'],
+  weight: ['500', '600', '700', '800']
+});
+
+const dmSans = DM_Sans({
+  variable: '--font-dm-sans',
   subsets: ['latin']
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin']
+const plexMono = IBM_Plex_Mono({
+  variable: '--font-plex-mono',
+  subsets: ['latin'],
+  weight: ['400', '500', '600']
 });
 
 type Props = {
@@ -52,11 +60,15 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="flex min-h-screen flex-col antialiased">
+    <html
+      lang={locale}
+      className={`${jakarta.variable} ${dmSans.variable} ${plexMono.variable}`}
+    >
+      <body className="flex min-h-screen flex-col bg-[#07090E] text-slate-100 antialiased">
         <NextIntlClientProvider messages={messages}>
           <SiteHeader />
-          <main className="flex-1">{children}</main>
+          {/* pt-14 compensa el header fijo (h-14) */}
+          <main className="flex-1 pt-14">{children}</main>
           <SiteFooter />
         </NextIntlClientProvider>
       </body>

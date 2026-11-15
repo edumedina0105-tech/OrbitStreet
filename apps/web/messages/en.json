@@ -12,7 +12,8 @@
       "detective": "Detective Mode",
       "upload": "Upload your series",
       "account": "Account"
-    }
+    },
+    "cta": "View analysis"
   },
   "languageSwitcher": {
     "label": "Language"
@@ -23,7 +24,10 @@
       "title": "Is your corner of the planet really changing?",
       "subtitle": "OrbitStreet turns anyone into an Earth System Trend Detective. Pick any place and a variable — temperature, rainfall, humidity — and find out what is changing, where, by how much, and whether the change is statistically significant.",
       "ctaQuestions": "Start investigating",
-      "ctaHonesty": "Why trust us"
+      "ctaHonesty": "Why trust us",
+      "statYears": "45 years of NASA reanalysis (1981–2025)",
+      "statTests": "Mann-Kendall + Sen's slope",
+      "statCI": "95% confidence intervals"
     },
     "questions": {
       "title": "Every good detective asks four questions",
@@ -147,7 +151,12 @@
       "cached": "served from local cache",
       "yearsNeededTitle": "How long would a local sensor need?",
       "yearsNeededBody": "With the natural variability of this series, a new sensor in this location would need about {years} years of measurements before this trend becomes statistically detectable. Starting to measure today is exactly how those years get counted.",
-      "yearsNeededInfinite": "This series is too noisy or too flat to estimate a horizon. Honestly, no promise is made here."
+      "yearsNeededInfinite": "This series is too noisy or too flat to estimate a horizon. Honestly, no promise is made here.",
+      "gridCell": "MERRA-2 grid 0.5° × 0.625° (~50 × 70 km)",
+      "ciCrossesZero": "The interval crosses zero: uncertain magnitude",
+      "ciSameSign": "The whole interval keeps the same sign",
+      "alphaNote": "Above the α = 0.05 threshold of the Mann-Kendall test",
+      "validResultNote": "Valid result: natural variability explains this swing"
     },
     "chart": {
       "value": "Observed annual value",
@@ -253,6 +262,7 @@
   },
   "footer": {
     "challenge": "Built for the NASA Space Apps Challenge 2026 — “Be An Earth System Trend Detective!”",
+    "source": "Climate source: NASA POWER (MERRA-2 reanalysis)",
     "license": "Open source under Apache-2.0.",
     "notForecast": "Not a weather forecast: long-term change detection."
   }
