@@ -194,7 +194,7 @@
     "panelTitle": "Comparación de regiones",
     "narrating": "La IA está redactando la interpretación…",
     "aiNote": "La divergencia se calcula en código determinista con Mann-Kendall + Sen; la IA solo interpreta el patrón observado, nunca afirma causalidad.",
-    "comparing": "Descargando ambas series…",
+    "comparing": "Comparando…",
     "sameRegion": "Elige dos regiones distintas para comparar.",
     "error": "No se pudieron descargar ambas series. Inténtalo de nuevo.",
     "sentence": "Mientras {regionA} muestra una tendencia {trendA} de {slopeA} {unit} por década (p = {pA}), {regionB} muestra una tendencia {trendB} de {slopeB} {unit} por década (p = {pB}).",

@@ -610,6 +610,30 @@ export function MapStage() {
             selectedCountry={selected.country}
             focusKey={focusKey}
             communityPoints={showPins ? communityPins : []}
+            comparePoints={
+              compareMode !== 'off'
+                ? [
+                    ...(comparePointA
+                      ? [
+                          {
+                            lat: comparePointA.lat,
+                            lon: comparePointA.lon,
+                            label: 'A'
+                          }
+                        ]
+                      : []),
+                    ...(comparePointB
+                      ? [
+                          {
+                            lat: comparePointB.lat,
+                            lon: comparePointB.lon,
+                            label: 'B'
+                          }
+                        ]
+                      : [])
+                  ]
+                : []
+            }
             onSelectLocation={handleSelectLocation}
           />
         </motion.div>
@@ -1081,8 +1105,9 @@ export function MapStage() {
           </div>
         </motion.div>
 
-        {/* Hint del modo comparación: guía los clics sobre el globo */}
-        {(compareMode === 'pickA' || compareMode === 'pickB') && (
+        {/* Hint del modo comparación: guía los clics sobre el globo y
+            avisa mientras se descargan ambas series ("Comparando…"). */}
+        {(compareMode === 'pickA' || compareMode === 'pickB') && !compareBusy && (
           <motion.div
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1099,6 +1124,22 @@ export function MapStage() {
               <p className="mt-1 font-mono text-[10px] text-slate-400">
                 {td(`variables.${variable}.label`)} ·{' '}
                 {td(`seasons.${season}`)} · {startYear}–{endYear}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Mensaje "Comparando…" mientras se descargan ambas series */}
+        {compareBusy && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="pointer-events-none absolute left-1/2 top-20 z-30 w-[calc(100%-2rem)] max-w-md -translate-x-1/2"
+          >
+            <div className="flex items-center justify-center gap-2 rounded-xl border border-cyan-400/50 bg-slate-950/85 p-3 text-center shadow-2xl backdrop-blur-md">
+              <Loader2 className="h-4 w-4 animate-spin text-cyan-300" aria-hidden />
+              <p className="text-sm font-semibold text-cyan-200">
+                {tc('comparing')}
               </p>
             </div>
           </motion.div>

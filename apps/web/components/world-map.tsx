@@ -119,6 +119,14 @@ export interface CommunityPoint {
   unit: string;
 }
 
+/** Puntos de comparación de regiones: marcadores A/B visibles. */
+export interface ComparePoint {
+  lat: number;
+  lon: number;
+  /** 'A' o 'B' */
+  label: string;
+}
+
 interface WorldMapProps {
   cities: MapCity[];
   selectedLat: number;
@@ -129,6 +137,8 @@ interface WorldMapProps {
   focusKey?: number;
   /** Pines de datos comunitarios (opcional; se muestran como esmeralda). */
   communityPoints?: CommunityPoint[];
+  /** Marcadores A/B del comparador de regiones (ámbar y cian). */
+  comparePoints?: ComparePoint[];
   onSelectLocation: (loc: {
     lat: number;
     lon: number;
@@ -146,6 +156,7 @@ export function WorldMap({
   selectedCountry,
   focusKey = 0,
   communityPoints = [],
+  comparePoints = [],
   onSelectLocation
 }: WorldMapProps) {
   const t = useTranslations('home.map');
@@ -647,6 +658,45 @@ export function WorldMap({
                 stroke="#050811"
                 strokeWidth={1.2}
               />
+            </g>
+          );
+        })}
+
+        {/* Marcadores A/B del comparador de regiones (ámbar/cian, grandes) */}
+        {comparePoints.map((cp) => {
+          if (!isVisibleOnFront(cp.lon, cp.lat)) return null;
+          const point = projection([cp.lon, cp.lat]);
+          if (!point) return null;
+          const [cx, cy] = point;
+          const isA = cp.label === 'A';
+          return (
+            <g
+              key={`compare-${cp.label}`}
+              transform={`translate(${cx}, ${cy})`}
+              className="pointer-events-none"
+            >
+              <circle
+                r={11}
+                fill={isA ? '#F59E0B' : '#22D3EE'}
+                fillOpacity={0.3}
+              />
+              <circle
+                r={5.5}
+                fill={isA ? '#F59E0B' : '#22D3EE'}
+                stroke="#050811"
+                strokeWidth={1.8}
+              />
+              <text
+                x={0}
+                y={2.2}
+                textAnchor="middle"
+                fontSize={7}
+                fontWeight={800}
+                fill="#050811"
+                className="select-none"
+              >
+                {cp.label}
+              </text>
             </g>
           );
         })}

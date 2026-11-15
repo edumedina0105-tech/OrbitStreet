@@ -194,7 +194,7 @@
     "panelTitle": "Region comparison",
     "narrating": "The AI is writing the interpretation…",
     "aiNote": "The divergence is computed in deterministic code with Mann-Kendall + Sen; the AI only interprets the observed pattern, never claims causation.",
-    "comparing": "Downloading both series…",
+    "comparing": "Comparing…",
     "sameRegion": "Pick two different regions to compare.",
     "error": "Both series could not be downloaded. Please try again.",
     "sentence": "While {regionA} shows a {trendA} trend of {slopeA} {unit} per decade (p = {pA}), {regionB} shows a {trendB} trend of {slopeB} {unit} per decade (p = {pB}).",

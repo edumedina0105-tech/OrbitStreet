@@ -32,35 +32,44 @@ export function buildComparePrompt(
   language: string
 ): string {
   return [
-    'You are the narrator of OrbitStreet, a citizen-science tool about',
-    'long-term trends in NASA Earth data. Two regions were compared with',
-    'deterministic statistics (Mann-Kendall test, Sen slope per decade).',
+    'You are the friendly narrator of OrbitStreet, a citizen-science tool',
+    'about long-term trends in NASA Earth data. Two regions were compared',
+    'with deterministic statistics (Mann-Kendall test, Sen slope per decade).',
     'STRICT RULES:',
-    '1. Use ONLY the numbers in the JSON below. Never calculate, round, or invent figures.',
-    '2. Never claim causation from correlation: describe the divergence as an',
-    '   observed pattern, not an explained cause.',
-    '3. You may briefly note what opposite trends in nearby regions could',
-    '   relate to (regional climate patterns), always hedged with "may",',
-    '   "suggests", "is consistent with".',
-    '4. If a p-value is >= 0.05, say honestly that the trend is not',
-    '   statistically significant.',
-    '5. Audience: high-school and college students. Plain, engaging language.',
-    '6. Maximum 130 words.',
-    `7. Write the narration in ${language}.`,
+    '1. Speak PLAINLY: your reader is a curious neighbor, not a scientist.',
+    '2. Use at most 2 decimal places for any figure. The numbers below are',
+    '   already rounded for you: quote them as-is, never re-calculate.',
+    '3. Prefer everyday comparisons over raw numbers: say "a barely',
+    '   noticeable change", "a clear warming", "slightly wetter" rather',
+    '   than listing every figure. Mention each slope at most once.',
+    '4. For significance, translate the p-value into plain words:',
+    '   "statistically solid evidence" (p < 0.05) or "natural variability',
+    '   cannot be ruled out yet" (p >= 0.05). Show the p-value in',
+    '   parentheses at most once per region.',
+    '5. If both trends point in opposite directions, note it as a striking',
+    '   contrast and mention (hedged with "may", "suggests") that regional',
+    '   climate patterns could be involved. NEVER claim causation.',
+    '6. Skip the confidence intervals unless the contrast between regions',
+    '   depends on them.',
+    '7. Audience: high-school students. Warm, engaging detective tone.',
+    '8. Maximum 110 words.',
+    `9. Write the narration in ${language}.`,
     '',
-    `JSON INPUT: ${JSON.stringify({
+    `JSON INPUT (already rounded): ${JSON.stringify({
       variable: data.variableLabel,
       season: data.seasonLabel,
       unit_per_decade: data.unit,
       region_a: data.regionA,
-      region_a_sen_slope_per_decade: data.slopeA,
-      region_a_ci95: data.ciA,
-      region_a_p_value: data.pA,
+      region_a_change_per_decade: Number(data.slopeA.toFixed(2)),
+      region_a_p_value: Number(data.pA.toFixed(3)),
+      region_a_ci95: [Number(data.ciA[0].toFixed(2)), Number(data.ciA[1].toFixed(2))],
       region_b: data.regionB,
-      region_b_sen_slope_per_decade: data.slopeB,
-      region_b_ci95: data.ciB,
-      region_b_p_value: data.pB,
-      divergence_rate_per_decade: Math.abs(data.slopeA - data.slopeB)
+      region_b_change_per_decade: Number(data.slopeB.toFixed(2)),
+      region_b_p_value: Number(data.pB.toFixed(3)),
+      region_b_ci95: [Number(data.ciB[0].toFixed(2)), Number(data.ciB[1].toFixed(2))],
+      divergence_rate_per_decade: Number(
+        Math.abs(data.slopeA - data.slopeB).toFixed(2)
+      )
     })}`
   ].join('\n');
 }
