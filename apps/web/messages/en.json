@@ -21,6 +21,7 @@
   },
   "home": {
     "uploadButton": "Upload your data",
+    "archiveCase": "Archive as case",
     "hero": {
       "badge": "Real NASA data · MERRA-2 reanalysis",
       "title": "Is your corner of the planet really changing?",
@@ -143,6 +144,41 @@
         "title": "No fake data in disguise",
         "description": "Any simulated or test data is always clearly labeled [SIMULATED DATA / TESTBED]."
       }
+    }
+  },
+  "caseboard": {
+    "boardTitle": "Community cases",
+    "boardSubtitle": "Case files published by citizen detectives: every case starts from a local suspicion, is solved with deterministic statistics on real NASA data, and stays open for anyone's audit.",
+    "boardNote": "Verdicts are recomputed on the server with Mann-Kendall + Sen; the AI only writes. “I observe it too” confirms the citizen observation, it never alters the math.",
+    "loading": "Loading cases…",
+    "empty": "No cases published yet with these filters. Investigate a place on the map, press “Query NASA POWER” and archive the first one.",
+    "filterAll": "All",
+    "filterConfirmed": "🟢 Confirmed",
+    "filterInconclusive": "🟡 Inconclusive",
+    "allVariables": "All variables",
+    "searchPlaceholder": "Search by place, hypothesis or note…",
+    "badgeConfirmed": "Confirmed",
+    "badgeInconclusive": "Inconclusive",
+    "confirm": "I observe it too",
+    "reviewEvidence": "Review evidence",
+    "modalTitle": "Archive as case",
+    "close": "Close",
+    "hypothesisLabel": "What did you suspect?",
+    "hypothesisPlaceholder": "The elders say summers are getting more and more stifling…",
+    "hypothesisHint": "Your local hypothesis: the story that motivated the investigation (10–200 characters).",
+    "fieldNoteLabel": "Field note",
+    "fieldNotePlaceholder": "In my neighborhood we logged nights above 26 °C for weeks in a row…",
+    "fieldNoteHint": "The human context the satellite cannot see: what happens on your street (20–1000 characters).",
+    "publish": "Archive and publish case",
+    "publishNote": "On publish, the server RECOMPUTES the analysis with real NASA POWER data (Mann-Kendall + Sen) and the AI only writes the conclusion. Your file goes to the public board with reproducible audit.",
+    "published": "Case archived and published. It now appears on the Case Board with your hypothesis, the mathematical verdict and the field note.",
+    "errors": {
+      "generic": "The case could not be published. Please try again.",
+      "hypothesis": "The hypothesis must be 10 to 200 characters long.",
+      "fieldNote": "The field note must be 20 to 1000 characters long.",
+      "cooldown": "You must wait {seconds} s before the next publication.",
+      "needsLogin": "You need an account: open it with the “Log in” button in the header (just username and password).",
+      "load": "The cases could not be loaded. Please try again."
     }
   },
   "comparator": {

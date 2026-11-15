@@ -1,5 +1,6 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import { MapStage } from '@/components/map-stage';
+import { CaseBoard } from '@/components/case-board';
 import { ProjectQaBox } from '@/components/project-qa-box';
 import { RegionComparator } from '@/components/region-comparator';
 
@@ -19,9 +20,15 @@ export default async function HomePage({ params }: Props) {
       <MapStage />
 
       <div className="mx-auto max-w-[1360px] px-6">
+        {/* Tablón de Casos del Detective: expedientes publicados por la
+            comunidad, con auditoría reproducible ("Revisar evidencia"). */}
+        <section id="cases" className="scroll-mt-24 pb-16 pt-4">
+          <CaseBoard />
+        </section>
+
         {/* Comparar regiones: el mismo fenómeno global puede causar
             efectos inversos en dos regiones distintas. */}
-        <section className="scroll-mt-24 pb-16 pt-4">
+        <section className="scroll-mt-24 pb-16">
           <RegionComparator />
         </section>
 

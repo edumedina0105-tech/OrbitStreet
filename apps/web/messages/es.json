@@ -21,6 +21,7 @@
   },
   "home": {
     "uploadButton": "Sube tu dato",
+    "archiveCase": "Archivar como caso",
     "hero": {
       "badge": "Datos reales de la NASA · reanálisis MERRA-2",
       "title": "¿Está cambiando realmente tu rincón del planeta?",
@@ -143,6 +144,41 @@
         "title": "Nada de datos falsos disfrazados",
         "description": "Todo dato simulado o de prueba se etiqueta siempre como [DATOS SIMULADOS / TESTBED]."
       }
+    }
+  },
+  "caseboard": {
+    "boardTitle": "Casos de la comunidad",
+    "boardSubtitle": "Expedientes publicados por detectives ciudadanos: cada caso parte de una sospecha local, se resuelve con estadística determinista sobre datos reales de la NASA y queda abierto a la auditoría de cualquiera.",
+    "boardNote": "Los veredictos se recalculan en el servidor con Mann-Kendall + Sen; la IA solo redacta. «Yo lo observo» confirma la observación ciudadana, nunca altera la matemática.",
+    "loading": "Cargando casos…",
+    "empty": "Todavía no hay casos publicados con estos filtros. Investiga un lugar en el mapa, presiona «Consultar NASA POWER» y archiva el primero.",
+    "filterAll": "Todos",
+    "filterConfirmed": "🟢 Confirmados",
+    "filterInconclusive": "🟡 Inconclusos",
+    "allVariables": "Todas las variables",
+    "searchPlaceholder": "Buscar por lugar, hipótesis o nota…",
+    "badgeConfirmed": "Confirmado",
+    "badgeInconclusive": "Inconcluso",
+    "confirm": "Yo lo observo",
+    "reviewEvidence": "Revisar evidencia",
+    "modalTitle": "Archivar como caso",
+    "close": "Cerrar",
+    "hypothesisLabel": "¿Qué sospechabas?",
+    "hypothesisPlaceholder": "Los abuelos dicen que los veranos son cada vez más sofocantes…",
+    "hypothesisHint": "Tu hipótesis local: el relato que motivó la investigación (10–200 caracteres).",
+    "fieldNoteLabel": "Nota de campo",
+    "fieldNotePlaceholder": "En mi barrio registramos noches por encima de 26 °C durante semanas seguidas…",
+    "fieldNoteHint": "El contexto humano que el satélite no ve: lo que ocurre en tu calle (20–1000 caracteres).",
+    "publish": "Archivar y publicar caso",
+    "publishNote": "Al publicar, el servidor RECALCULA el análisis con datos reales de NASA POWER (Mann-Kendall + Sen) y la IA solo redacta la conclusión. Tu expediente queda en el tablón público con auditoría reproducible.",
+    "published": "Caso archivado y publicado. Ya aparece en el Tablón de Casos, con tu hipótesis, el veredicto matemático y la nota de campo.",
+    "errors": {
+      "generic": "No se pudo publicar el caso. Inténtalo de nuevo.",
+      "hypothesis": "La hipótesis debe tener entre 10 y 200 caracteres.",
+      "fieldNote": "La nota de campo debe tener entre 20 y 1000 caracteres.",
+      "cooldown": "Debes esperar {seconds} s antes de la próxima publicación.",
+      "needsLogin": "Necesitas una cuenta: ábrela con el botón «Iniciar sesión» del encabezado (solo usuario y contraseña).",
+      "load": "No se pudieron cargar los casos. Inténtalo de nuevo."
     }
   },
   "comparator": {

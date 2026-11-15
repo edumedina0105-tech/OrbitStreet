@@ -7,11 +7,12 @@ import {
   useScroll,
   useTransform
 } from 'motion/react';
-import { ArrowDown, ChevronDown, Loader2, MapPin, Radio, Search, Upload, X } from 'lucide-react';
+import { ArrowDown, ChevronDown, FolderArchive, Loader2, MapPin, Radio, Search, Upload, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import type { MapCity } from '@/components/world-map';
 import { ObservationModal } from '@/components/observation-modal';
+import { CaseModal } from '@/components/case-modal';
 import { TrendChart, type TrendChartDatum } from '@/components/trend-chart';
 import { DetectiveReport } from '@/components/detective-report';
 import { VARIABLE_ICONS } from '@/components/variable-icons';
@@ -246,6 +247,9 @@ export function MapStage() {
 
   // Modal "Sube tu dato" (observación comunitaria con evidencia).
   const [uploadOpen, setUploadOpen] = useState(false);
+
+  // Modal "Archivar como caso" (Tablón de Casos del Detective).
+  const [caseOpen, setCaseOpen] = useState(false);
 
   // Ciudades con nombres localizados por i18n (los pines llevan texto visible).
   const cities: MapCity[] = useMemo(
@@ -1171,6 +1175,19 @@ export function MapStage() {
               </div>
             )}
 
+            {/* Publicar el expediente al Tablón de Casos: el usuario
+                aporta hipótesis + nota de campo; el servidor recalcula. */}
+            {analysis && (
+              <button
+                type="button"
+                onClick={() => setCaseOpen(true)}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-400/40 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-200 transition-colors hover:bg-cyan-500/20"
+              >
+                <FolderArchive className="h-4 w-4" aria-hidden />
+                {th('archiveCase')}
+              </button>
+            )}
+
             {/* Informe del detective: IA si hay clave; resumen local si no.
                 Se genera solo al montar; la IA solo redacta cifras ya calculadas. */}
             <DetectiveReport
@@ -1213,6 +1230,25 @@ export function MapStage() {
       {/* Modal "Sube tu dato": observación comunitaria con evidencia.
           Flota sobre el globo; el usuario no sale del mapa. */}
       <ObservationModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
+
+      {/* Modal "Archivar como caso": publica el expediente al tablón. */}
+      <CaseModal
+        open={caseOpen}
+        onClose={() => setCaseOpen(false)}
+        investigation={
+          analysis
+            ? {
+                lat: selected.lat,
+                lon: selected.lon,
+                placeName: selected.name,
+                variable: analysis.trend.variable,
+                season: analysis.trend.season,
+                startYear,
+                endYear
+              }
+            : null
+        }
+      />
     </div>
   );
 }

@@ -113,6 +113,8 @@ model User {
   sessions        Session[]
   communitySeries CommunitySeries[]
   observations    Observation[]
+  cases           Case[]
+  caseConfirmations CaseConfirmation[]
 
   @@index([email])
 }
@@ -198,4 +200,54 @@ model Observation {
   /// Cooldown del usuario y futuras consultas por celda/variable.
   @@index([userId, createdAt])
   @@index([latitude, longitude, variable])
+}
+
+/// Caso del detective publicado por un usuario ("Tablón de Casos").
+/// El usuario aporta la hipótesis local y la nota de campo (el contexto
+/// humano que el satélite no ve); el análisis determinista se RECALCULA
+/// en el servidor al publicar (nunca se confía en números del navegador)
+/// y la IA solo redacta la conclusión con las cifras ya calculadas.
+model Case {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  /// Sospecha o relato local que motivó la investigación (10-200).
+  hypothesis  String
+  /// Contexto humano de la calle: lo que el satélite no ve (20-1000).
+  fieldNote   String
+  placeName   String
+  locale      String   @default("es")
+  latitude    Float
+  longitude   Float
+  variable    String
+  season      String
+  /// Años del periodo investigado (YYYY).
+  periodStart String
+  periodEnd   String
+  /// Análisis determinista recalculado server-side: { trend, sigma, yearsNeeded }.
+  resultJson  Json
+  /// Desnormalizados para filtros y tarjetas (calculados en código).
+  significant Boolean
+  slopePerDecade Float
+  /// Conclusión redactada por IA (solo texto; plantilla determinista sin clave).
+  aiConclusion String?
+  createdAt   DateTime @default(now())
+
+  confirmations CaseConfirmation[]
+
+  @@index([createdAt])
+  @@index([significant, createdAt])
+  @@index([latitude, longitude])
+}
+
+/// "Yo lo observo": confirmación ciudadana, una por usuario y caso.
+model CaseConfirmation {
+  id        String   @id @default(cuid())
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  caseId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([caseId, userId])
 }
