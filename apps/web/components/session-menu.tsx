@@ -238,7 +238,7 @@ export function SessionMenu({ initialUser }: { initialUser: SessionUser | null }
       )}
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 max-h-[80vh] w-96 overflow-y-auto rounded-2xl border border-slate-600/50 bg-slate-900/85 p-4 shadow-2xl backdrop-blur-md">
+        <div className="absolute right-0 top-11 z-50 max-h-[80vh] w-96 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-2xl border border-slate-600/50 bg-slate-900/85 p-4 shadow-2xl backdrop-blur-md">
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm font-bold text-white">{t('title')}</p>
             <button

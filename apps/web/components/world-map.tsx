@@ -226,7 +226,11 @@ export function WorldMap({
     return () => observer.disconnect();
   }, []);
 
-  const centerX = size.width >= 1024 ? size.width * 0.41 : size.width * 0.5;
+  // Globo centrado en la PÁGINA: los paneles del HUD son translúcidos y
+  // flotan sobre el mapa, así que no hay razón para desplazar el centro.
+  // (Antes usaba width*0.41 en escritorio para compensar el panel derecho,
+  // lo que dejaba el mundo visiblemente corrido a la izquierda.)
+  const centerX = size.width * 0.5;
   const centerY = size.height * 0.52;
   const baseRadius = Math.min(size.width * 0.44, size.height * 0.44);
 

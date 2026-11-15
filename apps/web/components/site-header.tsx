@@ -23,7 +23,7 @@ export async function SiteHeader() {
             <span className="block text-sm font-bold tracking-tight text-white">
               {t('brand')}
             </span>
-            <span className="block text-[11px] text-cyan-300/90">
+            <span className="hidden text-[11px] text-cyan-300/90 sm:block">
               {t('tagline')}
             </span>
           </span>
@@ -38,7 +38,7 @@ export async function SiteHeader() {
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-2.5 py-1.5 font-mono text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20"
           >
             <RadioTower className="h-3.5 w-3.5" aria-hidden />
-            {t('stationLink')}
+            <span className="hidden sm:inline">{t('stationLink')}</span>
           </Link>
           <SessionMenu
             initialUser={

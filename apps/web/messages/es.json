@@ -140,7 +140,8 @@
           "name": "Nueva York",
           "country": "Estados Unidos"
         }
-      }
+      },
+      "mobileMission": "Misión del detective"
     },
     "questions": {
       "title": "Todo buen detective hace cuatro preguntas",

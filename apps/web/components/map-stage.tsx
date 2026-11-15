@@ -115,6 +115,12 @@ export function MapStage() {
   // se abre al consultar y se cierra al tocar el mapa (que se re-centra).
   const [resultsOpen, setResultsOpen] = useState(false);
 
+  // Acordeones móviles: en pantallas pequeñas los paneles del HUD se
+  // PLEGAN para que el globo respire; un tap los despliega. En escritorio
+  // (sm/md en adelante) todo queda como siempre (paneles fijos expandidos).
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
+  const [mobileMissionOpen, setMobileMissionOpen] = useState(false);
+
   // Datos comunitarios públicos: cercanos a la celda seleccionada y
   // pines globales para el globo (ciencia ciudadana visible).
   const [communityNearby, setCommunityNearby] = useState<
@@ -581,6 +587,8 @@ export function MapStage() {
       setAnalysis(result);
       // Abre el panel grande de resultados (izquierda) y desplaza el mapa.
       setResultsOpen(true);
+      // En móvil, despliega el acordeón para que el resultado sea visible.
+      setMobilePanelOpen(true);
       return result;
     } catch {
       setFetchError(true);
@@ -660,8 +668,38 @@ export function MapStage() {
           style={{ opacity: hudOpacity, y: hudTranslateY }}
           className="pointer-events-none absolute inset-0 z-20"
         >
-          {/* Panel izquierdo: ficha de misión del detective */}
-          <div className="pointer-events-auto absolute left-6 top-32 hidden w-[400px] max-h-[calc(100vh-18rem)] overflow-y-auto md:block">
+          {/* Móvil: botón que despliega/plega la ficha de misión. Mientras
+              está plegada, el globo queda libre a pantalla completa.
+              En escritorio este botón no existe. */}
+          <button
+            type="button"
+            onClick={() => {
+              const next = !mobileMissionOpen;
+              setMobileMissionOpen(next);
+              // En móvil solo un panel abierto a la vez: el otro se pliega.
+              if (next) setMobilePanelOpen(false);
+            }}
+            aria-expanded={mobileMissionOpen}
+            className="pointer-events-auto absolute left-3 top-20 z-30 flex items-center gap-1.5 rounded-xl border border-cyan-400/40 bg-slate-950/80 px-3 py-2 text-[11px] font-semibold text-cyan-200 shadow-xl backdrop-blur-md transition-colors hover:bg-slate-800 md:hidden"
+          >
+            <Search className="h-3.5 w-3.5" aria-hidden />
+            {t('mobileMission')}
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform ${
+                mobileMissionOpen ? 'rotate-180' : ''
+              }`}
+              aria-hidden
+            />
+          </button>
+
+          {/* Panel izquierdo: ficha de misión del detective. En móvil es un
+              panel DESPLEGABLE (plegado por defecto para ver el globo); en
+              escritorio es fijo y expandido como siempre. */}
+          <div
+            className={`pointer-events-auto absolute left-3 right-3 top-32 z-30 max-h-[calc(100vh-16rem)] overflow-y-auto md:left-6 md:right-auto md:w-[400px] ${
+              mobileMissionOpen ? 'block' : 'hidden'
+            } md:block`}
+          >
             <div className="space-y-3 rounded-2xl border border-white/15 bg-slate-950/70 p-4 shadow-2xl backdrop-blur-md">
               <div className="flex items-center justify-between font-mono text-[11px]">
                 <span className="text-cyan-300">Ground Truth Detective</span>
@@ -869,26 +907,49 @@ export function MapStage() {
               cuadro se expande hacia la izquierda (anclado a la derecha)
               mostrando los resultados dentro. El mapa queda centrado. */}
           <div
-            className={`pointer-events-auto absolute right-4 top-20 max-h-[calc(100vh-12rem)] w-[calc(100%-2rem)] overflow-y-auto transition-[width] duration-500 ease-out sm:right-6 ${
+            className={`pointer-events-auto absolute right-4 top-32 max-h-[calc(100vh-15rem)] w-[calc(100%-2rem)] overflow-y-auto transition-[width] duration-500 ease-out sm:right-6 sm:top-20 ${
               analysis && resultsOpen
                 ? 'sm:w-[620px]'
                 : 'sm:w-[360px]'
             }`}
           >
             <div className="flex flex-col gap-3.5 rounded-2xl border border-white/15 bg-slate-950/75 p-4 text-slate-100 shadow-2xl backdrop-blur-md sm:p-5">
+              {/* Header: en MÓVIL es un botón de acordeón (plegado por
+                  defecto para ver el globo); en escritorio solo título. */}
               <div className="flex items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-sm font-semibold text-white">
-                    {t('variablesTitle')}
-                  </h2>
-                  <p className="text-[11px] text-slate-400">
-                    {t('variablesSubtitle')}
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !mobilePanelOpen;
+                    setMobilePanelOpen(next);
+                    // En móvil solo un panel abierto a la vez.
+                    if (next) setMobileMissionOpen(false);
+                  }}
+                  aria-expanded={mobilePanelOpen}
+                  className="flex flex-1 items-center justify-between gap-2 text-left"
+                >
+                  <span>
+                    <h2 className="text-sm font-semibold text-white">
+                      {t('variablesTitle')}
+                    </h2>
+                    <p className="text-[11px] text-slate-400">
+                      {t('variablesSubtitle')}
+                    </p>
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-cyan-300 transition-transform sm:hidden ${
+                      mobilePanelOpen ? 'rotate-180' : ''
+                    }`}
+                    aria-hidden
+                  />
+                </button>
                 <span className="font-mono text-[11px] tabular-nums text-cyan-300">
                   {VARIABLE_CONFIG[variable].powerParameters[0]}
                 </span>
               </div>
+
+              {/* Contenido plegable en móvil; siempre expandido en escritorio. */}
+              <div className={`${mobilePanelOpen ? 'flex' : 'hidden'} flex-col gap-3.5 sm:flex`}>
 
               {/* Grilla de variables */}
               <div className="grid grid-cols-2 gap-2">
@@ -1118,6 +1179,8 @@ export function MapStage() {
                   {t('previewNote')}
                 </p>
               </div>
+              </div>
+              {/* ^ fin del contenido plegable en móvil */}
             </div>
           </div>
         </motion.div>
