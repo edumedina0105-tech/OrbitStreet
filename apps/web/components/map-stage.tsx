@@ -7,11 +7,12 @@ import {
   useScroll,
   useTransform
 } from 'motion/react';
-import { ArrowDown, ChevronDown, Loader2, Radio, Search } from 'lucide-react';
+import { ArrowDown, ChevronDown, Loader2, Radio, Search, Upload } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from '@/i18n/navigation';
 import type { MapCity } from '@/components/world-map';
+import { ObservationModal } from '@/components/observation-modal';
 import { VARIABLE_ICONS } from '@/components/variable-icons';
 import {
   analyzeDailySeries,
@@ -114,6 +115,9 @@ export function MapStage() {
     fallback: boolean;
   } | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+
+  // Modal "Sube tu dato" (observación comunitaria con evidencia).
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   // Ciudades con nombres localizados por i18n (los pines llevan texto visible).
   const cities: MapCity[] = useMemo(
@@ -379,6 +383,17 @@ export function MapStage() {
                   <Search className="h-3.5 w-3.5" />
                 )}
                 {isFetching ? t('analyzing') : t('investigate')}
+              </button>
+
+              {/* Subir un dato propio (foto o manual): la celda no es tu calle.
+                  Requiere cuenta; el modal lo gestiona. */}
+              <button
+                type="button"
+                onClick={() => setUploadOpen(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-white/[0.12]"
+              >
+                <Upload className="h-3.5 w-3.5" aria-hidden />
+                {th('uploadButton')}
               </button>
 
               {/* Informe del caso, narrado por IA sobre las cifras ya
@@ -677,6 +692,14 @@ export function MapStage() {
           <ChevronDown className="h-4 w-4 animate-bounce text-cyan-400" aria-hidden />
         </div>
       </div>
+
+      {/* Modal "Sube tu dato": observación comunitaria con evidencia.
+          Flota sobre el globo; el usuario no sale del mapa. */}
+      <ObservationModal
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        selected={selected}
+      />
     </div>
   );
 }

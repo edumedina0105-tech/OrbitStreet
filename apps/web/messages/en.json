@@ -18,6 +18,7 @@
     "label": "Language"
   },
   "home": {
+    "uploadButton": "Upload your data",
     "hero": {
       "badge": "Real NASA data · MERRA-2 reanalysis",
       "title": "Is your corner of the planet really changing?",
@@ -334,6 +335,59 @@
       "out_of_range": "Some value is outside the physically possible range for this variable.",
       "cooldown": "Please wait {minutes} minute(s) before uploading another series.",
       "unauthorized": "Your session expired. Log in again."
+    }
+  },
+  "observation": {
+    "title": "Upload your observation",
+    "subtitle": "One data point from your street, with evidence. The AI only reads the photo; you confirm; the bias against the NASA cell is computed by deterministic code.",
+    "checking": "Checking your session…",
+    "requiresAccount": "To upload observations you need an account: it blocks bots and keeps your observation history.",
+    "loginCta": "Create account / sign in",
+    "close": "Close",
+    "tabs": {
+      "photo": "Photo",
+      "manual": "Manual"
+    },
+    "photo": {
+      "hint": "Photograph a thermometer reading, a weather station screen, or a figure from a news report. The AI will extract the value; you confirm it.",
+      "choose": "Choose image",
+      "change": "Change image",
+      "extracting": "The AI is reading the image…",
+      "noReadout": "The AI found no legible environmental reading. Try a sharper photo.",
+      "extracted": "AI extraction",
+      "confidence": "confidence",
+      "aiUnavailable": "Photo extraction needs the vision AI (GEMINI_API_KEY), which is not configured. Manual mode remains available."
+    },
+    "form": {
+      "variable": "Variable",
+      "value": "Measured value",
+      "date": "Date of the measurement",
+      "location": "Location of the data",
+      "locationMap": "Map point",
+      "locationExif": "Photo GPS",
+      "locationGps": "My location (browser)",
+      "gpsDenied": "Location permission denied or unavailable.",
+      "accuracy": "My location (~{m} m)"
+    },
+    "save": "Save observation",
+    "saving": "Saving and checking against the NASA cell…",
+    "saved": {
+      "title": "Observation saved",
+      "badge": "Community data · unvalidated",
+      "verdictPlausible": "It matches the NASA cell for that day: your street validates the satellite.",
+      "verdictDoubtful": "It deviates {bias} {unit} from that day's NASA cell: marked as doubtful.",
+      "verdictSuspicious": "It deviates {bias} {unit} from the NASA cell: marked as suspicious.",
+      "verdictNoReference": "No NASA cell reference for that day yet.",
+      "cellValue": "MERRA-2 cell: {value} {unit} · source: {source}",
+      "progress": "You have {count} of {goal} observations: once you reach the goal you can analyze your own series."
+    },
+    "errors": {
+      "tooLarge": "The image exceeds 4 MB.",
+      "outOfRange": "The value is outside the physically possible range.",
+      "invalidDate": "Invalid date (1981 through today).",
+      "extract": "The image could not be processed. Please try again.",
+      "save": "The observation could not be saved. Please try again.",
+      "cooldown": "You must wait {seconds} s before the next upload."
     }
   },
   "footer": {

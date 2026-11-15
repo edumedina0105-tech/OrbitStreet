@@ -107,6 +107,7 @@ model User {
 
   sessions        Session[]
   communitySeries CommunitySeries[]
+  observations    Observation[]
 
   @@index([email])
 }
@@ -142,4 +143,54 @@ model CommunitySeries {
 
   /// Índice para la consulta de cooldown (última subida del usuario).
   @@index([userId, createdAt])
+}
+
+/// Cómo se obtuvo la ubicación declarada de una observación.
+/// La IP NUNCA es fuente de verdad (la derriba una VPN); solo se usa como
+/// señal auxiliar de inconsistencia en el cliente.
+enum LocationSource {
+  /// GPS embebido en el EXIF de la foto (confirmado por el usuario).
+  EXIF
+  /// Geolocation API del navegador (con permiso explícito).
+  GPS
+  /// Punto seleccionado en el globo del mapa.
+  MAP
+}
+
+/// Cómo ingresó el dato el usuario.
+enum InputMode {
+  /// Lectura extraída de una imagen por IA de visión (el usuario confirmó).
+  PHOTO
+  /// Valor escrito a mano por el usuario.
+  MANUAL
+}
+
+/// Observación puntual comunitaria con evidencia (foto o manual).
+/// Un punto NO es una serie: se acumulan por usuario+variable+celda y, al
+/// llegar al umbral (p. ej. 10), habilitan el análisis determinista propio.
+/// NUNCA se mezcla con datos NASA sin su etiqueta de procedencia.
+model Observation {
+  id             String         @id @default(cuid())
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  variable       String
+  value          Float
+  unit           String
+  /// Fecha (día) que representa la lectura.
+  observedAt     DateTime
+  latitude       Float
+  longitude      Float
+  locationSource LocationSource
+  inputMode      InputMode
+  /// Extracción por IA de visión: { engine, confidence, description }.
+  /// null cuando inputMode = MANUAL.
+  extractionJson Json?
+  /// Cross-check determinista contra la celda MERRA-2 de ese día:
+  /// { cellValue, bias, verdict } — veredicto calculado en código, no por IA.
+  nasaCheckJson  Json?
+  createdAt      DateTime       @default(now())
+
+  /// Cooldown del usuario y futuras consultas por celda/variable.
+  @@index([userId, createdAt])
+  @@index([latitude, longitude, variable])
 }

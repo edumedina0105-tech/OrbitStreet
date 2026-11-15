@@ -18,6 +18,7 @@
     "label": "Idioma"
   },
   "home": {
+    "uploadButton": "Sube tu dato",
     "hero": {
       "badge": "Datos reales de la NASA · reanálisis MERRA-2",
       "title": "¿Está cambiando realmente tu rincón del planeta?",
@@ -334,6 +335,59 @@
       "out_of_range": "Algún valor está fuera del rango físicamente posible para esta variable.",
       "cooldown": "Espera {minutes} minuto(s) antes de subir otra serie.",
       "unauthorized": "Tu sesión expiró. Inicia sesión de nuevo."
+    }
+  },
+  "observation": {
+    "title": "Sube tu observación",
+    "subtitle": "Un dato de tu calle, con evidencia. La IA solo lee la foto; tú confirmas; el sesgo contra la celda NASA lo calcula código determinista.",
+    "checking": "Verificando tu sesión…",
+    "requiresAccount": "Para subir observaciones necesitas una cuenta: bloquea bots y acumula tu historial de observaciones.",
+    "loginCta": "Crear cuenta / iniciar sesión",
+    "close": "Cerrar",
+    "tabs": {
+      "photo": "Foto",
+      "manual": "Manual"
+    },
+    "photo": {
+      "hint": "Fotografía la lectura de un termómetro, la pantalla de una estación o un dato de una noticia. La IA extraerá el valor; tú lo confirmas.",
+      "choose": "Elegir imagen",
+      "change": "Cambiar imagen",
+      "extracting": "La IA está leyendo la imagen…",
+      "noReadout": "La IA no encontró una lectura ambiental legible. Prueba con una foto más nítida.",
+      "extracted": "Extracción de la IA",
+      "confidence": "confianza",
+      "aiUnavailable": "La extracción por foto necesita la IA de visión (GEMINI_API_KEY), que no está configurada. El modo manual sigue disponible."
+    },
+    "form": {
+      "variable": "Variable",
+      "value": "Valor medido",
+      "date": "Fecha de la medición",
+      "location": "Ubicación del dato",
+      "locationMap": "Punto del mapa",
+      "locationExif": "GPS de la foto",
+      "locationGps": "Mi ubicación (navegador)",
+      "gpsDenied": "Permiso de ubicación denegado o no disponible.",
+      "accuracy": "Mi ubicación (~{m} m)"
+    },
+    "save": "Guardar observación",
+    "saving": "Guardando y verificando contra la celda NASA…",
+    "saved": {
+      "title": "Observación guardada",
+      "badge": "Dato comunitario · no validado",
+      "verdictPlausible": "Coincide con la celda NASA de ese día: tu calle valida al satélite.",
+      "verdictDoubtful": "Se desvía {bias} {unit} de la celda NASA de ese día: queda marcado como dudoso.",
+      "verdictSuspicious": "Se desvía {bias} {unit} de la celda NASA: queda marcado como sospechoso.",
+      "verdictNoReference": "Sin celda NASA de referencia para ese día todavía.",
+      "cellValue": "Celda MERRA-2: {value} {unit} · fuente: {source}",
+      "progress": "Llevas {count} de {goal} observaciones: al llegar al objetivo podrás analizar tu propia serie."
+    },
+    "errors": {
+      "tooLarge": "La imagen supera los 4 MB.",
+      "outOfRange": "El valor está fuera del rango físicamente posible.",
+      "invalidDate": "La fecha es inválida (1981 hasta hoy).",
+      "extract": "No se pudo procesar la imagen. Inténtalo de nuevo.",
+      "save": "No se pudo guardar la observación. Inténtalo de nuevo.",
+      "cooldown": "Debes esperar {seconds} s antes de la próxima subida."
     }
   },
   "footer": {
