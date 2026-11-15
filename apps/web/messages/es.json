@@ -407,6 +407,34 @@
       "unauthorized": "Tu sesión expiró. Inicia sesión de nuevo."
     }
   },
+  "station": {
+    "tab": "Estación",
+    "intro": "Registra tu nodo ESP32: el token se genera una sola vez y se pega en el asistente del nodo (campo «Token de estación»).",
+    "name": "Nombre de la estación",
+    "namePlaceholder": "Ej: Balcón de Asunción",
+    "latitude": "Latitud",
+    "longitude": "Longitud",
+    "sensor": "Sensor del nodo",
+    "noSensor": "Sin sensor (solo baseline NASA)",
+    "register": "Registrar estación",
+    "registering": "Registrando…",
+    "registerAnother": "Registrar otra estación",
+    "tokenTitle": "Token de ingesta (visible solo ahora)",
+    "tokenWarning": "Guárdalo ya: el servidor solo conserva su hash y no podrá mostrarse de nuevo. Si lo pierdes, re-registra la estación para rotarlo.",
+    "tokenNextSteps": "1) Conecta el ESP32 a la red y abre su dashboard. 2) Pega el token en el asistente. 3) El nodo enviará telemetría firmada con este token y calculará su ΔT frente a la baseline NASA.",
+    "copy": "Copiar token",
+    "errors": {
+      "unauthorized": "Inicia sesión para registrar una estación.",
+      "invalid_name": "El nombre debe tener entre 2 y 60 caracteres.",
+      "invalid_latitude": "Latitud inválida (−90 a 90).",
+      "invalid_longitude": "Longitud inválida (−180 a 180).",
+      "invalid_altitude": "Altitud inválida (−500 a 10000 m).",
+      "invalid_sensor_type": "Tipo de sensor no soportado.",
+      "invalid_device_id": "ID de dispositivo inválido.",
+      "device_taken": "Ese dispositivo ya está registrado por otra cuenta.",
+      "generic": "No se pudo registrar la estación. Inténtalo de nuevo."
+    }
+  },
   "observation": {
     "title": "Sube tu observación",
     "subtitle": "Un dato de tu calle, con evidencia. La IA solo lee la foto; tú confirmas; el sesgo contra la celda NASA lo calcula código determinista.",

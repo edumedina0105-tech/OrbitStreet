@@ -20,6 +20,15 @@ model Station {
   status    StationStatus @default(PENDING)
   /// Identificador autogenerado por el nodo (hash de MAC), único.
   deviceId  String?       @unique
+  /// SHA-256 del token de ingesta: en claro SOLO se muestra una vez al registrar.
+  tokenHash String?       @unique
+  /// Sensor declarado: bme280 | dht11 | dht22 | b3950 | none.
+  sensorType String?
+  /// Propietario opcional (quien registró la estación desde la web).
+  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  /// Última telemetría aceptada: para marcar ONLINE/OFFLINE.
+  lastSeenAt DateTime?
   createdAt DateTime      @default(now())
 
   telemetry TelemetryRecord[]
@@ -114,6 +123,7 @@ model User {
   communitySeries CommunitySeries[]
   observations    Observation[]
   cases           Case[]
+  stations        Station[]
   caseConfirmations CaseConfirmation[]
 
   @@index([email])

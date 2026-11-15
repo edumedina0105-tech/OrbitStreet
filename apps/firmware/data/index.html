@@ -29,16 +29,21 @@ label{font-size:.75rem;color:#94a3b8;display:block;margin-top:.5rem}
 <label>Red WiFi (SSID)</label><input id="wifi_ssid" placeholder="MiRed">
 <label>Contraseña WiFi</label><input id="wifi_pass" type="password" placeholder="••••••••">
 <label>Sensor</label>
-<select id="sensor_type">
+<select id="sensor_type" onchange="sensorChanged()">
 <option value="none">Ninguno (solo baseline NASA)</option>
-<option value="bme280">BME280 (I²C: SDA=21, SCL=22)</option>
+<option value="bme280">BME280 (I²C)</option>
 <option value="dht11">DHT11 (GPIO digital)</option>
 <option value="dht22">DHT22 / AM2302 (GPIO digital)</option>
+<option value="b3950">B3950 termistor (ADC)</option>
 </select>
-<label>Pin GPIO del sensor (DHT/B3950)</label>
+<label id="lbl_sda">Pin SDA (I²C)</label><input id="pin_sda" type="number" value="21">
+<label id="lbl_scl">Pin SCL (I²C)</label><input id="pin_scl" type="number" value="22">
+<label id="lbl_pin">Pin GPIO del sensor (DHT/B3950)</label>
 <input id="sensor_pin" type="number" value="4" placeholder="4">
 <label>Latitud (ej: -25.26)</label><input id="lat" type="number" step="0.01" value="-25.26">
 <label>Longitud (ej: -57.53)</label><input id="lon" type="number" step="0.01" value="-57.53">
+<label>Servidor OrbitStreet</label><input id="server_url" value="https://orbitstreet.up.railway.app">
+<label>Token de estación (de "Mi estación" en la web)</label><input id="stationToken" placeholder="opcional">
 <label>Intervalo de lectura (segundos)</label><input id="read_s" type="number" value="30">
 <button onclick="saveConfig()">Guardar y conectar</button>
 </div>
@@ -46,19 +51,37 @@ label{font-size:.75rem;color:#94a3b8;display:block;margin-top:.5rem}
 <div class="card"><div class="lbl">🌡️ Temperatura</div><div class="val" id="t">—</div><div class="unit">°C</div></div>
 <div class="card"><div class="lbl">💧 Humedad</div><div class="val" id="h">—</div><div class="unit">%</div></div>
 <div class="card"><div class="lbl">📊 Presión</div><div class="val" id="p">—</div><div class="unit">hPa</div></div>
+<div class="card"><div class="lbl">🛰️ ΔT vs NASA</div><div class="val" id="a">—</div><div class="unit">°C</div></div>
 </div>
 <div id="info" class="status"></div>
 <script>
+function sensorChanged(){
+ const t=document.getElementById('sensor_type').value;
+ const i2c=t==='bme280';
+ document.getElementById('lbl_sda').style.display=i2c?'':'none';
+ document.getElementById('pin_sda').style.display=i2c?'':'none';
+ document.getElementById('lbl_scl').style.display=i2c?'':'none';
+ document.getElementById('pin_scl').style.display=i2c?'':'none';
+ document.getElementById('lbl_pin').style.display=i2c?'none':'';
+ document.getElementById('sensor_pin').style.display=i2c?'none':'';
+}
+sensorChanged();
 async function poll(){
 try{
 const r=await fetch('/api/data');const d=await r.json();
-document.getElementById('t').textContent=d.hasData?d.temperature.toFixed(1):'—';
-document.getElementById('h').textContent=d.hasData?d.humidity.toFixed(0):'—';
-document.getElementById('p').textContent=d.hasData?d.pressure.toFixed(0):'—';
+document.getElementById('t').textContent=(d.hasData&&typeof d.temperature==='number')?d.temperature.toFixed(1):'—';
+document.getElementById('h').textContent=(d.hasData&&d.hasHumidity)?d.humidity.toFixed(0):'—';
+document.getElementById('p').textContent=(d.hasData&&d.hasPressure)?d.pressure.toFixed(0):'—';
+const a=document.getElementById('a');
+a.textContent=(d.hasData&&d.anomaly!==null&&d.anomaly!==undefined)?((d.anomaly>=0?'+':'')+d.anomaly.toFixed(1)):'—';
+a.style.color=(d.anomaly===null||d.anomaly===undefined)?'#64748b':(Math.abs(d.anomaly)>=2?'#fbbf24':'#34d399');
 const s=document.getElementById('status');
-s.textContent=d.connected?'✅ Conectado · '+d.ip:'📡 AP activo · 192.168.4.1';
+let extra='';
+if(d.pendingTelemetry>0)extra=' · '+d.pendingTelemetry+' en cola';
+if(d.timeValid===false&&d.connected)extra+=' · reloj NTP sincronizando';
+s.textContent=d.connected?'✅ Conectado · '+d.ip+extra:'📡 AP activo · 192.168.4.1';
 s.className='status '+(d.connected?'ok':'warn');
-document.getElementById('info').textContent=d.sensorType+' · lat '+d.latitude+'°';
+document.getElementById('info').textContent=d.sensorType+' · '+(d.wiring||'');
 if(!d.configured){document.getElementById('setup').classList.add('show');document.getElementById('grid').style.display='none';}
 else{document.getElementById('setup').classList.remove('show');document.getElementById('grid').style.display='grid';}
 }catch(e){document.getElementById('status').textContent='⚠️ Nodo no accesible';}
@@ -68,9 +91,13 @@ const body=JSON.stringify({
 wifi_ssid:document.getElementById('wifi_ssid').value,
 wifi_pass:document.getElementById('wifi_pass').value,
 sensor_type:document.getElementById('sensor_type').value,
-sensor_pin:parseInt(document.getElementById('sensor_pin').value)||4,
+sensor_pin_sda:parseInt(document.getElementById('pin_sda').value)||21,
+sensor_pin_scl:parseInt(document.getElementById('pin_scl').value)||22,
+sensor_pin_dht:parseInt(document.getElementById('sensor_pin').value)||4,
 latitude:parseFloat(document.getElementById('lat').value)||0,
 longitude:parseFloat(document.getElementById('lon').value)||0,
+server_url:document.getElementById('server_url').value,
+station_token:document.getElementById('stationToken').value,
 read_interval_s:parseInt(document.getElementById('read_s').value)||30
 });
 const r=await fetch('/api/config',{method:'POST',headers:{'content-type':'application/json'},body});

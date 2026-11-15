@@ -2,7 +2,8 @@
 
 Firmware PlatformIO para el nodo de ciencia ciudadana de OrbitStreet.
 El ESP32 sirve su propio dashboard web embebido, lee sensores
-ambientales y envía telemetría al servidor.
+ambientales y envía telemetría firmada al servidor, donde se compara
+con la línea base NASA.
 
 ## Requisitos
 
@@ -33,21 +34,32 @@ pio run -e esp32dev -t monitor
    **`OrbitStreet-Setup`** (sin contraseña).
 2. Conecta tu móvil o PC a esa red.
 3. Abre **`http://192.168.4.1`** en el navegador (captive portal).
-4. Verás el asistente: elige tu red WiFi, tu sensor y su pin.
+4. Verás el asistente: elige tu red WiFi, tu sensor y sus pines.
 5. Al guardar, el ESP32 se conecta a tu WiFi y cierra el AP.
 6. El monitor serie muestra la IP asignada (ej: `192.168.1.123`).
 7. Abre esa IP en el navegador → dashboard con lecturas en vivo.
 
-## Dashboard
+## Conectar el nodo a la plataforma (telemetría + baseline NASA)
 
-| Sección | Descripción |
-|---------|-------------|
-| 🌡️ Temperatura | °C con offset de calibración aplicado |
-| 💧 Humedad | % relativa |
-| 📊 Presión | hPa |
-| Estado | IP del nodo, tipo de sensor, conexión al servidor |
-
-El dashboard se actualiza cada 3 segundos (polling con `fetch()`).
+1. En la web de OrbitStreet: menú de cuenta → pestaña **«Estación»** →
+   registra tu nodo (nombre + coordenadas + sensor).
+2. Copia el **token de ingesta** (se muestra UNA sola vez; si lo pierdes,
+   vuelve a registrar la estación para rotarlo).
+3. En el dashboard del ESP32, pega el token en **«Token de estación»**
+   junto con la URL del servidor.
+4. El nodo entonces:
+   - Sincroniza su reloj por **NTP** (sin hora válida no envía nada:
+     mejor perder un punto que mentir sobre su fecha).
+   - Envía telemetría firmada con el token cada N minutos:
+     `POST /api/station/telemetry` con header `Authorization: Bearer …`
+     y lotes de hasta 60 registros `{ts, t, h, p}`.
+   - Si no hay WiFi, las lecturas quedan en un **buffer de reconexión**
+     (64 registros en RAM) y se reenvían al reconectar.
+   - Descarga la **baseline NASA** (normales mensuales de temperatura,
+     `GET /api/station/baseline`) y la guarda en LittleFS
+     (`baseline.json`), refrescándola una vez al día.
+   - Calcula la **anomalía offline**: `ΔT = temperatura − normal del mes`,
+     visible en el dashboard (tarjeta «ΔT vs NASA») y en el monitor serie.
 
 ## Sensores soportados
 
@@ -63,41 +75,32 @@ El dashboard se actualiza cada 3 segundos (polling con `fetch()`).
 
 El BME280 sufre auto-calentamiento del chip (+1 a +2 °C). Para
 compensar: compara con un termómetro de referencia y ajusta el offset
-desde el dashboard (⚙️ Configuración).
-
-## Telemetría al servidor (F4 — pendiente)
-
-Cuando el nodo esté conectado a WiFi y registrado en el servidor
-OrbitStreet, enviará telemetría cada N minutos:
-
-```
-POST /api/station/telemetry
-{
-  "token": "<token-de-estación>",
-  "timestamp": "2026-11-15T12:00:00Z",
-  "temperature": 25.3,
-  "humidity": 60.2,
-  "pressure": 1013.5,
-  "nasaBias": 1.2,
-  "quality": "UNVALIDATED"
-}
-```
+desde la configuración (`sensor_offset_temp` en `config.json`).
 
 ## Estructura del código
 
 ```
 apps/firmware/
-├── platformio.ini          # Entornos de compilación (esp32dev, esp32-c3)
+├── platformio.ini          # Entornos (esp32dev, esp32-c3) + gzip pre-build
 ├── include/
 │   ├── Config.h            # Configuración persistente (LittleFS)
-│   └── WiFiManager.h       # AP+STA con captive portal
+│   ├── WiFiManager.h       # AP+STA con captive portal
+│   ├── SensorManager.h     # Drivers de sensores
+│   └── TelemetryClient.h   # NTP + telemetría + baseline NASA
 ├── src/
-│   ├── main.cpp            # Entry point: loop no bloqueante
+│   ├── main.cpp            # Entry point: loop no bloqueante + rutas web
 │   ├── Config.cpp          # Lectura/escritura de config.json
-│   └── WiFiManager.cpp     # Gestión WiFi con reintentos
+│   ├── WiFiManager.cpp     # Gestión WiFi con reintentos
+│   ├── SensorManager.cpp   # BME280 / DHT11 / DHT22 / B3950
+│   └── TelemetryClient.cpp # Buffer de reconexión + POST + baseline
+├── scripts/
+│   └── gzip_data.py        # Comprime data/*.html → .gz antes del build
 └── data/
-    └── index.html          # Dashboard web (se comprime a .gz en LittleFS)
+    └── index.html          # Dashboard web (servido comprimido desde LittleFS)
 ```
+
+Regla del proyecto: **cero `delay()` en el loop** (solo transiciones
+críticas: guardar config / reiniciar). Todo usa `millis()`.
 
 ## Placas compatibles
 

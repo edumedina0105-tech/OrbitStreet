@@ -13,6 +13,7 @@ import {
   X
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { StationPanel } from './station-panel';
 
 /**
  * Menú de sesión del header: cuadro flotante sobre la página (sin ruta
@@ -59,6 +60,7 @@ export function SessionMenu({ initialUser }: { initialUser: SessionUser | null }
   const t = useTranslations('account');
   const tobs = useTranslations('observation');
   const tmy = useTranslations('myData');
+  const tst = useTranslations('station');
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -73,7 +75,7 @@ export function SessionMenu({ initialUser }: { initialUser: SessionUser | null }
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   // Gestión de datos: lo subido por el usuario.
-  const [dataTab, setDataTab] = useState<'profile' | 'data'>('profile');
+  const [dataTab, setDataTab] = useState<'profile' | 'data' | 'station'>('profile');
   const [myData, setMyData] = useState<{
     observations: MyObservation[];
     cases: MyCase[];
@@ -275,6 +277,17 @@ export function SessionMenu({ initialUser }: { initialUser: SessionUser | null }
                 >
                   {tmy('myData')}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setDataTab('station')}
+                  className={`flex-1 rounded-lg border px-2 py-1.5 text-xs font-semibold transition-colors ${
+                    dataTab === 'station'
+                      ? 'border-cyan-400/60 bg-cyan-500/20 text-cyan-200'
+                      : 'border-white/15 bg-white/5 text-slate-300 hover:bg-white/10'
+                  }`}
+                >
+                  {tst('tab')}
+                </button>
               </div>
 
               {dataTab === 'profile' ? (
@@ -299,6 +312,8 @@ export function SessionMenu({ initialUser }: { initialUser: SessionUser | null }
                     {t('logout')}
                   </button>
                 </div>
+              ) : dataTab === 'station' ? (
+                <StationPanel />
               ) : (
                 <div className="mt-4 space-y-4">
                   {dataLoading && (

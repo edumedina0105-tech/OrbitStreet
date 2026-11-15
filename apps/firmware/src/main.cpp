@@ -1,13 +1,11 @@
 /**
- * OrbitStreet — Nodo en tierra (Ground Truth Node)
+ * OrbitStreet — Nodo en tierra (Ground Truth Node) v0.1.0
  *
  * Firmware ESP32 con dashboard web embebido:
  *  - Primera vez: AP "OrbitStreet-Setup" + captive portal → asistente
  *  - Tras configurar: STA + dashboard en http://<ip-del-esp>/
- *  - Lectura periódica del sensor configurado (sin delay()).
- *  - Telemetría al servidor OrbitStreet (cuando esté implementada).
- *
- * SIN delay() en el loop: todas las tareas usan millis().
+ *  - Lectura periódica del sensor configurado (sin delay() en el loop).
+ *  - Telemetría al servidor OrbitStreet.
  */
 
 #include <Arduino.h>
@@ -15,17 +13,18 @@
 #include <LittleFS.h>
 #include "Config.h"
 #include "WiFiManager.h"
+#include "SensorManager.h"
+#include "TelemetryClient.h"
 
-// --- Servidor web del ESP32 ---
 AsyncWebServer server(80);
 
-// --- Estado global ---
 static uint32_t g_lastReadMs = 0;
-static float g_temp = 0.0, g_hum = 0.0, g_press = 0.0;
-static bool  g_hasData = false;
-static String g_sensorName = "none";
+static SensorReading g_lastReading;
+static uint32_t g_lastTelemetryMs = 0;
+static uint32_t g_lastBaselineMs = 0;
+static bool g_ntpStarted = false;
+static float g_anomaly = NAN; // °C respecto a la normal NASA del mes
 
-// --- Prototipos ---
 void setupRoutes();
 void readSensor();
 void sendTelemetry(uint32_t nowMs);
@@ -34,131 +33,173 @@ void setup() {
     Serial.begin(115200);
     Serial.printf("\n\n=== OrbitStreet Ground Truth Node v%s ===\n\n", ORBITSTREET_VERSION);
 
-    // 1. Montar LittleFS y cargar configuración.
     if (!Config::begin()) {
         Serial.println("[MAIN] Sin configuración. Primera vez.");
     }
 
-    // 2. WiFi: AP (primera vez) o STA (ya configurado).
     WiFiManager::begin();
 
-    // 3. Servidor web.
+    if (Config::configured) {
+        if (!SensorManager::begin()) {
+            Serial.println("[MAIN] Sensor no inicializado. Revisar wiring.");
+        }
+    }
+
     setupRoutes();
     server.begin();
-    Serial.println("[MAIN] Servidor web iniciado en puerto 80.");
-
-    Serial.printf("[MAIN] IP del nodo: %s\n", WiFiManager::getIP().c_str());
+    Serial.println("[MAIN] Servidor web en puerto 80.");
+    Serial.printf("[MAIN] IP: %s | Wiring: %s\n",
+        WiFiManager::getIP().c_str(), SensorManager::getWiring().c_str());
 }
 
 void loop() {
     uint32_t nowMs = millis();
-
-    // WiFi: DNS del portal cautivo + reintento de conexión.
     WiFiManager::loop(nowMs);
 
+    if (!Config::configured) return;
+
+    // NTP: arrancar la sincronización en cuanto haya WiFi.
+    if (WiFiManager::isConnected() && !g_ntpStarted) {
+        g_ntpStarted = true;
+        TelemetryClient::syncTime();
+    }
+
     // Lectura del sensor cada N segundos (no bloqueante).
-    if (WiFiManager::isConnected() || Config::configured) {
-        if (nowMs - g_lastReadMs >= (uint32_t)(Config::readIntervalS * 1000)) {
-            g_lastReadMs = nowMs;
-            readSensor();
+    if (nowMs - g_lastReadMs >= (uint32_t)(Config::readIntervalS * 1000)) {
+        g_lastReadMs = nowMs;
+        readSensor();
+    }
+
+    // Telemetría al servidor cada N minutos (no bloqueante).
+    if (WiFiManager::isConnected() && Config::stationToken.length() > 0) {
+        if (nowMs - g_lastTelemetryMs >= (uint32_t)(Config::telemetryIntervalMin * 60000)) {
+            g_lastTelemetryMs = nowMs;
+            sendTelemetry(nowMs);
         }
     }
-}
 
-// --- Lectura del sensor ---
-void readSensor() {
-    // TODO (F2): leer según Config::sensorType (bme280, dht11, dht22, b3950).
-    // Por ahora: valores de prueba etiquetados como SIMULADOS.
-    if (Config::sensorType == "none") {
-        g_hasData = false;
-        return;
+    // Baseline NASA: refrescar al arrancar y luego 1 vez al día.
+    if (WiFiManager::isConnected() && TelemetryClient::timeValid() &&
+        (g_lastBaselineMs == 0 || nowMs - g_lastBaselineMs >= 86400000UL)) {
+        g_lastBaselineMs = nowMs;
+        TelemetryClient::refreshBaseline();
     }
-
-    // Placeholder hasta implementar drivers en F2:
-    g_temp   = 25.0 + Config::offsetTemp;
-    g_hum    = 60.0 + Config::offsetHum;
-    g_press  = 1013.0 + Config::offsetPress;
-    g_hasData = true;
-
-    Serial.printf("[SENSOR] T=%.1f°C H=%.0f%% P=%.0f hPa\n", g_temp, g_hum, g_press);
 }
 
-// --- Rutas del servidor web ---
+void readSensor() {
+    g_lastReading = SensorManager::read();
+    if (g_lastReading.valid) {
+        g_anomaly = TelemetryClient::anomaly(g_lastReading.temperature);
+        Serial.printf("[SENSOR] T=%.1f°C", g_lastReading.temperature);
+        if (g_lastReading.hasHumidity) Serial.printf(" H=%.0f%%", g_lastReading.humidity);
+        if (g_lastReading.hasPressure) Serial.printf(" P=%.0f hPa", g_lastReading.pressure);
+        if (!isnan(g_anomaly)) Serial.printf(" | ΔT vs NASA: %+.1f°C", g_anomaly);
+        Serial.println();
+    } else {
+        Serial.println("[SENSOR] Lectura inválida.");
+    }
+}
+
+void sendTelemetry(uint32_t nowMs) {
+    if (!g_lastReading.valid) return;
+    TelemetryClient::publish(g_lastReading);
+}
+
 void setupRoutes() {
-    // Dashboard HTML desde LittleFS (gzipped).
     server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html.gz");
 
-    // API: estado actual del nodo.
+    // GET: lecturas actuales
     server.on("/api/data", HTTP_GET, [](AsyncWebServerRequest *req) {
         JsonDocument doc;
-        doc["temperature"] = g_temp;
-        doc["humidity"] = g_hum;
-        doc["pressure"] = g_press;
-        doc["hasData"] = g_hasData;
-        doc["sensorType"] = Config::sensorType;
+        doc["temperature"] = g_lastReading.temperature;
+        doc["humidity"] = g_lastReading.humidity;
+        doc["pressure"] = g_lastReading.pressure;
+        doc["hasData"] = g_lastReading.valid;
+        doc["hasHumidity"] = g_lastReading.hasHumidity;
+        doc["hasPressure"] = g_lastReading.hasPressure;
+        doc["sensorType"] = SensorManager::getType();
+        doc["wiring"] = SensorManager::getWiring();
         doc["connected"] = WiFiManager::isConnected();
         doc["ip"] = WiFiManager::getIP();
         doc["configured"] = Config::configured;
-
-        String json;
-        serializeJson(doc, json);
+        if (isnan(g_anomaly)) doc["anomaly"] = nullptr;
+        else doc["anomaly"] = g_anomaly;
+        doc["hasBaseline"] = TelemetryClient::hasBaseline();
+        doc["pendingTelemetry"] = TelemetryClient::pendingCount();
+        doc["timeValid"] = TelemetryClient::timeValid();
+        String json; serializeJson(doc, json);
         req->send(200, "application/json", json);
     });
 
-    // API: leer configuración.
+    // GET: configuración
     server.on("/api/config", HTTP_GET, [](AsyncWebServerRequest *req) {
         JsonDocument doc;
         doc["wifi_ssid"] = Config::wifiSsid;
         doc["sensor_type"] = Config::sensorType;
+        doc["sensor_pin_sda"] = Config::pinSda;
+        doc["sensor_pin_scl"] = Config::pinScl;
+        doc["sensor_pin_dht"] = Config::pinDht;
+        doc["sensor_offset_temp"] = Config::offsetTemp;
         doc["latitude"] = Config::latitude;
         doc["longitude"] = Config::longitude;
         doc["read_interval_s"] = Config::readIntervalS;
         doc["telemetry_interval_min"] = Config::telemetryIntervalMin;
+        doc["server_url"] = Config::serverUrl;
+        doc["stationToken"] = Config::stationToken;
         doc["configured"] = Config::configured;
-
-        String json;
-        serializeJson(doc, json);
+        String json; serializeJson(doc, json);
         req->send(200, "application/json", json);
     });
 
-    // API: guardar configuración (POST con JSON body).
-    server.on("/api/config", HTTP_POST, [](AsyncWebServerRequest *req) {
-        // El body llega como parámetro de form-data o raw.
-        String body = "";
-        if (req->hasParam("body", true)) {
-            body = req->getParam("body", true)->value();
-        } else if (req->contentLength() > 0) {
-            // El body viene en el handler de upload; AsyncWebServer lo
-            // pasa via onBody. Simplificado: intentamos raw.
+    // POST: guardar configuración (usa onBody para el JSON crudo)
+    server.on("/api/config", HTTP_POST,
+        [](AsyncWebServerRequest *req) {
+            // La respuesta se envía en onBody después de parsear.
+        },
+        NULL,
+        [](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total) {
+            static String body = "";
+            if (index == 0) body = "";
+            body.concat((const char*)data, len);
+
+            if (index + len < total) return; // aún no llegó todo el body.
+
+            JsonDocument doc;
+            DeserializationError err = deserializeJson(doc, body);
+            if (err != DeserializationError::Ok) {
+                req->send(400, "application/json", "{\"error\":\"invalid_json\"}");
+                return;
+            }
+
+            if (!doc["wifi_ssid"].isNull()) Config::wifiSsid = doc["wifi_ssid"].as<String>();
+            if (!doc["wifi_pass"].isNull()) Config::wifiPass = doc["wifi_pass"].as<String>();
+            if (!doc["server_url"].isNull()) Config::serverUrl = doc["server_url"].as<String>();
+            if (!doc["station_token"].isNull()) Config::stationToken = doc["station_token"].as<String>();
+            if (!doc["sensor_type"].isNull()) Config::sensorType = doc["sensor_type"].as<String>();
+            if (!doc["sensor_pin_sda"].isNull()) Config::pinSda = doc["sensor_pin_sda"].as<int>();
+            if (!doc["sensor_pin_scl"].isNull()) Config::pinScl = doc["sensor_pin_scl"].as<int>();
+            if (!doc["sensor_pin_dht"].isNull()) Config::pinDht = doc["sensor_pin_dht"].as<int>();
+            if (!doc["sensor_offset_temp"].isNull()) Config::offsetTemp = doc["sensor_offset_temp"].as<float>();
+            if (!doc["latitude"].isNull()) Config::latitude = doc["latitude"].as<float>();
+            if (!doc["longitude"].isNull()) Config::longitude = doc["longitude"].as<float>();
+            if (!doc["read_interval_s"].isNull()) Config::readIntervalS = doc["read_interval_s"].as<int>();
+            if (!doc["telemetry_interval_min"].isNull()) Config::telemetryIntervalMin = doc["telemetry_interval_min"].as<int>();
+
+            Config::configured = true;
+            Config::save();
+            SensorManager::begin();
+
+            req->send(200, "application/json", "{\"ok\":true}");
+
+            // Reconectar WiFi (diferido: primero deja que la respuesta llegue).
+            delay(500);
+            if (Config::wifiSsid.length() > 0) {
+                WiFiManager::connectSTA(Config::wifiSsid, Config::wifiPass);
+            }
         }
+    );
 
-        JsonDocument doc;
-        DeserializationError err = deserializeJson(doc, body);
-        if (err != DeserializationError::Ok) {
-            req->send(400, "application/json", "{\"error\":\"invalid_json\"}");
-            return;
-        }
-
-        if (doc["wifi_ssid"].is<String>()) Config::wifiSsid = doc["wifi_ssid"].as<String>();
-        if (doc["wifi_pass"].is<String>()) Config::wifiPass = doc["wifi_pass"].as<String>();
-        if (doc["sensor_type"].is<String>()) Config::sensorType = doc["sensor_type"].as<String>();
-        if (doc["latitude"].is<float>()) Config::latitude = doc["latitude"].as<float>();
-        if (doc["longitude"].is<float>()) Config::longitude = doc["longitude"].as<float>();
-        if (doc["read_interval_s"].is<int>()) Config::readIntervalS = doc["read_interval_s"].as<int>();
-        if (doc["telemetry_interval_min"].is<int>()) Config::telemetryIntervalMin = doc["telemetry_interval_min"].as<int>();
-
-        Config::configured = true;
-        Config::save();
-
-        req->send(200, "application/json", "{\"ok\":true}");
-
-        // Reconectar WiFi con la nueva configuración (diferido para
-        // permitir que la respuesta llegue primero).
-        delay(500); // único delay() permitido en el firmware: transición crítica.
-        WiFiManager::connectSTA(Config::wifiSsid, Config::wifiPass);
-    });
-
-    // API: reiniciar (desde el dashboard).
+    // POST: reiniciar
     server.on("/api/reboot", HTTP_POST, [](AsyncWebServerRequest *req) {
         req->send(200, "application/json", "{\"ok\":true}");
         delay(500);

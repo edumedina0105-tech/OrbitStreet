@@ -33,6 +33,7 @@
 
 #define CONFIG_FILE "/config.json"
 #define FS LittleFS
+// ORBITSTREET_VERSION viene de platformio.ini (build_flags).
 
 class Config {
 public:

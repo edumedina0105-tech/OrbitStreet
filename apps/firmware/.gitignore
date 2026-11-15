@@ -3,3 +3,5 @@
 .piolibdeps/
 *.bin
 *.elf
+# Generado por scripts/gzip_data.py en cada build (pre: extra_scripts)
+data/*.gz
