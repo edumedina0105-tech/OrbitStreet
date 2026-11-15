@@ -1,10 +1,12 @@
 import type { ConfidenceInterval } from '@orbitstreet/shared-types';
-import { mulberry32 } from './random';
+import { stdNormalInverseCdf } from './normal';
+import { varianceS } from './mann-kendall';
 
 export interface SenSlopeWithCI {
   slope: number;
   ci95: ConfidenceInterval;
-  bootstraps: number;
+  /** Método del IC: ordenes estadísticos clásicos (Sen 1968 / Gilbert 1987). */
+  method: 'sen-1968';
 }
 
 /** Mediana de un arreglo (par: promedio de los dos centrales). */
@@ -34,49 +36,75 @@ export function senSlope(x: number[]): number {
 }
 
 /**
- * Pendiente de Sen con intervalo de confianza por bootstrap.
- * Determinista: el remuestreo usa un PRNG con semilla fija, por lo que
- * el mismo input produce exactamente el mismo output.
+ * Pendiente de Sen con intervalo de confianza CLÁSICO no paramétrico
+ * (Sen 1968; Gilbert 1987, §16.4.2): el IC de la mediana de las N
+ * pendientes por pares NO se remuestrea — se ubica por ordenes
+ * estadísticos usando la varianza de S de Mann-Kendall (corregida por
+ * empates):
+ *
+ *   Cα = z_{1−α/2} · √varS
+ *   M1 = (N − Cα)/2    (rango 1-based del límite inferior)
+ *   M2 = (N + Cα)/2    (el superior es el orden M2 + 1)
+ *
+ * y se interpolan las pendientes ordenadas en esos rangos. Determinista,
+ * sin aleatoriedad y sin asumir independencia entre pendientes por pares
+ * (el bootstrap anterior las remuestreaba como si fueran independientes,
+ * lo que subestimaba la varianza).
  */
 export function senSlopeWithCI(
   x: number[],
-  options: { bootstraps?: number; confidence?: number; seed?: number } = {}
+  options: { confidence?: number } = {}
 ): SenSlopeWithCI {
-  const { bootstraps = 1000, confidence = 0.95, seed = 42 } = options;
-  const slopes = pairwiseSlopes(x);
+  const { confidence = 0.95 } = options;
+  const slopes = pairwiseSlopes(x).sort((a, b) => a - b);
   const slope = median(slopes);
+  const N = slopes.length;
 
-  if (slopes.length === 0) {
+  if (N === 0 || x.length < 3) {
     return {
       slope,
       ci95: { lower: Number.NaN, upper: Number.NaN },
-      bootstraps: 0
+      method: 'sen-1968'
     };
   }
 
-  const rand = mulberry32(seed);
-  const medians = new Array<number>(bootstraps);
-  for (let b = 0; b < bootstraps; b++) {
-    // Remuestreo de las pendientes por pares con reemplazo.
-    const resample = new Array<number>(slopes.length);
-    for (let k = 0; k < slopes.length; k++) {
-      resample[k] = slopes[Math.floor(rand() * slopes.length)];
-    }
-    medians[b] = median(resample);
+  const varS = varianceS(x);
+  if (!Number.isFinite(varS) || varS <= 0) {
+    return {
+      slope,
+      ci95: { lower: Number.NaN, upper: Number.NaN },
+      method: 'sen-1968'
+    };
   }
-  medians.sort((a, b) => a - b);
 
-  const errorRate = 1 - confidence;
-  const lowerIndex = Math.floor((errorRate / 2) * medians.length);
-  const upperIndex =
-    Math.min(
-      medians.length - 1,
-      Math.ceil((1 - errorRate / 2) * medians.length) - 1
-    );
+  const z = stdNormalInverseCdf(1 - (1 - confidence) / 2);
+  const cAlpha = z * Math.sqrt(varS);
+  if (!Number.isFinite(cAlpha) || cAlpha <= 0) {
+    return {
+      slope,
+      ci95: { lower: Number.NaN, upper: Number.NaN },
+      method: 'sen-1968'
+    };
+  }
+
+  const m1 = (N - cAlpha) / 2;
+  const m2 = (N + cAlpha) / 2 + 1;
+
+  // Orden estadístico 1-based con interpolación lineal en rangos fraccionarios.
+  const orderStat = (rank: number): number => {
+    if (rank <= 1) return slopes[0];
+    if (rank >= N) return slopes[N - 1];
+    const lo = Math.floor(rank);
+    const frac = rank - lo;
+    const a = slopes[lo - 1];
+    const b = slopes[Math.min(lo, N - 1)];
+    return a + (b - a) * frac;
+  };
 
   return {
     slope,
-    ci95: { lower: medians[lowerIndex], upper: medians[upperIndex] },
-    bootstraps
+    ci95: { lower: orderStat(m1), upper: orderStat(m2) },
+    method: 'sen-1968'
   };
 }
+

@@ -1,5 +1,5 @@
 import type { MannKendallResult, TrendResult, VariableId, SeasonOrAnnual } from '@orbitstreet/shared-types';
-import { mannKendall } from './mann-kendall';
+import { mannKendallHamedRao, mannKendall } from './mann-kendall';
 import { senSlopeWithCI } from './sen-slope';
 
 export interface AnalyzeTrendOptions {
@@ -11,8 +11,14 @@ export interface AnalyzeTrendOptions {
   alpha?: number;
   /** Valor p ajustado por FDR (si se probaron múltiples hipótesis). */
   pFdr?: number;
-  /** Bootstrap para el IC de Sen (default 1000, determinista con semilla fija). */
-  bootstraps?: number;
+  /**
+   * Corrección de varianza de Mann-Kendall:
+   *  - 'hamed-rao' (default): corrige varS por autocorrelación (Hamed y
+   *    Rao 1998). Honestidad ante series anuales autocorrelacionadas
+   *    (p. ej. ENSO): sin corrección el p sale demasiado optimista.
+   *  - 'ties': solo la corrección clásica por empates.
+   */
+  autocorrelation?: 'hamed-rao' | 'ties';
 }
 
 export interface AnalyzeTrendResult extends TrendResult {
@@ -31,10 +37,11 @@ export function analyzeTrend(
   options: AnalyzeTrendOptions
 ): AnalyzeTrendResult {
   const alpha = options.alpha ?? 0.05;
-  const mk = mannKendall(annualValues, alpha);
-  const sen = senSlopeWithCI(annualValues, {
-    bootstraps: options.bootstraps
-  });
+  const mk =
+    (options.autocorrelation ?? 'hamed-rao') === 'ties'
+      ? mannKendall(annualValues, alpha)
+      : mannKendallHamedRao(annualValues, alpha);
+  const sen = senSlopeWithCI(annualValues);
 
   // La serie es anual: la pendiente por paso es por año; ×10 = por década.
   const senSlopePerDecade = sen.slope * 10;

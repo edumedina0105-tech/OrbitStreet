@@ -76,11 +76,12 @@ describe('monthlyAnomalies (desestacionalización)', () => {
 });
 
 describe('toAnnual', () => {
+  // Año final cerrado (diciembre): ambas fechas válidas para el análisis.
   const points: TimePoint[] = [
     { date: '2023-01-01', value: 30 },
-    { date: '2023-07-01', value: 10 },
+    { date: '2023-12-01', value: 10 },
     { date: '2024-01-01', value: 36 },
-    { date: '2024-07-01', value: 14 }
+    { date: '2024-12-01', value: 14 }
   ];
 
   it('mean: promedio anual', () => {
@@ -103,6 +104,51 @@ describe('toAnnual', () => {
     expect(toAnnual(points, 'countAbove', 15)[0].value).toBe(1);
     // 2024: [36, 14] → ambos superan 12 → 2
     expect(toAnnual(points, 'countAbove', 12)[1].value).toBe(2);
+  });
+});
+
+describe('toAnnual — cobertura de años (honestidad estadística)', () => {
+  it('descarta el último año si la serie no llega a diciembre', () => {
+    // 2020–2023 mensuales completos + 2024 que termina en julio.
+    const points: TimePoint[] = [];
+    for (let year = 2020; year <= 2024; year++) {
+      const endMonth = year === 2024 ? 7 : 12;
+      for (let month = 1; month <= endMonth; month++) {
+        points.push({ date: `${year}-${pad(month)}-15`, value: 10 });
+      }
+    }
+    const annual = toAnnual(points, 'mean');
+    expect(annual.map((p) => yearOf(p.date))).toEqual([
+      2020, 2021, 2022, 2023
+    ]);
+  });
+
+  it('descarta años con cobertura < 90% (huecos de datos faltantes)', () => {
+    const points: TimePoint[] = [];
+    for (let year = 2020; year <= 2023; year++) {
+      for (let month = 1; month <= 12; month++) {
+        // 2022 pierde 5 meses (Jun–Oct): 7/12 ≈ 58% < 90%.
+        if (year === 2022 && month >= 6 && month <= 10) continue;
+        points.push({ date: `${year}-${pad(month)}-15`, value: 10 });
+      }
+    }
+    const annual = toAnnual(points, 'mean');
+    expect(annual.map((p) => yearOf(p.date))).toEqual([2020, 2021, 2023]);
+  });
+
+  it('mantiene el último año cuando el caller certifica la ventana cerrada (SON en noviembre)', () => {
+    const points: TimePoint[] = [];
+    for (let year = 2020; year <= 2024; year++) {
+      for (const month of [9, 10, 11]) {
+        points.push({ date: `${year}-${pad(month)}-15`, value: 10 });
+      }
+    }
+    // Sin certificado: el último punto está en noviembre → no diciembre → fuera.
+    expect(toAnnual(points, 'mean')).toHaveLength(4);
+    // Con la ventana SON certificada como cerrada: los 5 años entran.
+    expect(
+      toAnnual(points, 'mean', undefined, { lastYearClosed: true })
+    ).toHaveLength(5);
   });
 });
 

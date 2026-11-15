@@ -442,7 +442,7 @@
     "registerAnother": "Register another station",
     "tokenTitle": "Ingest token (visible only now)",
     "tokenWarning": "Save it now: the server only keeps its hash and will never show it again. If you lose it, re-register the station to rotate it.",
-    "tokenNextSteps": "1) Connect the ESP32 to your network and open its dashboard. 2) Paste the token in the wizard. 3) The node will send telemetry signed with this token and compute its ΔT against the NASA baseline.",
+    "tokenNextSteps": "1) Connect the ESP32 to your network and open its dashboard. 2) Paste the token in the wizard. 3) The node will send telemetry signed with this token and compute its ΔT against the NASA monthly normal (historical reference).",
     "copy": "Copy token",
     "errors": {
       "unauthorized": "Sign in to register a station.",
@@ -540,12 +540,20 @@
     "unsupportedChrome": "Google Chrome or Microsoft Edge desktop (version 89 or newer).",
     "unsupportedDesktop": "Firefox and Safari do not support Web Serial; it is also unavailable on mobile.",
     "flowTitle": "After flashing",
-    "flow.flash.title": "1 · Flash",
-    "flow.flash.body": "The firmware is burned from the browser with Web Serial. Binaries built by PlatformIO from the project's open source.",
-    "flow.setup.title": "2 · Configure",
-    "flow.setup.body": "On boot, the node creates the «OrbitStreet-Setup» network. Join it, open 192.168.4.1 and follow the wizard: WiFi, sensor, location and token.",
-    "flow.guide.title": "3 · Observe",
-    "flow.guide.body": "The node measures, compares against the NASA baseline and sends signed telemetry. Your street becomes certified scientific data.",
+    "flow": {
+      "flash": {
+        "title": "1 · Flash",
+        "body": "The firmware is burned from the browser with Web Serial. Binaries built by PlatformIO from the project's open source."
+      },
+      "setup": {
+        "title": "2 · Configure",
+        "body": "On boot, the node creates the «OrbitStreet-Setup» network. Join it, open 192.168.4.1 and follow the wizard: WiFi, sensor, location and token."
+      },
+      "guide": {
+        "title": "3 · Observe",
+        "body": "The node measures, compares against the NASA baseline and sends signed telemetry. Your street becomes certified scientific data."
+      }
+    },
     "guideCta": "See the full guide"
   },
   "guide": {
@@ -555,25 +563,33 @@
     "whatTitle": "What is the node?",
     "whatBody": "It is OrbitStreet's «ground witness»: while satellites measure ~50 km cells, the node measures exactly where you live. Its readings are compared with the NASA climatology (MERRA-2) of the same point to compute the local anomaly, and uploaded signed with a unique station token.",
     "assemblyTitle": "Assembly",
-    "assembly.step1": "An ESP32 Dev Module (WROOM-32) or ESP32-C3 Super Mini plus a USB data cable.",
-    "assembly.step2": "Optional sensor: BME280 over I²C (SDA=GPIO21, SCL=GPIO22) or DHT11/DHT22/B3950 on any free GPIO.",
-    "assembly.step3": "Power it over USB or 5V; the node draws less than 0.5 W.",
+    "assembly": {
+      "step1": "An ESP32 Dev Module (WROOM-32) or ESP32-C3 Super Mini plus a USB data cable.",
+      "step2": "Optional sensor: BME280 over I²C (SDA=GPIO21, SCL=GPIO22) or DHT11/DHT22/B3950 on any free GPIO.",
+      "step3": "Power it over USB or 5V; the node draws less than 0.5 W."
+    },
     "sensorsTitle": "Supported sensors",
-    "sensors.bme280": "I²C, temperature + humidity + pressure. The most complete; its self-heating is compensated with a software offset.",
-    "sensors.dht11": "Digital, temperature + humidity. The cheapest (±2 °C): perfect to get started.",
-    "sensors.dht22": "Digital, temperature + humidity with better accuracy (±0.5 °C).",
-    "sensors.b3950": "Analog thermistor (ADC): temperature only, Steinhart-Hart math. Great for junk-drawer parts.",
+    "sensors": {
+      "bme280": "I²C, temperature + humidity + pressure. The most complete; its self-heating is compensated with a software offset.",
+      "dht11": "Digital, temperature + humidity. The cheapest (±2 °C): perfect to get started.",
+      "dht22": "Digital, temperature + humidity with better accuracy (±0.5 °C).",
+      "b3950": "Analog thermistor (ADC): temperature only, Steinhart-Hart math. Great for junk-drawer parts."
+    },
     "setupTitle": "Flashing and first setup",
-    "setup.step1": "Flash the firmware from /flash (Chrome/Edge, Web Serial) or with PlatformIO (pio run -e esp32dev -t upload).",
-    "setup.step2": "Upload the dashboard to LittleFS with -t uploadfs (if you flashed from the browser, it is already included).",
-    "setup.step3": "Join the «OrbitStreet-Setup» network, open 192.168.4.1 and complete the wizard: WiFi, sensor, pins, coordinates and station token.",
+    "setup": {
+      "step1": "Flash the firmware from /flash (Chrome/Edge, Web Serial) or with PlatformIO (pio run -e esp32dev -t upload).",
+      "step2": "Upload the dashboard to LittleFS with -t uploadfs (if you flashed from the browser, it is already included).",
+      "step3": "Join the «OrbitStreet-Setup» network, open 192.168.4.1 and complete the wizard: WiFi, sensor, pins, coordinates and station token."
+    },
     "tokenTitle": "Station token",
     "tokenBody": "In your account menu → «Station» you register the node and receive an ingest token. It is shown only ONCE (the server keeps just its SHA-256 hash) and gets pasted into the ESP32 wizard. If you lose it, re-register the station to rotate it.",
     "telemetryTitle": "How it sends its data",
-    "telemetry.ntp": "It syncs its clock over NTP: with no valid time it sends nothing (better to lose a point than to lie about its date).",
-    "telemetry.buffer": "If WiFi drops, readings sit in a reconnect buffer (64 in RAM) and are re-sent on reconnect.",
-    "telemetry.baseline": "It downloads the NASA baseline (monthly normals) and stores it in flash memory: it works even offline.",
-    "telemetry.anomaly": "It computes the local anomaly ΔT = temperature − monthly normal, visible on its dashboard.",
+    "telemetry": {
+      "ntp": "It syncs its clock over NTP: with no valid time it sends nothing (better to lose a point than to lie about its date).",
+      "buffer": "If WiFi drops, readings sit in a reconnect buffer (64 in RAM) and are re-sent on reconnect.",
+      "baseline": "It downloads the NASA baseline (monthly normals) and stores it in flash memory: it works even offline.",
+      "anomaly": "It computes ΔT = temperature − NASA monthly normal: a difference against a historical reference (not a strict climate anomaly nor proof of local warming)."
+    },
     "flashCta": "Go to flashing"
   },
   "footer": {

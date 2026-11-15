@@ -1,7 +1,9 @@
 /**
  * Corrección por tasa de falsos descubrimientos (Benjamini-Hochberg, 1995).
  * Devuelve valores p ajustados conservando el orden de entrada.
- * Se aplica cuando se prueban muchas variables × estaciones a la vez.
+ * Aplicada donde se prueban múltiples hipótesis a la vez (p. ej. el
+ * comparador A/B de regiones); nunca se afirma corrección donde solo hay
+ * una hipótesis.
  */
 export function benjaminiHochberg(pValues: number[]): number[] {
   const m = pValues.length;

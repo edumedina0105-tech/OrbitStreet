@@ -11,6 +11,9 @@ import type { PowerParameterId, TimePoint } from '@orbitstreet/shared-types';
 const POWER_DAILY_URL = 'https://power.larc.nasa.gov/api/temporal/daily/point';
 const FILL_VALUE = -999;
 const YEARS_PER_CHUNK = 10;
+/** Timeout y reintentos: la demo en vivo no puede colgarse por la API. */
+const POWER_TIMEOUT_MS = 15_000;
+const POWER_ATTEMPTS = 2;
 
 interface PowerProperties {
   parameter?: Record<string, Record<string, number>>;
@@ -121,17 +124,36 @@ export async function fetchPowerDaily(
       end: range.end
     });
 
-    const response = await fetch(url, {
-      headers: { accept: 'application/json' }
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `POWER API respondió ${response.status} para el bloque ${range.start}-${range.end}`
-      );
+    // Un timeout duro evita que la demo se cuelgue si POWER no responde.
+    // Un reintento cubre los fallos transitorios de red (la API pública
+    // ocasionalmente corta conexiones). Los errores HTTP persistentes
+    // se propagan: nunca se inventa el bloque fallido.
+    let lastError: unknown = null;
+    let json: unknown = null;
+    for (let attempt = 1; attempt <= POWER_ATTEMPTS; attempt++) {
+      try {
+        const response = await fetch(url, {
+          headers: { accept: 'application/json' },
+          signal: AbortSignal.timeout(POWER_TIMEOUT_MS)
+        });
+        if (!response.ok) {
+          throw new Error(
+            `POWER API respondió ${response.status} para el bloque ${range.start}-${range.end}`
+          );
+        }
+        json = await response.json();
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    if (lastError !== null || json === null) {
+      throw lastError instanceof Error
+        ? lastError
+        : new Error(`POWER API falló para el bloque ${range.start}-${range.end}`);
     }
 
-    const json: unknown = await response.json();
     points.push(...parsePowerDaily(json, req.parameter));
   }
 

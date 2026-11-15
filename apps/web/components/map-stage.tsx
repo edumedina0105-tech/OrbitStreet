@@ -21,6 +21,7 @@ import {
   senFit,
   type SeriesAnalysis
 } from '@/lib/analysis/analyze-series';
+import { benjaminiHochberg } from '@/lib/stats/fdr';
 import { VARIABLE_CONFIG, VARIABLE_IDS } from '@/lib/analysis/variables';
 import { YEARS_NEEDED_PRACTICAL_LIMIT } from '@orbitstreet/shared-types';
 import type {
@@ -358,11 +359,11 @@ export function MapStage() {
             season,
             unit: VARIABLE_CONFIG[variable].unit,
             slopeA: a.trend.senSlopePerDecade,
-            pA: a.trend.mannKendall.p,
+            pA: a.trend.pFdr ?? a.trend.mannKendall.p,
             ciALow: a.trend.ci95PerDecade.lower,
             ciAHigh: a.trend.ci95PerDecade.upper,
             slopeB: b.trend.senSlopePerDecade,
-            pB: b.trend.mannKendall.p,
+            pB: b.trend.pFdr ?? b.trend.mannKendall.p,
             ciBLow: b.trend.ci95PerDecade.lower,
             ciBHigh: b.trend.ci95PerDecade.upper
           }
@@ -394,6 +395,22 @@ export function MapStage() {
         setComparePointB(null);
         return;
       }
+
+      // Dos regiones = dos hipótesis probadas a la vez: corrección por
+      // comparaciones múltiples (Benjamini-Hochberg) sobre la familia
+      // {A, B}. El p ajustado alimenta la narración y la insignia de
+      // significancia del panel comparativo.
+      const [pAdjA, pAdjB] = benjaminiHochberg([
+        resultA.trend.mannKendall.p,
+        resultB.trend.mannKendall.p
+      ]);
+      resultA.trend.pFdr = pAdjA;
+      resultB.trend.pFdr = pAdjB;
+      resultA.trend.significant =
+        pAdjA < 0.05 && resultA.trend.mannKendall.trend !== 'no-trend';
+      resultB.trend.significant =
+        pAdjB < 0.05 && resultB.trend.mannKendall.trend !== 'no-trend';
+
       setCompareResultA(resultA);
       setCompareResultB(resultB);
       setCompareMode('done');

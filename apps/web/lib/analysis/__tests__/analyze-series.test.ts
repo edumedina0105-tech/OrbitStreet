@@ -77,8 +77,9 @@ describe('analyzeDailySeries', () => {
     const points: TimePoint[] = [];
     for (let year = 1981; year <= 2025; year++) {
       for (let day = 1; day <= 90; day++) {
+        // Diciembre: el año 2025 queda cerrado y entra al análisis.
         points.push({
-          date: `${year}-10-${pad(day % 28 + 1)}`,
+          date: `${year}-12-${pad(day % 28 + 1)}`,
           value: 30 + 0.13 * (year - 1981) + rand() * 3
         });
       }

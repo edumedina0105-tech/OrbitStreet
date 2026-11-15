@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { mannKendall } from '../mann-kendall';
+import { mannKendall, mannKendallHamedRao } from '../mann-kendall';
+import { mulberry32 } from '../random';
 
 describe('mannKendall', () => {
   it('calcula S correcto a mano para [5,3,4,1,2] (S = -6)', () => {
@@ -39,5 +40,49 @@ describe('mannKendall', () => {
   it('es determinista: mismas entradas, mismo resultado', () => {
     const x = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5];
     expect(mannKendall(x)).toEqual(mannKendall(x));
+  });
+});
+
+describe('mannKendallHamedRao (corrección por autocorrelación)', () => {
+  it('serie corta (n < 6) cae al Mann-Kendall clásico', () => {
+    const x = [1, 2, 3, 4, 5];
+    const hr = mannKendallHamedRao(x);
+    expect(hr.varS).toBe(mannKendall(x).varS);
+    expect(hr.varianceCorrection).toBe('ties');
+  });
+
+  it('con autocorrelación positiva, varS corregida > clásica (p menos optimista)', () => {
+    // AR(1) con φ = 0.7 y tendencia suave: la autocorrelación de los
+    // rangos infla la varianza de S; el p clásico sale demasiado pequeño.
+    const rand = mulberry32(3);
+    const n = 40;
+    const x: number[] = [];
+    let prev = 0;
+    for (let i = 0; i < n; i++) {
+      // Ruido ~gaussiano determinista (suma de 6 uniformes centradas).
+      let e = 0;
+      for (let k = 0; k < 6; k++) e += rand() - 0.5;
+      prev = 0.7 * prev + e;
+      x.push(prev + 0.05 * i);
+    }
+    const mk = mannKendall(x);
+    const hr = mannKendallHamedRao(x);
+    expect(hr.varS).toBeGreaterThan(mk.varS);
+    expect(hr.p).toBeGreaterThanOrEqual(mk.p);
+    expect(hr.varianceCorrection).toBe('hamed-rao');
+  });
+
+  it('con ruido blanco la corrección es leve (no inventa autocorrelación)', () => {
+    const rand = mulberry32(77);
+    const x = Array.from({ length: 50 }, () => {
+      let e = 0;
+      for (let k = 0; k < 6; k++) e += rand() - 0.5;
+      return e + 0.03 * 25;
+    });
+    const mk = mannKendall(x);
+    const hr = mannKendallHamedRao(x);
+    // Ruido blanco: los lags del ACF caen casi todos bajo el umbral de
+    // significancia; la corrección mueve varS menos de ±50%.
+    expect(Math.abs(hr.varS - mk.varS)).toBeLessThan(0.5 * mk.varS);
   });
 });

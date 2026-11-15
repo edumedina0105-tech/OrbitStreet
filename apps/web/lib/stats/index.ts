@@ -5,7 +5,13 @@
  */
 export { stdNormalCdf, stdNormalInverseCdf } from './normal';
 export { mulberry32 } from './random';
-export { mannKendall } from './mann-kendall';
+export {
+  mannKendall,
+  mannKendallHamedRao,
+  mkScore,
+  varianceS,
+  averageRanks
+} from './mann-kendall';
 export {
   median,
   pairwiseSlopes,

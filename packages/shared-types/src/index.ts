@@ -33,7 +33,12 @@ export interface TimePoint {
 
 export type TrendDirection = 'increasing' | 'decreasing' | 'no-trend';
 
-/** Resultado de la prueba de Mann-Kendall (con corrección por empates). */
+/**
+ * Resultado de la prueba de Mann-Kendall.
+ *  - varS incluye la corrección por empates (Kendall 1975).
+ *  - varianceCorrection documenta si se aplicó además la corrección por
+ *    autocorrelación de Hamed-Rao (1998) o solo la básica por empates.
+ */
 export interface MannKendallResult {
   n: number;
   s: number;
@@ -42,6 +47,8 @@ export interface MannKendallResult {
   /** Valor p bilateral. */
   p: number;
   trend: TrendDirection;
+  /** Corrección de varianza aplicada: empates ('ties') o empates + autocorrelación ('hamed-rao'). */
+  varianceCorrection?: 'ties' | 'hamed-rao';
 }
 
 export interface ConfidenceInterval {
@@ -49,7 +56,7 @@ export interface ConfidenceInterval {
   upper: number;
 }
 
-/** Pendiente de Sen con intervalo de confianza por bootstrap determinista. */
+/** Pendiente de Sen con IC clásico no paramétrico (Sen 1968 / Gilbert 1987). */
 export interface SenSlopeResult {
   /** Pendiente por paso temporal (ej.: °C/año si la serie es anual). */
   slope: number;

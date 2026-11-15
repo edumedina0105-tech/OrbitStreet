@@ -52,7 +52,7 @@ describe('senSlopeWithCI', () => {
     expect(result.ci95.upper).toBeLessThan(0);
   });
 
-  it('es determinista: misma entrada → mismo IC (semilla fija)', () => {
+  it('es determinista: misma entrada → mismo IC (sin aleatoriedad)', () => {
     const rand = mulberry32(99);
     const x = Array.from({ length: 40 }, (_, i) => 0.1 * i + rand());
     const a = senSlopeWithCI(x);

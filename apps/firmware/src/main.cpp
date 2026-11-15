@@ -93,7 +93,7 @@ void readSensor() {
         Serial.printf("[SENSOR] T=%.1f°C", g_lastReading.temperature);
         if (g_lastReading.hasHumidity) Serial.printf(" H=%.0f%%", g_lastReading.humidity);
         if (g_lastReading.hasPressure) Serial.printf(" P=%.0f hPa", g_lastReading.pressure);
-        if (!isnan(g_anomaly)) Serial.printf(" | ΔT vs NASA: %+.1f°C", g_anomaly);
+        if (!isnan(g_anomaly)) Serial.printf(" | dT vs normal NASA: %+.1fC", g_anomaly);
         Serial.println();
     } else {
         Serial.println("[SENSOR] Lectura inválida.");
