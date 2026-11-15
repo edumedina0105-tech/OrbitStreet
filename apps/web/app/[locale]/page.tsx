@@ -2,7 +2,6 @@ import { setRequestLocale } from 'next-intl/server';
 import { MapStage } from '@/components/map-stage';
 import { CaseBoard } from '@/components/case-board';
 import { ProjectQaBox } from '@/components/project-qa-box';
-import { RegionComparator } from '@/components/region-comparator';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -26,13 +25,8 @@ export default async function HomePage({ params }: Props) {
           <CaseBoard />
         </section>
 
-        {/* Comparar regiones: el mismo fenómeno global puede causar
-            efectos inversos en dos regiones distintas. */}
-        <section className="scroll-mt-24 pb-16">
-          <RegionComparator />
-        </section>
-
-        {/* Tutor de preguntas: "Pregunta sobre los datos" */}
+        {/* Tutor de preguntas: "Pregunta sobre los datos".
+            La comparación de regiones vive ahora DENTRO del mapa. */}
         <section className="scroll-mt-24 pb-16">
           <ProjectQaBox />
         </section>

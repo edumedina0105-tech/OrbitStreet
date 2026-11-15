@@ -7,7 +7,7 @@ import {
   useScroll,
   useTransform
 } from 'motion/react';
-import { ArrowDown, ChevronDown, FolderArchive, Loader2, MapPin, Radio, Search, Upload, X } from 'lucide-react';
+import { ArrowDown, ChevronDown, FolderArchive, GitCompareArrows, Loader2, MapPin, Radio, Search, Upload, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import type { MapCity } from '@/components/world-map';
@@ -87,6 +87,7 @@ export function MapStage() {
   const t = useTranslations('home.map');
   const th = useTranslations('home');
   const td = useTranslations('detective');
+  const tc = useTranslations('comparator');
   const locale = useLocale();
   const prefersReducedMotion = useReducedMotion();
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -251,6 +252,31 @@ export function MapStage() {
   // Modal "Archivar como caso" (Tablón de Casos del Detective).
   const [caseOpen, setCaseOpen] = useState(false);
 
+  // Comparador de regiones DENTRO del mapa: se eligen dos puntos con
+  // clics sobre el globo y el resultado flota sobre el mapa.
+  const [compareMode, setCompareMode] = useState<
+    'off' | 'pickA' | 'pickB' | 'done'
+  >('off');
+  const [comparePointA, setComparePointA] = useState<{
+    lat: number;
+    lon: number;
+    name: string;
+  } | null>(null);
+  const [comparePointB, setComparePointB] = useState<{
+    lat: number;
+    lon: number;
+    name: string;
+  } | null>(null);
+  const [compareResultA, setCompareResultA] = useState<SeriesAnalysis | null>(
+    null
+  );
+  const [compareResultB, setCompareResultB] = useState<SeriesAnalysis | null>(
+    null
+  );
+  const [compareBusy, setCompareBusy] = useState(false);
+  const [compareNarration, setCompareNarration] = useState<string | null>(null);
+  const [compareNarrationBusy, setCompareNarrationBusy] = useState(false);
+
   // Ciudades con nombres localizados por i18n (los pines llevan texto visible).
   const cities: MapCity[] = useMemo(
     () =>
@@ -283,6 +309,135 @@ export function MapStage() {
     prefersReducedMotion ? [0, 0] : [0, -28]
   );
 
+  /**
+   * Comparar regiones: descarga la serie de cada punto y corre el MISMO
+   * motor determinista; luego pide la narración IA de la divergencia
+   * (solo texto; respaldo = frase determinista i18n).
+   */
+  const fetchCompareSeries = async (point: {
+    lat: number;
+    lon: number;
+  }): Promise<SeriesAnalysis | null> => {
+    const config = VARIABLE_CONFIG[variable];
+    const parameter = config.powerParameters[0];
+    const params = new URLSearchParams({
+      lat: String(point.lat),
+      lon: String(point.lon),
+      parameter,
+      start: `${startYear}0101`,
+      end: `${endYear}1231`
+    });
+    const response = await fetch(`/api/power/daily?${params}`);
+    const data = (await response.json()) as { points?: TimePoint[] };
+    if (!response.ok || !data.points || data.points.length < 10) return null;
+    return analyzeDailySeries(data.points, {
+      variable,
+      season,
+      threshold: config.threshold,
+      periodStart: `${startYear}0101`,
+      periodEnd: `${endYear}1231`
+    });
+  };
+
+  const fetchCompareNarration = async (
+    a: SeriesAnalysis,
+    b: SeriesAnalysis
+  ) => {
+    setCompareNarrationBusy(true);
+    setCompareNarration(null);
+    try {
+      const response = await fetch('/api/compare-report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          locale,
+          comparison: {
+            regionA: comparePointA?.name ?? 'A',
+            regionB: comparePointB?.name ?? 'B',
+            variable,
+            season,
+            unit: VARIABLE_CONFIG[variable].unit,
+            slopeA: a.trend.senSlopePerDecade,
+            pA: a.trend.mannKendall.p,
+            ciALow: a.trend.ci95PerDecade.lower,
+            ciAHigh: a.trend.ci95PerDecade.upper,
+            slopeB: b.trend.senSlopePerDecade,
+            pB: b.trend.mannKendall.p,
+            ciBLow: b.trend.ci95PerDecade.lower,
+            ciBHigh: b.trend.ci95PerDecade.upper
+          }
+        })
+      });
+      const data = (await response.json()) as { text?: string };
+      if (!response.ok || !data.text) return; // respaldo: frase determinista
+      setCompareNarration(data.text);
+    } catch {
+      // respaldo: la frase determinista ya se muestra siempre
+    } finally {
+      setCompareNarrationBusy(false);
+    }
+  };
+
+  const runComparison = async (
+    a: { lat: number; lon: number; name: string },
+    b: { lat: number; lon: number; name: string }
+  ) => {
+    setCompareBusy(true);
+    try {
+      const [resultA, resultB] = await Promise.all([
+        fetchCompareSeries(a),
+        fetchCompareSeries(b)
+      ]);
+      if (!resultA || !resultB) {
+        setCompareMode('pickA');
+        setComparePointA(null);
+        setComparePointB(null);
+        return;
+      }
+      setCompareResultA(resultA);
+      setCompareResultB(resultB);
+      setCompareMode('done');
+      void fetchCompareNarration(resultA, resultB);
+    } catch {
+      setCompareMode('pickA');
+    } finally {
+      setCompareBusy(false);
+    }
+  };
+
+  const exitCompareMode = () => {
+    setCompareMode('off');
+    setComparePointA(null);
+    setComparePointB(null);
+    setCompareResultA(null);
+    setCompareResultB(null);
+    setCompareNarration(null);
+  };
+
+  /** Respaldo determinista si la IA no narra: la frase i18n con los números. */
+  const deterministicSentence = () => {
+    if (!compareResultA || !compareResultB) return '';
+    const trendWord = (slope: number) =>
+      slope > 0
+        ? td('results.trendIncreasing')
+        : slope < 0
+          ? td('results.trendDecreasing')
+          : td('results.trendNone');
+    const formatP = (p: number) =>
+      p < 0.001 ? '< 0.001' : p.toFixed(3);
+    return tc('sentence', {
+      regionA: comparePointA?.name ?? 'A',
+      trendA: trendWord(compareResultA.trend.senSlopePerDecade),
+      slopeA: `${compareResultA.trend.senSlopePerDecade > 0 ? '+' : ''}${compareResultA.trend.senSlopePerDecade.toFixed(2)}`,
+      pA: formatP(compareResultA.trend.mannKendall.p),
+      regionB: comparePointB?.name ?? 'B',
+      trendB: trendWord(compareResultB.trend.senSlopePerDecade),
+      slopeB: `${compareResultB.trend.senSlopePerDecade > 0 ? '+' : ''}${compareResultB.trend.senSlopePerDecade.toFixed(2)}`,
+      pB: formatP(compareResultB.trend.mannKendall.p),
+      unit: VARIABLE_CONFIG[variable].unit
+    });
+  };
+
   const handleSelectLocation = (loc: {
     lat: number;
     lon: number;
@@ -290,6 +445,21 @@ export function MapStage() {
     country: string;
     presetId?: string;
   }) => {
+    // En modo comparación, los clics fijan las regiones A y B.
+    if (compareMode === 'pickA') {
+      setComparePointA({ lat: loc.lat, lon: loc.lon, name: loc.name });
+      setCompareMode('pickB');
+      return;
+    }
+    if (compareMode === 'pickB') {
+      setComparePointB({ lat: loc.lat, lon: loc.lon, name: loc.name });
+      void runComparison(comparePointA ?? { lat: loc.lat, lon: loc.lon, name: loc.name }, {
+        lat: loc.lat,
+        lon: loc.lon,
+        name: loc.name
+      });
+      return;
+    }
     setSelected(loc);
     // Tocar el mapa cierra el panel de resultados: el globo se re-centra.
     setResultsOpen(false);
@@ -522,6 +692,29 @@ export function MapStage() {
               >
                 <Upload className="h-3.5 w-3.5" aria-hidden />
                 {th('uploadButton')}
+              </button>
+
+              {/* Comparar regiones: se eligen DOS puntos con clics sobre
+                  el globo; el resultado flota sobre el mapa. */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (compareMode === 'off') {
+                    setCompareMode('pickA');
+                  } else {
+                    exitCompareMode();
+                  }
+                }}
+                className={`flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
+                  compareMode !== 'off'
+                    ? 'border-amber-400/60 bg-amber-500/20 text-amber-200 hover:bg-amber-500/30'
+                    : 'border-white/10 bg-white/[0.06] text-cyan-200 hover:bg-white/[0.12]'
+                }`}
+              >
+                <GitCompareArrows className="h-3.5 w-3.5" aria-hidden />
+                {compareMode !== 'off'
+                  ? tc('exitCompare')
+                  : tc('compareRegions')}
               </button>
 
               {/* Datos de la comunidad en la celda seleccionada (públicos) */}
@@ -887,6 +1080,133 @@ export function MapStage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Hint del modo comparación: guía los clics sobre el globo */}
+        {(compareMode === 'pickA' || compareMode === 'pickB') && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="pointer-events-none absolute left-1/2 top-20 z-30 w-[calc(100%-2rem)] max-w-md -translate-x-1/2"
+          >
+            <div className="rounded-xl border border-amber-400/50 bg-slate-950/85 p-3 text-center shadow-2xl backdrop-blur-md">
+              <p className="text-sm font-semibold text-amber-200">
+                {compareMode === 'pickA'
+                  ? tc('pickA')
+                  : tc('pickB', {
+                      region: comparePointA?.name ?? 'A'
+                    })}
+              </p>
+              <p className="mt-1 font-mono text-[10px] text-slate-400">
+                {td(`variables.${variable}.label`)} ·{' '}
+                {td(`seasons.${season}`)} · {startYear}–{endYear}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Comparación de regiones: cuadro flotante que se mueve con el
+            mapa. Divergencia calculada en código; la IA solo narra. */}
+        {compareMode === 'done' && compareResultA && compareResultB && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="absolute bottom-8 left-4 right-4 z-30 md:left-6 md:right-auto md:w-[560px]"
+          >
+            <div className="space-y-3 rounded-2xl border border-amber-400/40 bg-slate-950/85 p-5 shadow-2xl backdrop-blur-md">
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-mono text-[11px] uppercase leading-snug tracking-wide text-amber-300">
+                  {tc('panelTitle')} · {td(`variables.${variable}.label`)} ·{' '}
+                  {startYear}–{endYear}
+                </p>
+                <button
+                  type="button"
+                  onClick={exitCompareMode}
+                  aria-label={tc('exitCompare')}
+                  className="shrink-0 rounded-lg p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <X className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+
+              {/* Tarjetas A/B con barras proporcionales (misma escala) */}
+              <div className="grid grid-cols-2 gap-3">
+                {(
+                  [
+                    [comparePointA?.name ?? 'A', compareResultA],
+                    [comparePointB?.name ?? 'B', compareResultB]
+                  ] as const
+                ).map(([name, result]) => {
+                  const slope = result.trend.senSlopePerDecade;
+                  const scale = Math.max(
+                    0.0001,
+                    Math.abs(compareResultA.trend.senSlopePerDecade),
+                    Math.abs(compareResultB.trend.senSlopePerDecade)
+                  );
+                  return (
+                    <div
+                      key={name}
+                      className="rounded-xl border border-white/10 bg-white/[0.04] p-3"
+                    >
+                      <p className="truncate text-xs font-bold text-white">
+                        {name}
+                      </p>
+                      <p className="mt-1 font-mono text-xl font-bold tabular-nums text-cyan-300">
+                        {slope > 0 ? '+' : ''}
+                        {slope.toFixed(2)}
+                      </p>
+                      <div className="mt-1.5 h-2 w-full rounded-full bg-slate-800">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-700 ${
+                            slope > 0
+                              ? 'bg-amber-400'
+                              : slope < 0
+                                ? 'bg-cyan-400'
+                                : 'bg-slate-600'
+                          }`}
+                          style={{
+                            width: `${Math.max(2, (Math.abs(slope) / scale) * 100)}%`
+                          }}
+                        />
+                      </div>
+                      <p className="mt-1.5 font-mono text-[10px] tabular-nums text-slate-400">
+                        p ={' '}
+                        {result.trend.mannKendall.p < 0.001
+                          ? '< 0.001'
+                          : result.trend.mannKendall.p.toFixed(3)}{' '}
+                        · {result.trend.significant ? '🟢' : '🟡'}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Divergencia determinista + narración IA */}
+              <p className="font-mono text-sm tabular-nums text-amber-300">
+                {tc('divergence', {
+                  diff: Math.abs(
+                    compareResultA.trend.senSlopePerDecade -
+                      compareResultB.trend.senSlopePerDecade
+                  ).toFixed(2),
+                  unit: VARIABLE_CONFIG[variable].unit
+                })}
+              </p>
+              <p className="text-xs leading-relaxed text-slate-300">
+                {compareNarrationBusy ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                    {tc('narrating')}
+                  </span>
+                ) : (
+                  (compareNarration ?? deterministicSentence())
+                )}
+              </p>
+              <p className="text-[9px] leading-snug text-slate-500">
+                {tc('aiNote')}
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {/* Indicador de scroll */}
         <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-slate-400">
