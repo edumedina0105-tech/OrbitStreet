@@ -161,6 +161,24 @@
       "senSlope": "Sen's slope: a robust estimate of the rate of change, unaffected by a few extreme years. It is expressed in real units per decade.",
       "confidenceInterval": "Confidence interval: the range where the true slope most likely lies. If it includes zero, the direction of the change is not yet certain."
     },
+    "report": {
+      "title": "Detective report",
+      "generate": "Generate report with AI",
+      "generateLocal": "View case summary",
+      "loading": "Writing…",
+      "badgeGemini": "Written by Gemini · numbers computed deterministically",
+      "badgeTemplate": "Automatic local summary · AI not configured",
+      "badgeFallback": "Automatic local summary · AI unavailable",
+      "aiDisclaimer": "The AI only writes the narrative: every number was computed by deterministic code, never by the model.",
+      "templateDisclaimer": "This summary is generated locally from the computed results.",
+      "error": "The report could not be generated. The numbers above remain valid.",
+      "s1": "Case under investigation: variable “{variable}”, {season}, period {period}.",
+      "s2": "Sen's slope: {slope} per decade (95% confidence interval: {low} to {high}).",
+      "s3": "Mann-Kendall test with {n} observations: p-value {p}.",
+      "verdictYes": "The trend is statistically significant: this change is very unlikely to be random noise.",
+      "verdictNo": "The trend does not yet reach statistical significance — sometimes a trend simply needs more years of data to be confirmed.",
+      "yearsNote": "With this natural variability, a new local sensor would need about {years} years of measurements to confirm this trend."
+    },
     "errors": {
       "invalidParams": "Check the parameters: latitude (-90 to 90), longitude (-180 to 180), a valid variable, and dates from 1981 to today.",
       "apiFailed": "NASA POWER could not be reached right now. No invented data will be shown — please try again in a moment.",

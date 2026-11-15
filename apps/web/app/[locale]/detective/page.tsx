@@ -10,7 +10,9 @@ import {
   VARIABLE_CONFIG,
   VARIABLE_IDS
 } from '@/lib/analysis/variables';
+import { isGeminiConfigured } from '@/lib/ai/gemini';
 import { TrendChart, type TrendChartDatum } from '@/components/trend-chart';
+import { DetectiveReport } from '@/components/detective-report';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -393,6 +395,26 @@ export default async function DetectivePage({ params, searchParams }: Props) {
               </p>
             )}
           </div>
+
+          {/* Informe del detective: IA si hay clave; resumen local como alternativa */}
+          <DetectiveReport
+            geminiAvailable={isGeminiConfigured()}
+            analysisPayload={{
+              variableId: result.trend.variable,
+              season: result.trend.season,
+              periodStart: result.trend.periodStart.slice(0, 4),
+              periodEnd: result.trend.periodEnd.slice(0, 4),
+              slopePerDecade: result.trend.senSlopePerDecade,
+              ciLow: result.trend.ci95PerDecade.lower,
+              ciHigh: result.trend.ci95PerDecade.upper,
+              pValue: result.trend.mannKendall.p,
+              n: result.trend.n,
+              significant: result.trend.significant,
+              yearsNeeded: Number.isFinite(result.years.years)
+                ? result.years.years
+                : null
+            }}
+          />
 
           {/* Glosario */}
           <details className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-5">

@@ -161,6 +161,24 @@
       "senSlope": "Pendiente de Sen: estimación robusta de la velocidad del cambio, no afectada por unos pocos años extremos. Se expresa en unidades reales por década.",
       "confidenceInterval": "Intervalo de confianza: el rango donde probablemente está la pendiente verdadera. Si incluye el cero, la dirección del cambio aún no es segura."
     },
+    "report": {
+      "title": "Informe del detective",
+      "generate": "Generar informe con IA",
+      "generateLocal": "Ver resumen del caso",
+      "loading": "Redactando…",
+      "badgeGemini": "Redactado por Gemini · cifras calculadas de forma determinista",
+      "badgeTemplate": "Resumen local automático · IA no configurada",
+      "badgeFallback": "Resumen local automático · IA no disponible",
+      "aiDisclaimer": "La IA solo redacta el texto: cada cifra fue calculada por código determinista, nunca por el modelo.",
+      "templateDisclaimer": "Este resumen se genera localmente a partir de los resultados calculados.",
+      "error": "No se pudo generar el informe. Los números de arriba siguen siendo válidos.",
+      "s1": "Caso investigado: variable «{variable}», {season}, período {period}.",
+      "s2": "Pendiente de Sen: {slope} por década (intervalo de confianza del 95%: {low} a {high}).",
+      "s3": "Prueba de Mann-Kendall con {n} observaciones: valor p {p}.",
+      "verdictYes": "La tendencia es estadísticamente significativa: es muy improbable que este cambio sea ruido aleatorio.",
+      "verdictNo": "La tendencia aún no alcanza significancia estadística — a veces una tendencia simplemente necesita más años de datos para confirmarse.",
+      "yearsNote": "Con esta variabilidad natural, un sensor local nuevo necesitaría unos {years} años de mediciones para confirmar esta tendencia."
+    },
     "errors": {
       "invalidParams": "Revisa los parámetros: latitud (-90 a 90), longitud (-180 a 180), una variable válida y fechas desde 1981 hasta hoy.",
       "apiFailed": "No se pudo contactar a NASA POWER en este momento. No se mostrarán datos inventados — inténtalo de nuevo en un momento.",
