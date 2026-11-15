@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import type { TimePoint } from '@orbitstreet/shared-types';
 import {
   filterBySeason,
-  monthOf,
   monthlyAnomalies,
   sampleStdDev,
   seasonOfMonth,

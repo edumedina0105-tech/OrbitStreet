@@ -8,7 +8,8 @@
     "tagline": "El cielo y tu calle",
     "nav": {
       "questions": "Las 4 preguntas",
-      "honesty": "Nuestra honestidad"
+      "honesty": "Nuestra honestidad",
+      "detective": "Modo Detective"
     }
   },
   "languageSwitcher": {
@@ -61,6 +62,107 @@
         "title": "Nada de datos falsos disfrazados",
         "description": "Todo dato simulado o de prueba se etiqueta siempre como [DATOS SIMULADOS / TESTBED]."
       }
+    }
+  },
+  "detective": {
+    "title": "Modo Detective",
+    "subtitle": "Elige un lugar y una variable del sistema Tierra. OrbitStreet descarga décadas de datos reales de la NASA, corre las pruebas estadísticas por ti y responde las cuatro preguntas del detective. La URL es compartible: envía tu investigación a quien quieras.",
+    "form": {
+      "place": "Lugar",
+      "latitude": "Latitud",
+      "longitude": "Longitud",
+      "variable": "Variable",
+      "season": "Estación del año",
+      "start": "Desde",
+      "end": "Hasta",
+      "submit": "Investigar",
+      "customHint": "Las coordenadas solo se usan cuando eliges «Personalizado» como lugar. Los datos comienzan en 1981.",
+      "presets": {
+        "asuncion": "Asunción, Paraguay",
+        "chaco": "Chaco, Paraguay",
+        "buenos_aires": "Buenos Aires, Argentina",
+        "lima": "Lima, Perú",
+        "ciudad_de_mexico": "Ciudad de México, México",
+        "madrid": "Madrid, España",
+        "nueva_york": "Nueva York, EE. UU.",
+        "custom": "Personalizado (ingresar coordenadas)"
+      }
+    },
+    "seasons": {
+      "ALL": "Todo el año",
+      "DJF": "Dic – Feb",
+      "MAM": "Mar – May",
+      "JJA": "Jun – Ago",
+      "SON": "Sep – Nov"
+    },
+    "variables": {
+      "T2M": {
+        "label": "Temperatura media del aire (2 m)",
+        "description": "Temperatura media diaria del aire a 2 metros sobre el suelo, del reanálisis MERRA-2."
+      },
+      "T2M_MAX": {
+        "label": "Temperatura máxima",
+        "description": "La temperatura más alta de cada día. Ideal para estudiar olas de calor y calor extremo."
+      },
+      "T2M_MIN": {
+        "label": "Temperatura mínima",
+        "description": "La temperatura más baja de cada día."
+      },
+      "RH2M": {
+        "label": "Humedad relativa (2 m)",
+        "description": "Cantidad de vapor de agua en el aire, en porcentaje."
+      },
+      "PRECTOTCORR": {
+        "label": "Precipitación total",
+        "description": "Lluvia acumulada, analizada como total anual (mm por año)."
+      },
+      "PS": {
+        "label": "Presión superficial",
+        "description": "La presión del aire a nivel del suelo."
+      },
+      "DAYS_ABOVE_THRESHOLD": {
+        "label": "Días sobre 35 °C",
+        "description": "Cantidad de días por año cuya temperatura máxima superó los 35 °C: una medida directa del calor extremo."
+      }
+    },
+    "results": {
+      "title": "Resultados de la investigación",
+      "what": "¿Qué está cambiando?",
+      "where": "¿Dónde está cambiando?",
+      "whereNote": "Celda de la NASA (~50 km): tu calle puede diferir — para eso existe justamente el nodo en tierra.",
+      "howMuch": "¿Cuánto está cambiando?",
+      "significant": "¿Es significativo?",
+      "significantYes": "Tendencia significativa",
+      "significantNo": "Sin tendencia significativa (todavía)",
+      "perDecade": "década",
+      "confidenceInterval": "Intervalo de confianza del 95%",
+      "pValue": "Valor p de Mann-Kendall",
+      "yearsAnalyzed": "Años analizados",
+      "trendIncreasing": "creciente",
+      "trendDecreasing": "decreciente",
+      "trendNone": "sin tendencia clara",
+      "source": "Fuente",
+      "cached": "servido desde caché local",
+      "yearsNeededTitle": "¿Cuánto tardaría un sensor local en confirmarlo?",
+      "yearsNeededBody": "Con la variabilidad natural de esta serie, un sensor nuevo en este lugar necesitaría unos {years} años de mediciones antes de que esta tendencia sea estadísticamente detectable. Empezar a medir hoy es justamente la forma de que esos años se cuenten.",
+      "yearsNeededInfinite": "Esta serie es demasiado ruidosa o plana para estimar un horizonte. Con honestidad: aquí no se promete nada."
+    },
+    "chart": {
+      "value": "Valor anual observado",
+      "fit": "Pendiente de Sen (tendencia)",
+      "band": "Banda de confianza del 95%",
+      "year": "Año"
+    },
+    "glossary": {
+      "title": "Aprende a leer estos resultados",
+      "pValue": "Valor p: la probabilidad de obtener una tendencia así por puro azar. Por debajo de 0,05, la comunidad científica acepta la tendencia como estadísticamente significativa.",
+      "senSlope": "Pendiente de Sen: estimación robusta de la velocidad del cambio, no afectada por unos pocos años extremos. Se expresa en unidades reales por década.",
+      "confidenceInterval": "Intervalo de confianza: el rango donde probablemente está la pendiente verdadera. Si incluye el cero, la dirección del cambio aún no es segura."
+    },
+    "errors": {
+      "invalidParams": "Revisa los parámetros: latitud (-90 a 90), longitud (-180 a 180), una variable válida y fechas desde 1981 hasta hoy.",
+      "apiFailed": "No se pudo contactar a NASA POWER en este momento. No se mostrarán datos inventados — inténtalo de nuevo en un momento.",
+      "noData": "La combinación elegida devolvió muy pocos datos para un análisis honesto."
     }
   },
   "footer": {

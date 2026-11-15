@@ -8,7 +8,8 @@
     "tagline": "The sky and your street",
     "nav": {
       "questions": "The 4 questions",
-      "honesty": "Our honesty"
+      "honesty": "Our honesty",
+      "detective": "Detective Mode"
     }
   },
   "languageSwitcher": {
@@ -61,6 +62,107 @@
         "title": "No fake data in disguise",
         "description": "Any simulated or test data is always clearly labeled [SIMULATED DATA / TESTBED]."
       }
+    }
+  },
+  "detective": {
+    "title": "Detective Mode",
+    "subtitle": "Pick a place and an Earth variable. OrbitStreet downloads decades of real NASA data, runs the statistical tests for you and answers the four detective questions. The URL is shareable: send your investigation to anyone.",
+    "form": {
+      "place": "Place",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "variable": "Variable",
+      "season": "Season",
+      "start": "From",
+      "end": "To",
+      "submit": "Investigate",
+      "customHint": "Coordinates are only used when “Custom” is selected as the place. Data starts in 1981.",
+      "presets": {
+        "asuncion": "Asunción, Paraguay",
+        "chaco": "Chaco, Paraguay",
+        "buenos_aires": "Buenos Aires, Argentina",
+        "lima": "Lima, Peru",
+        "ciudad_de_mexico": "Mexico City, Mexico",
+        "madrid": "Madrid, Spain",
+        "nueva_york": "New York, USA",
+        "custom": "Custom (enter coordinates)"
+      }
+    },
+    "seasons": {
+      "ALL": "Whole year",
+      "DJF": "Dec – Feb",
+      "MAM": "Mar – May",
+      "JJA": "Jun – Aug",
+      "SON": "Sep – Nov"
+    },
+    "variables": {
+      "T2M": {
+        "label": "Average air temperature (2 m)",
+        "description": "Daily average air temperature at 2 meters above the ground, from the MERRA-2 reanalysis."
+      },
+      "T2M_MAX": {
+        "label": "Maximum temperature",
+        "description": "The highest temperature of each day. Ideal for studying heat waves and extreme heat."
+      },
+      "T2M_MIN": {
+        "label": "Minimum temperature",
+        "description": "The lowest temperature of each day."
+      },
+      "RH2M": {
+        "label": "Relative humidity (2 m)",
+        "description": "The amount of water vapor in the air, as a percentage."
+      },
+      "PRECTOTCORR": {
+        "label": "Total precipitation",
+        "description": "Accumulated rainfall, analyzed as the annual total (mm per year)."
+      },
+      "PS": {
+        "label": "Surface pressure",
+        "description": "The atmospheric pressure at ground level."
+      },
+      "DAYS_ABOVE_THRESHOLD": {
+        "label": "Days above 35 °C",
+        "description": "Number of days per year whose maximum temperature exceeded 35 °C: a direct measure of extreme heat."
+      }
+    },
+    "results": {
+      "title": "Investigation results",
+      "what": "What is changing?",
+      "where": "Where is it changing?",
+      "whereNote": "NASA grid cell (~50 km): your street may differ — that is exactly the role of the ground node.",
+      "howMuch": "How much is it changing?",
+      "significant": "Is it significant?",
+      "significantYes": "Significant trend",
+      "significantNo": "No significant trend (yet)",
+      "perDecade": "decade",
+      "confidenceInterval": "95% confidence interval",
+      "pValue": "Mann-Kendall p-value",
+      "yearsAnalyzed": "Years analyzed",
+      "trendIncreasing": "increasing",
+      "trendDecreasing": "decreasing",
+      "trendNone": "no clear trend",
+      "source": "Source",
+      "cached": "served from local cache",
+      "yearsNeededTitle": "How long would a local sensor need?",
+      "yearsNeededBody": "With the natural variability of this series, a new sensor in this location would need about {years} years of measurements before this trend becomes statistically detectable. Starting to measure today is exactly how those years get counted.",
+      "yearsNeededInfinite": "This series is too noisy or too flat to estimate a horizon. Honestly, no promise is made here."
+    },
+    "chart": {
+      "value": "Observed annual value",
+      "fit": "Sen's slope (trend)",
+      "band": "95% confidence band",
+      "year": "Year"
+    },
+    "glossary": {
+      "title": "Learn to read these results",
+      "pValue": "p-value: the probability of getting a trend like this by pure chance. Below 0.05, scientists accept the trend as statistically significant.",
+      "senSlope": "Sen's slope: a robust estimate of the rate of change, unaffected by a few extreme years. It is expressed in real units per decade.",
+      "confidenceInterval": "Confidence interval: the range where the true slope most likely lies. If it includes zero, the direction of the change is not yet certain."
+    },
+    "errors": {
+      "invalidParams": "Check the parameters: latitude (-90 to 90), longitude (-180 to 180), a valid variable, and dates from 1981 to today.",
+      "apiFailed": "NASA POWER could not be reached right now. No invented data will be shown — please try again in a moment.",
+      "noData": "The selected combination returned too few data points for an honest analysis."
     }
   },
   "footer": {

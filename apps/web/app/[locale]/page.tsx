@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -38,12 +39,13 @@ export default async function HomePage({ params }: Props) {
           {t('hero.subtitle')}
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <a
-            href="#questions"
+          {/* Caso insignia: calor de primavera en Asunción, datos reales. */}
+          <Link
+            href="/detective?preset=asuncion&variable=T2M_MAX&season=SON"
             className="rounded-lg bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400"
           >
             {t('hero.ctaQuestions')}
-          </a>
+          </Link>
           <a
             href="#honesty"
             className="rounded-lg border border-slate-700 bg-slate-900 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-500"

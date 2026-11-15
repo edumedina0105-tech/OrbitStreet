@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { LanguageSwitcher } from '@/components/language-switcher';
 
 export async function SiteHeader() {
@@ -20,12 +21,24 @@ export async function SiteHeader() {
         </div>
 
         <nav className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
-          <a className="transition-colors hover:text-cyan-400" href="#questions">
+          <Link
+            className="font-medium text-cyan-400 transition-colors hover:text-cyan-300"
+            href="/detective"
+          >
+            {t('nav.detective')}
+          </Link>
+          <Link
+            className="transition-colors hover:text-cyan-400"
+            href="/#questions"
+          >
             {t('nav.questions')}
-          </a>
-          <a className="transition-colors hover:text-cyan-400" href="#honesty">
+          </Link>
+          <Link
+            className="transition-colors hover:text-cyan-400"
+            href="/#honesty"
+          >
             {t('nav.honesty')}
-          </a>
+          </Link>
         </nav>
 
         <LanguageSwitcher />
