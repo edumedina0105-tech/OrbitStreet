@@ -9,7 +9,9 @@
     "nav": {
       "questions": "Las 4 preguntas",
       "honesty": "Nuestra honestidad",
-      "detective": "Modo Detective"
+      "detective": "Modo Detective",
+      "upload": "Sube tu serie",
+      "account": "Cuenta"
     }
   },
   "languageSwitcher": {
@@ -163,6 +165,72 @@
       "invalidParams": "Revisa los parámetros: latitud (-90 a 90), longitud (-180 a 180), una variable válida y fechas desde 1981 hasta hoy.",
       "apiFailed": "No se pudo contactar a NASA POWER en este momento. No se mostrarán datos inventados — inténtalo de nuevo en un momento.",
       "noData": "La combinación elegida devolvió muy pocos datos para un análisis honesto."
+    }
+  },
+  "account": {
+    "title": "Tu cuenta de detective",
+    "subtitle": "Investigar los datos de la NASA está abierto para todos. La cuenta solo hace falta para subir tus propias mediciones y guardar tu progreso — protege los datos comunitarios de los bots.",
+    "loginTab": "Iniciar sesión",
+    "registerTab": "Crear cuenta",
+    "displayName": "Nombre visible",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "passwordHint": "Mínimo 8 caracteres. Se guarda solo como hash scrypt, nunca en texto claro.",
+    "loginSubmit": "Iniciar sesión",
+    "registerSubmit": "Crear cuenta e iniciar sesión",
+    "busy": "Procesando…",
+    "logout": "Cerrar sesión",
+    "loggedInAs": "Sesión iniciada como",
+    "cooldownNote": "Puedes subir una serie cada {minutes} minutos.",
+    "privacyNote": "Solo guardamos tu correo, tu nombre visible y el hash de tu contraseña. Nada más. Sin rastreadores.",
+    "errors": {
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "invalid_email": "Ingresa un correo electrónico válido.",
+      "email_taken": "Ese correo ya está registrado. Prueba iniciar sesión.",
+      "weak_password": "La contraseña debe tener al menos 8 caracteres.",
+      "invalid_name": "El nombre visible debe tener entre 1 y 40 caracteres.",
+      "invalid_credentials": "Correo o contraseña incorrectos."
+    }
+  },
+  "upload": {
+    "title": "Sube tu serie",
+    "subtitle": "Aporta tus propias mediciones — un pluviómetro casero, un termómetro escolar, una estación personal. Tu serie pasa por exactamente las mismas estadísticas deterministas que los datos de la NASA, y siempre se etiqueta como dato comunitario (no validado).",
+    "loginRequired": "Subir datos requiere una cuenta con contraseña. Esto protege la base comunitaria de bots y subidas masivas.",
+    "loginCta": "Crear cuenta / iniciar sesión",
+    "labelField": "Nombre de la serie",
+    "variable": "Variable",
+    "latitude": "Latitud (opcional)",
+    "longitude": "Longitud (opcional)",
+    "data": "Datos",
+    "dataPlaceholder": "2024-01-01,23.5\n2024-01-02,24.1\n2024-01-03,22.8",
+    "dataHint": "Una línea por día: YYYY-MM-DD,valor — o pega un arreglo JSON [{\"date\": \"…\", \"value\": …}].",
+    "submit": "Subir y analizar",
+    "busy": "Analizando…",
+    "cooldownNote": "Anti-subida-masiva: una serie cada {minutes} minutos.",
+    "resultTitle": "Análisis determinista de tu serie",
+    "resultEmpty": "Sube una serie para ver aquí su análisis: Mann-Kendall, pendiente de Sen con intervalo de confianza del 95% y el veredicto honesto.",
+    "perDecade": "por década",
+    "confidenceInterval": "Intervalo de confianza del 95%",
+    "pValue": "Valor p de Mann-Kendall",
+    "yearsAnalyzed": "Observaciones analizadas",
+    "significantYes": "Tendencia significativa",
+    "significantNo": "Sin tendencia significativa (todavía)",
+    "yearsNeededBody": "Con esta variabilidad, harían falta unos {years} años de mediciones para confirmar una tendencia con confianza estadística. ¡Sigue midiendo!",
+    "yearsNeededInfinite": "Esta serie es demasiado corta o ruidosa para estimar un horizonte. Es honesto, no un fracaso.",
+    "communityLabel": "Dato comunitario, no validado — nunca se mezcla con datos de la NASA sin su etiqueta.",
+    "errors": {
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "invalid_label": "El nombre de la serie debe tener entre 1 y 80 caracteres.",
+      "invalid_variable": "Selecciona una variable válida.",
+      "invalid_coords": "Las coordenadas deben ser latitud (-90 a 90) y longitud (-180 a 180), o vacías.",
+      "invalid_format": "Formato no reconocido. Usa una línea por día: YYYY-MM-DD,valor — o un arreglo JSON.",
+      "too_many_points": "Demasiados puntos (máximo 5.000 por serie).",
+      "too_few_points": "Muy pocos puntos (mínimo 5) para un análisis honesto.",
+      "invalid_date": "Alguna fecha es inválida o está duplicada. Revisa los valores YYYY-MM-DD.",
+      "invalid_value": "Algún valor no es un número.",
+      "out_of_range": "Algún valor está fuera del rango físicamente posible para esta variable.",
+      "cooldown": "Espera {minutes} minuto(s) antes de subir otra serie.",
+      "unauthorized": "Tu sesión expiró. Inicia sesión de nuevo."
     }
   },
   "footer": {

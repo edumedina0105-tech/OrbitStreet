@@ -9,7 +9,9 @@
     "nav": {
       "questions": "The 4 questions",
       "honesty": "Our honesty",
-      "detective": "Detective Mode"
+      "detective": "Detective Mode",
+      "upload": "Upload your series",
+      "account": "Account"
     }
   },
   "languageSwitcher": {
@@ -163,6 +165,72 @@
       "invalidParams": "Check the parameters: latitude (-90 to 90), longitude (-180 to 180), a valid variable, and dates from 1981 to today.",
       "apiFailed": "NASA POWER could not be reached right now. No invented data will be shown — please try again in a moment.",
       "noData": "The selected combination returned too few data points for an honest analysis."
+    }
+  },
+  "account": {
+    "title": "Your detective account",
+    "subtitle": "Investigating NASA data is open to everyone. An account is only needed to upload your own measurements and save your progress — it protects the community data from bots.",
+    "loginTab": "Log in",
+    "registerTab": "Create account",
+    "displayName": "Display name",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters. Stored only as a scrypt hash, never in clear text.",
+    "loginSubmit": "Log in",
+    "registerSubmit": "Create account and log in",
+    "busy": "Working…",
+    "logout": "Log out",
+    "loggedInAs": "Logged in as",
+    "cooldownNote": "You can upload one series every {minutes} minutes.",
+    "privacyNote": "We only store your email, display name and password hash. Nothing else. No trackers.",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "invalid_email": "Enter a valid email address.",
+      "email_taken": "That email is already registered. Try logging in.",
+      "weak_password": "Password must be at least 8 characters long.",
+      "invalid_name": "Display name must be 1 to 40 characters.",
+      "invalid_credentials": "Incorrect email or password."
+    }
+  },
+  "upload": {
+    "title": "Upload your series",
+    "subtitle": "Contribute your own measurements — a homemade rain gauge, a school thermometer, a personal weather station. Your series runs through the exact same deterministic statistics as NASA data, and is always labeled as community data (unvalidated).",
+    "loginRequired": "Uploading data requires an account with a password. This protects the community database from bots and mass uploads.",
+    "loginCta": "Create account / log in",
+    "labelField": "Series name",
+    "variable": "Variable",
+    "latitude": "Latitude (optional)",
+    "longitude": "Longitude (optional)",
+    "data": "Data",
+    "dataPlaceholder": "2024-01-01,23.5\n2024-01-02,24.1\n2024-01-03,22.8",
+    "dataHint": "One line per day: YYYY-MM-DD,value — or paste a JSON array [{\"date\": \"…\", \"value\": …}].",
+    "submit": "Upload and analyze",
+    "busy": "Analyzing…",
+    "cooldownNote": "Anti-mass-upload: one series every {minutes} minutes.",
+    "resultTitle": "Deterministic analysis of your series",
+    "resultEmpty": "Upload a series to see its analysis here: Mann-Kendall, Sen's slope with 95% confidence interval, and the honest verdict.",
+    "perDecade": "per decade",
+    "confidenceInterval": "95% confidence interval",
+    "pValue": "Mann-Kendall p-value",
+    "yearsAnalyzed": "Observations analyzed",
+    "significantYes": "Significant trend",
+    "significantNo": "No significant trend (yet)",
+    "yearsNeededBody": "With this variability, about {years} years of measurements would be needed to confirm a trend with statistical confidence. Keep measuring!",
+    "yearsNeededInfinite": "This series is too short or noisy to estimate a time horizon. That is honest, not a failure.",
+    "communityLabel": "Community data, unvalidated — never mixed with NASA data without its label.",
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "invalid_label": "Series name must be 1 to 80 characters.",
+      "invalid_variable": "Select a valid variable.",
+      "invalid_coords": "Coordinates must be latitude (-90 to 90) and longitude (-180 to 180), or empty.",
+      "invalid_format": "Unrecognized format. Use one line per day: YYYY-MM-DD,value — or a JSON array.",
+      "too_many_points": "Too many points (maximum 5,000 per series).",
+      "too_few_points": "Too few points (minimum 5) for an honest analysis.",
+      "invalid_date": "Some date is invalid or duplicated. Check the YYYY-MM-DD values.",
+      "invalid_value": "Some value is not a number.",
+      "out_of_range": "Some value is outside the physically possible range for this variable.",
+      "cooldown": "Please wait {minutes} minute(s) before uploading another series.",
+      "unauthorized": "Your session expired. Log in again."
     }
   },
   "footer": {

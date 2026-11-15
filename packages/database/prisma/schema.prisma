@@ -91,9 +91,44 @@ model PowerCache {
   @@unique([latitude, longitude, parameter, temporal, start, end])
 }
 
+/// Usuario registrado: necesario para subir datos comunitarios y guardar progreso.
+/// El análisis público sigue abierto para todos; solo la subida exige cuenta.
+model User {
+  id        String   @id @default(cuid())
+  /// Email normalizado (minúsculas), único.
+  email     String   @unique
+  /// Hash scrypt con sal aleatoria (formato: scrypt$salt$hash). NUNCA en claro.
+  passwordHash String
+  displayName String
+  locale    String   @default("es")
+  /// Cooldown de subidas, en minutos, flexible por cuenta (default 10).
+  uploadCooldownMinutes Int @default(10)
+  createdAt DateTime @default(now())
+
+  sessions        Session[]
+  communitySeries CommunitySeries[]
+
+  @@index([email])
+}
+
+/// Sesión: la cookie httpOnly lleva el token aleatorio; en la DB solo se
+/// guarda su hash SHA-256 (robo de DB ≠ robo de sesiones).
+model Session {
+  /// Hash SHA-256 del token de sesión.
+  id        String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
+}
+
 /// Series comunitarias subidas por usuarios ("sube tu serie"), con su análisis.
 model CommunitySeries {
   id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
   label        String
   variable     String
   latitude     Float?
@@ -104,4 +139,7 @@ model CommunitySeries {
   /// Análisis determinista (MK/Sen/IC) generado por el mismo motor estadístico.
   analysisJson Json?
   createdAt    DateTime @default(now())
+
+  /// Índice para la consulta de cooldown (última subida del usuario).
+  @@index([userId, createdAt])
 }

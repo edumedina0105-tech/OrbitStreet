@@ -20,12 +20,24 @@ export async function SiteHeader() {
           </div>
         </div>
 
-        <nav className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
+        <nav className="hidden items-center gap-5 text-sm text-slate-300 lg:flex">
           <Link
             className="font-medium text-cyan-400 transition-colors hover:text-cyan-300"
             href="/detective"
           >
             {t('nav.detective')}
+          </Link>
+          <Link
+            className="transition-colors hover:text-cyan-400"
+            href="/upload"
+          >
+            {t('nav.upload')}
+          </Link>
+          <Link
+            className="transition-colors hover:text-cyan-400"
+            href="/account"
+          >
+            {t('nav.account')}
           </Link>
           <Link
             className="transition-colors hover:text-cyan-400"
