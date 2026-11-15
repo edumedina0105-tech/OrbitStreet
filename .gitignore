@@ -34,3 +34,6 @@ Thumbs.db
 
 # Despliegue
 .vercel
+
+# PlatformIO (ESP32 firmware)
+.pio/
