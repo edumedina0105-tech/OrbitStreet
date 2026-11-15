@@ -21,6 +21,10 @@
         {
           "path": "esp32dev/firmware.bin",
           "offset": 65536
+        },
+        {
+          "path": "esp32dev/spiffs.bin",
+          "offset": 2686976
         }
       ]
     },
@@ -42,6 +46,10 @@
         {
           "path": "esp32-c3/firmware.bin",
           "offset": 65536
+        },
+        {
+          "path": "esp32-c3/spiffs.bin",
+          "offset": 2686976
         }
       ]
     }

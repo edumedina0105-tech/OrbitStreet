@@ -205,4 +205,31 @@ void setupRoutes() {
         delay(500);
         ESP.restart();
     });
+
+    // 404 amigable: si el dashboard no está (LittleFS vacío), explicar la
+    // causa y la solución en HTML legible, nunca texto plano críptico.
+    server.onNotFound([](AsyncWebServerRequest *req) {
+        if (LittleFS.exists("/index.html.gz")) {
+            req->send(404, "text/plain", "Not found");
+            return;
+        }
+        const char* html =
+            "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+            "<title>OrbitStreet</title></head>"
+            "<body style='background:#07090E;color:#e2e8f0;"
+            "font-family:system-ui,sans-serif;text-align:center;"
+            "padding:3rem 1rem'>"
+            "<h2 style='color:#22d3ee;margin:0 0 1rem'>OrbitStreet</h2>"
+            "<p style='max-width:32rem;margin:0 auto'>"
+            "El firmware esta instalado, pero la memoria LittleFS esta vacia: "
+            "falta el dashboard del nodo.</p>"
+            "<p style='max-width:32rem;margin:1rem auto'>"
+            "<b>Solucion:</b> vuelve a flashear desde "
+            "<code>orbitstreet.up.railway.app/es/flash</code> (la version "
+            "actual del instalador incluye la particion de datos), o con "
+            "PlatformIO: <code>pio run -e esp32dev -t uploadfs</code>.</p>"
+            "</body></html>";
+        req->send(200, "text/html", html);
+    });
 }

@@ -5,7 +5,14 @@ Copia bootloader/partitions/boot_app0/firmware de las builds de PlatformIO
 a apps/web/public/firmware/<board>/ y genera el manifest.json que consume
 ESP Web Tools (https://esphome.github.io/esp-web-tools/) desde /flash.
 
-Uso (después de compilar ambos entornos):
+IMPORTANTE: también exporta la partición de datos (spiffs.bin, imagen
+LittleFS generada con 'pio run -e <env> -t buildfs') que contiene el
+dashboard web del nodo. Sin ella, el flasheo web deja el ESP32 sin
+interfaz (solo firmware) y 192.168.4.1 responde 404.
+
+Uso (después de compilar AMBOS entornos y sus filesystems):
+    pio run -e esp32dev -t buildfs
+    pio run -e esp32-c3-devkitm-1 -t buildfs
     python scripts/export_web.py
 
 Los .bin quedan versionados en el repo (ruta pública de la app web) para
@@ -21,10 +28,10 @@ WEB_PUBLIC = os.path.normpath(
     os.path.join(FIRMWARE, "..", "web", "public", "firmware")
 )
 
-# (env de PlatformIO, carpeta destino, offset del bootloader)
+# (env de PlatformIO, carpeta destino, offset del bootloader, offset spiffs)
 BUILDS = [
-    ("esp32dev", "esp32dev", 0x1000),
-    ("esp32-c3-devkitm-1", "esp32-c3", 0x0),
+    ("esp32dev", "esp32dev", 0x1000, 0x290000),
+    ("esp32-c3-devkitm-1", "esp32-c3", 0x0, 0x290000),
 ]
 
 PARTITIONS_OFFSET = 0x8000   # 32768
@@ -55,7 +62,7 @@ def main():
         raise SystemExit("No se encontró boot_app0.bin en los paquetes de PlatformIO")
 
     manifest_builds = []
-    for env, folder, bootloader_offset in BUILDS:
+    for env, folder, bootloader_offset, spiffs_offset in BUILDS:
         src = os.path.join(build_dir, env)
         dst = os.path.join(WEB_PUBLIC, folder)
         os.makedirs(dst, exist_ok=True)
@@ -69,6 +76,17 @@ def main():
 
         shutil.copy2(boot_app0, os.path.join(dst, "boot_app0.bin"))
 
+        # Partición de datos: imagen LittleFS con el dashboard del nodo.
+        # Generada por 'pio run -e <env> -t buildfs' (mismo tamaño que la
+        # partición spiffs de default.csv: 0x160000).
+        spiffs = os.path.join(src, "littlefs.bin")
+        if not os.path.exists(spiffs):
+            raise SystemExit(
+                f"Falta littlefs.bin: ejecuta 'pio run -e {env} -t buildfs'"
+            )
+        shutil.copy2(spiffs, os.path.join(dst, "spiffs.bin"))
+        print(f"{folder}/spiffs.bin: {os.path.getsize(spiffs)} bytes")
+
         manifest_builds.append({
             "chipFamily": "ESP32" if env == "esp32dev" else "ESP32-C3",
             "parts": [
@@ -76,6 +94,7 @@ def main():
                 {"path": f"{folder}/partitions.bin", "offset": PARTITIONS_OFFSET},
                 {"path": f"{folder}/boot_app0.bin", "offset": BOOT_APP0_OFFSET},
                 {"path": f"{folder}/firmware.bin", "offset": FIRMWARE_OFFSET},
+                {"path": f"{folder}/spiffs.bin", "offset": spiffs_offset},
             ],
         })
 
