@@ -52,8 +52,11 @@
       "startYear": "Año inicial",
       "endYear": "Año final",
       "consult": "Consultar NASA POWER en vivo",
+      "analyzing": "Consultando NASA POWER…",
+      "viewFull": "Ver gráfico e informe completo",
+      "yearsNoteShort": "Sensor local: ~{years} años",
       "seeAnalysis": "Ver las 4 preguntas",
-      "previewNote": "La consulta abre el Modo Detective con datos reales de la NASA (reanálisis MERRA-2) y estadística determinista.",
+      "previewNote": "El análisis se calcula aquí mismo con el mismo motor determinista (Mann-Kendall + Sen) del Modo Detective; nunca datos inventados.",
       "regions": {
         "world": "Mundo",
         "south_america": "Sudamérica",

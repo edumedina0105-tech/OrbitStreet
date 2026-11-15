@@ -7,14 +7,22 @@ import {
   useScroll,
   useTransform
 } from 'motion/react';
-import { ArrowDown, ChevronDown, Radio, Search } from 'lucide-react';
+import { ArrowDown, ChevronDown, Loader2, Radio, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from '@/i18n/navigation';
 import type { MapCity } from '@/components/world-map';
 import { VARIABLE_ICONS } from '@/components/variable-icons';
+import {
+  analyzeDailySeries,
+  type SeriesAnalysis
+} from '@/lib/analysis/analyze-series';
 import { VARIABLE_CONFIG, VARIABLE_IDS } from '@/lib/analysis/variables';
-import type { SeasonOrAnnual, VariableId } from '@orbitstreet/shared-types';
+import type {
+  SeasonOrAnnual,
+  TimePoint,
+  VariableId
+} from '@orbitstreet/shared-types';
 
 /**
  * El globo renderiza ~240 países en SVG: se carga solo en el cliente
@@ -88,6 +96,11 @@ export function MapStage() {
   const [startYear, setStartYear] = useState(1981);
   const [endYear, setEndYear] = useState(2025);
 
+  // Análisis en línea (mismo motor determinista que el Modo Detective).
+  const [analysis, setAnalysis] = useState<SeriesAnalysis | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+
   // Ciudades con nombres localizados por i18n (los pines llevan texto visible).
   const cities: MapCity[] = useMemo(
     () =>
@@ -131,6 +144,52 @@ export function MapStage() {
   };
 
   /** URL del Modo Detective con todo el estado del escenario. */
+  /**
+   * Consulta en vivo contra /api/power/daily y corre el MISMO motor
+   * determinista (Mann-Kendall + Sen + IC) en el navegador: el resultado
+   * se muestra dentro del panel, sin salir del mapa.
+   */
+  const handleConsult = async () => {
+    setIsFetching(true);
+    setFetchError(false);
+    setAnalysis(null);
+    try {
+      const config = VARIABLE_CONFIG[variable];
+      const parameter = config.powerParameters[0];
+      const params = new URLSearchParams({
+        lat: String(selected.lat),
+        lon: String(selected.lon),
+        parameter,
+        start: `${startYear}0101`,
+        end: `${endYear}1231`
+      });
+
+      const response = await fetch(`/api/power/daily?${params}`);
+      const data = (await response.json()) as {
+        points?: TimePoint[];
+        errorCode?: string;
+      };
+
+      if (!response.ok || !data.points || data.points.length < 10) {
+        throw new Error(data.errorCode ?? 'invalid_payload');
+      }
+
+      const result = analyzeDailySeries(data.points, {
+        variable,
+        season,
+        threshold: config.threshold,
+        periodStart: `${startYear}0101`,
+        periodEnd: `${endYear}1231`
+      });
+
+      setAnalysis(result);
+    } catch {
+      setFetchError(true);
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
   const detectiveUrl = () => {
     const params = new URLSearchParams({
       variable,
@@ -368,12 +427,79 @@ export function MapStage() {
               <div className="space-y-2 border-t border-white/10 pt-1">
                 <button
                   type="button"
-                  onClick={() => router.push(detectiveUrl())}
-                  className="flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-cyan-600 px-3.5 py-2 text-xs font-bold text-slate-950 transition-colors hover:bg-cyan-500"
+                  onClick={handleConsult}
+                  disabled={isFetching}
+                  className="flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-cyan-600 px-3.5 py-2 text-xs font-bold text-slate-950 transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <Radio className="h-3.5 w-3.5" />
-                  {t('consult')}
+                  {isFetching ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Radio className="h-3.5 w-3.5" />
+                  )}
+                  {isFetching ? t('analyzing') : t('consult')}
                 </button>
+
+                {/* Resultado en línea: mismo motor determinista del Detective */}
+                {analysis && !isFetching && (
+                  <div className="space-y-2 rounded-xl border border-cyan-400/30 bg-slate-950/80 p-3">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-mono text-xl font-bold tabular-nums text-cyan-300">
+                        {analysis.trend.senSlopePerDecade > 0 ? '+' : ''}
+                        {analysis.trend.senSlopePerDecade.toFixed(2)}
+                      </span>
+                      <span className="font-mono text-[10px] text-slate-400">
+                        {VARIABLE_CONFIG[variable].unit} / {td('results.perDecade')}
+                      </span>
+                    </div>
+
+                    <p className="font-mono text-[11px] tabular-nums text-slate-300">
+                      {td('results.confidenceInterval')}:{' '}
+                      [{analysis.trend.ci95PerDecade.lower.toFixed(2)},{' '}
+                      {analysis.trend.ci95PerDecade.upper.toFixed(2)}]
+                    </p>
+
+                    <p className="font-mono text-[11px] tabular-nums text-slate-400">
+                      {td('results.pValue')} ={' '}
+                      {analysis.trend.mannKendall.p.toExponential(1)}
+                      {' · '}
+                      {td('results.yearsAnalyzed')} = {analysis.trend.n}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span
+                        className={`rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold ${
+                          analysis.trend.significant
+                            ? 'border-amber-400/40 bg-amber-500/15 text-amber-300'
+                            : 'border-white/15 bg-white/5 text-slate-400'
+                        }`}
+                      >
+                        {analysis.trend.significant
+                          ? td('results.significantYes')
+                          : td('results.significantNo')}
+                      </span>
+                      {Number.isFinite(analysis.years.years) && (
+                        <span className="rounded-md border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-[10px] text-slate-400">
+                          {t('yearsNoteShort', { years: analysis.years.years })}
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => router.push(detectiveUrl())}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-1.5 text-[11px] font-semibold text-cyan-200 transition-colors hover:bg-cyan-500/20"
+                    >
+                      <span>{t('viewFull')}</span>
+                      <ArrowDown className="h-3 w-3 -rotate-90" aria-hidden />
+                    </button>
+                  </div>
+                )}
+
+                {fetchError && !isFetching && (
+                  <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-[11px] leading-snug text-amber-300">
+                    {td('errors.apiFailed')}
+                  </p>
+                )}
 
                 <button
                   type="button"

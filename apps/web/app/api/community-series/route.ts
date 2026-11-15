@@ -4,6 +4,7 @@ import {
   listRecentCommunitySeries,
   uploadCommunitySeries
 } from '@/lib/upload/community-series';
+import { parseCoordinate } from '@/lib/parse-coord';
 
 /**
  * GET  /api/community-series — últimas series comunitarias (público).
@@ -48,11 +49,11 @@ export async function POST(request: NextRequest) {
     latitude:
       input.latitude === null || input.latitude === undefined
         ? undefined
-        : Number(input.latitude),
+        : parseCoordinate(input.latitude as string | number),
     longitude:
       input.longitude === null || input.longitude === undefined
         ? undefined
-        : Number(input.longitude),
+        : parseCoordinate(input.longitude as string | number),
     data: input.data
   });
 

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { VARIABLE_IDS } from '@/lib/analysis/variables';
+import { parseCoordinate } from '@/lib/parse-coord';
 import type { VariableId } from '@orbitstreet/shared-types';
 
 /**
@@ -65,8 +66,8 @@ export function UploadForm({ cooldownMinutes }: { cooldownMinutes: number }) {
         body: JSON.stringify({
           label,
           variable,
-          latitude: latitude.trim() === '' ? null : Number(latitude),
-          longitude: longitude.trim() === '' ? null : Number(longitude),
+          latitude: latitude.trim() === '' ? null : parseCoordinate(latitude),
+          longitude: longitude.trim() === '' ? null : parseCoordinate(longitude),
           data
         })
       });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { PowerParameterId } from '@orbitstreet/shared-types';
 import { getDailySeries } from '@/lib/power/service';
+import { parseCoordinate } from '@/lib/parse-coord';
 
 /**
  * GET /api/power/daily?lat=-25.26&lon=-57.53&parameter=T2M&start=19810101&end=20251231
@@ -29,8 +30,8 @@ function badRequest(message: string) {
 export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
 
-  const latitude = Number(sp.get('lat'));
-  const longitude = Number(sp.get('lon'));
+  const latitude = parseCoordinate(sp.get('lat'));
+  const longitude = parseCoordinate(sp.get('lon'));
   const parameter = (sp.get('parameter') ?? 'T2M') as PowerParameterId;
   const start = sp.get('start') ?? EARLIEST;
   const end = sp.get('end') ?? todayYyyymmdd();

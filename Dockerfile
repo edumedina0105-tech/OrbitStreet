@@ -39,10 +39,22 @@ COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/public ./apps/web/public
 
+# Prisma CLI aislado (con todas sus dependencias: @prisma/config, effect, etc.)
+# para crear/actualizar las tablas automáticamente al arrancar el contenedor.
+# db push es idempotente: solo crea lo que falta. El runtime ya trae el cliente
+# generado (por eso --skip-generate) y NO tocamos su node_modules.
+RUN mkdir -p /prisma-cli && cd /prisma-cli \
+  && npm init -y >/dev/null \
+  && npm install --no-audit --no-fund prisma@6 >/dev/null \
+  && npm cache clean --force >/dev/null 2>&1 || true
+COPY --from=builder /app/packages/database/prisma /prisma-cli/schema
+
 EXPOSE 3000
 
 # Healthcheck de plataforma: GET /api/health
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget -qO- http://127.0.0.1:${PORT}/api/health || exit 1
 
-CMD ["node", "apps/web/server.js"]
+# 1) Asegura el esquema (CREATE TABLE si no existen) y 2) arranca el servidor.
+# exec: node reemplaza a sh para recibir SIGTERM correctamente (Railway).
+CMD ["sh", "-c", "node /prisma-cli/node_modules/prisma/build/index.js db push --schema /prisma-cli/schema/schema.prisma --skip-generate && exec node apps/web/server.js"]

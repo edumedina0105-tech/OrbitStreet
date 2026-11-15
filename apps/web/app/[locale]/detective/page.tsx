@@ -10,6 +10,7 @@ import {
   VARIABLE_CONFIG,
   VARIABLE_IDS
 } from '@/lib/analysis/variables';
+import { parseCoordinate } from '@/lib/parse-coord';
 import {
   CloudRain,
   Droplets,
@@ -93,8 +94,9 @@ export default async function DetectivePage({ params, searchParams }: Props) {
 
   // ---- Parseo y validación de parámetros de consulta ----
   const preset = firstParam(sp.preset);
-  const latRaw = Number(firstParam(sp.lat));
-  const lonRaw = Number(firstParam(sp.lon));
+  // Acepta coma decimal (formato español): "-23,6879" es válido aquí.
+  const latRaw = parseCoordinate(firstParam(sp.lat));
+  const lonRaw = parseCoordinate(firstParam(sp.lon));
 
   const presetCoords =
     preset && preset !== 'custom' ? PLACE_PRESETS[preset] : undefined;

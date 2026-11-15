@@ -368,9 +368,11 @@ export function WorldMap({
       }
     }
 
+    // Redondeo automático a 2 decimales (resolución más fina que la celda
+    // MERRA-2 de 0.5° x 0.625°): -23.6879 -> -23.69, sin avisos al usuario.
     return {
-      lat: Number(lat.toFixed(4)),
-      lon: Number(lon.toFixed(4)),
+      lat: Number(lat.toFixed(2)),
+      lon: Number(lon.toFixed(2)),
       hasCountry: Boolean(matchedCountry),
       countryEs: toLocalCountry(matchedCountry)
     };
@@ -796,7 +798,7 @@ export function WorldMap({
             |
           </span>
           <span className="font-mono tabular-nums text-cyan-300">
-            {selectedLat.toFixed(4)}°, {selectedLon.toFixed(4)}°
+            {selectedLat.toFixed(2)}°, {selectedLon.toFixed(2)}°
           </span>
           {hoverCoords && (
             <>

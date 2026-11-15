@@ -52,8 +52,11 @@
       "startYear": "Start year",
       "endYear": "End year",
       "consult": "Query live NASA POWER",
+      "analyzing": "Querying NASA POWER…",
+      "viewFull": "See full chart & report",
+      "yearsNoteShort": "Local sensor: ~{years} yrs",
       "seeAnalysis": "See the 4 questions",
-      "previewNote": "The query opens Detective Mode with real NASA data (MERRA-2 reanalysis) and deterministic statistics.",
+      "previewNote": "The analysis runs right here with the same deterministic engine (Mann-Kendall + Sen) as Detective Mode; never invented data.",
       "regions": {
         "world": "World",
         "south_america": "South America",

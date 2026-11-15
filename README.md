@@ -88,14 +88,10 @@ La configuración está fijada en código (`railway.json` en la raíz), así que
 1. Crea el proyecto en Railway y apúntalo al repo `OrbitStreet` (rama `main`).
 2. Agrega el plugin **PostgreSQL**: Railway inyecta `DATABASE_URL` automáticamente en las variables del servicio.
 3. Variables del servicio: `DATABASE_URL` (automática), `NODE_ENV=production` y, **opcionalmente**, `GEMINI_API_KEY` (si no está, la IA se oculta y se muestra el resumen determinista local).
-4. **Una sola vez**, aplica el esquema a la base de datos de Railway desde tu máquina (el runtime de la imagen no incluye la CLI de Prisma):
+4. Genera un dominio público en **Settings → Networking** y verifica `https://<tu-dominio>/api/health` (debe responder `{"status":"ok"}`).
 
-   ```bash
-   DATABASE_URL="<la URL pública de Railway>" npx prisma db push --schema packages/database/prisma/schema.prisma
-   ```
-
-   En PowerShell: `$env:DATABASE_URL="postgresql://..."; npx prisma db push --schema packages/database/prisma/schema.prisma`
-5. Genera un dominio público en **Settings → Networking** y verifica `https://<tu-dominio>/api/health` (debe responder `{"status":"ok"}`).
+> **Esquema automático:** el contenedor ejecuta `prisma db push` (idempotente) justo antes de arrancar el servidor, así que las tablas se crean solas la primera vez que despliegas — no hace falta ningún paso manual contra la DB de Railway.
+> (Alternativa equivalente por si algún día quieres aplicar el esquema a mano: `DATABASE_URL="<url>" npx prisma db push --schema packages/database/prisma/schema.prisma`)
 
 > Nota: Railway escucha el puerto que define `PORT`; el contenedor ya arranca en `0.0.0.0`, requisito de la plataforma.
 
