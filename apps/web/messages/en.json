@@ -741,6 +741,65 @@
     "moreGuide": "Full guide",
     "moreFlash": "Advanced flashing",
     "footerNote": "The node measures real temperature and humidity, compares them with the NASA monthly normal (historical reference) and uploads them signed with its token.",
-    "backToMap": "Back to the map"
+    "backToMap": "Back to the map",
+    "connect": {
+      "title": "Power on and connect to the node",
+      "subtitle": "Follow the steps: power the board, join its network, open its web page and complete the wizard. The network picker below is an interactive mock of what you will see on your phone.",
+      "simBadge": "INTERACTIVE MOCK",
+      "wifiPicker": "Available Wi-Fi networks (phone / PC)",
+      "wifiApActive": "AP active",
+      "wifiConnect": "Connect",
+      "wifiConnecting": "Connecting to the ESP32…",
+      "wifiConnected": "Connected (no internet · node local network)",
+      "wifiOk": "Connected",
+      "wifiNext": "I'm connected",
+      "flow": {
+        "pc": "PC / phone via USB",
+        "dashboard": "Node dashboard"
+      },
+      "steps": {
+        "1": {
+          "title": "1. Power the node",
+          "short": "USB with data",
+          "heading": "Step 1: plug the ESP32 over USB",
+          "body": "The same data cable you used to flash works: keep it plugged into a PC USB port or a phone charger (5 V). The node boots on its own and, with no prior configuration, creates its own Wi-Fi network.",
+          "tip": "Any 5 V USB source works — the node draws less than 0.5 W."
+        },
+        "2": {
+          "title": "2. Join its network",
+          "short": "OrbitStreet-Setup",
+          "heading": "Step 2: connect to \"OrbitStreet-Setup\"",
+          "body": "Open the Wi-Fi settings on your phone or PC and tap the \"OrbitStreet-Setup\" network (no password, highlighted below).",
+          "tip": "If you see a \"No internet\" warning, choose Keep connection: the node web page runs locally, without your mobile data."
+        },
+        "3": {
+          "title": "3. Open 192.168.4.1",
+          "short": "Node portal",
+          "heading": "Step 3: open the node web page",
+          "body": "With the node network active, open your browser and type http://192.168.4.1 (on many phones the captive portal pops up by itself).",
+          "tip": "No internet needed: the page is served from the ESP32 flash memory.",
+          "next": "Entered the portal"
+        },
+        "4": {
+          "title": "4. Complete the wizard",
+          "short": "WiFi + sensor + token",
+          "heading": "Step 4: first-configuration wizard",
+          "body": "The node web asks for its data once; then it saves everything to flash and boots on its own:",
+          "f1": "Your home Wi-Fi name and password (2.4 GHz; the ESP32 cannot see 5 GHz networks).",
+          "f2": "The sensor you wired (DHT11/DHT22 on GPIO 4, B3950 on an ADC pin, or BME280 over I²C).",
+          "f3": "Your coordinates (with them it downloads the NASA baseline for your cell).",
+          "f4": "The station token you copied in step 2 of this page.",
+          "f5": "The measurement interval (30 s by default) and save: the node joins your network and closes its own."
+        },
+        "5": {
+          "title": "5. Node online",
+          "short": "Measures and sends",
+          "heading": "Step 5: your station is now scientific",
+          "body": "The node sits at the IP shown by the wizard (e.g. 192.168.1.123): open it to see the dashboard with live readings, ΔT against the NASA monthly normal and telemetry status.",
+          "done": "Every few minutes it sends token-signed readings. If Wi-Fi drops, it buffers in memory and re-sends on its own.",
+          "tip": "Verify it: your account Station panel and the node dashboard show the pending telemetry queue in real time."
+        }
+      }
+    }
   }
 }

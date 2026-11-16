@@ -1,9 +1,10 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { ArrowLeft, BookOpen, Cpu, Wifi } from 'lucide-react';
+import { ArrowLeft, BookOpen, Cpu } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { WebSerialFlasher } from '@/components/web-serial-flasher';
 import { StationGate } from '@/components/station-gate';
 import { WiringDiagram } from '@/components/wiring-diagram';
+import { ConnectSteps } from '@/components/connect-steps';
 import type { Locale } from '@orbitstreet/shared-types';
 
 type Props = {
@@ -33,7 +34,6 @@ export default async function StationPage({ params }: Props) {
   const stepTitle = 'flex items-center gap-3 text-lg font-bold text-slate-100';
   const stepBadge =
     'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cyan-400/40 bg-cyan-500/10 font-mono text-sm font-bold text-cyan-300';
-  const card = 'rounded-xl border border-slate-800 bg-slate-900/90 p-6';
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
@@ -88,31 +88,19 @@ export default async function StationPage({ params }: Props) {
         <div className="mt-4">
           <WiringDiagram />
         </div>
+      </section>
 
-        {/* Asistente cautivo del nodo (primera configuración) */}
-        <div className={`${card} mt-4`}>
-          <p className="flex items-center gap-2 text-sm font-semibold text-cyan-200">
-            <Wifi className="h-4 w-4" aria-hidden />
-            {t('wizard.title')}
-          </p>
-          <ol className="mt-3 grid gap-2 text-xs leading-relaxed text-slate-400 md:grid-cols-2">
-            <li className="flex gap-2">
-              <span className="text-cyan-400">1.</span>
-              {t('wizard.network')}
-            </li>
-            <li className="flex gap-2">
-              <span className="text-cyan-400">2.</span>
-              {t('wizard.browser')}
-            </li>
-            <li className="flex gap-2">
-              <span className="text-cyan-400">3.</span>
-              {t('wizard.fields')}
-            </li>
-            <li className="flex gap-2">
-              <span className="text-cyan-400">4.</span>
-              {t('wizard.done')}
-            </li>
-          </ol>
+      {/* PASO 4 — Encender y conectarse al nodo (stepper interactivo) */}
+      <section className="mt-12">
+        <h2 className={stepTitle}>
+          <span className={stepBadge}>4</span>
+          {t('connect.title')}
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm text-slate-400">
+          {t('connect.subtitle')}
+        </p>
+        <div className="mt-4">
+          <ConnectSteps />
         </div>
       </section>
 

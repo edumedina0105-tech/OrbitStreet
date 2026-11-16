@@ -741,6 +741,65 @@
     "moreGuide": "Guía completa",
     "moreFlash": "Flasheo avanzado",
     "footerNote": "El nodo mide temperatura y humedad reales, las compara con la normal mensual NASA (referencia histórica) y las sube firmadas con su token.",
-    "backToMap": "Volver al mapa"
+    "backToMap": "Volver al mapa",
+    "connect": {
+      "title": "Enciende y conéctate al nodo",
+      "subtitle": "Sigue los pasos: alimenta la placa, únete a su red, abre su web y completa el asistente. El selector de redes de abajo es una maqueta interactiva de lo que verás en tu teléfono.",
+      "simBadge": "MAQUETA INTERACTIVA",
+      "wifiPicker": "Redes Wi-Fi disponibles (teléfono / PC)",
+      "wifiApActive": "AP activo",
+      "wifiConnect": "Conectar",
+      "wifiConnecting": "Conectando con el ESP32…",
+      "wifiConnected": "Conectado (sin internet · red local del nodo)",
+      "wifiOk": "Conectado",
+      "wifiNext": "Ya estoy conectado",
+      "flow": {
+        "pc": "PC / celular por USB",
+        "dashboard": "Dashboard del nodo"
+      },
+      "steps": {
+        "1": {
+          "title": "1. Alimenta el nodo",
+          "short": "USB con datos",
+          "heading": "Paso 1: conecta el ESP32 por USB",
+          "body": "El mismo cable con datos que usaste para flashear sirve: déjalo conectado a un puerto USB del PC o a un cargador de celular (5 V). El nodo arranca solo y, sin configuración previa, crea su propia red Wi-Fi.",
+          "tip": "Si usas un cargador en vez del PC, cualquier USB de 5 V sirve: el nodo consume menos de 0,5 W."
+        },
+        "2": {
+          "title": "2. Únete a su red",
+          "short": "OrbitStreet-Setup",
+          "heading": "Paso 2: conéctate a «OrbitStreet-Setup»",
+          "body": "Abre los ajustes de Wi-Fi de tu teléfono o PC y toca la red «OrbitStreet-Setup» (sin contraseña, resaltada abajo).",
+          "tip": "Si aparece el aviso «Sin conexión a internet», elige Mantener conexión: la web del nodo funciona en local, sin usar tus datos."
+        },
+        "3": {
+          "title": "3. Abre 192.168.4.1",
+          "short": "Portal del nodo",
+          "heading": "Paso 3: abre la web del nodo",
+          "body": "Con la red del nodo activa, abre el navegador y escribe http://192.168.4.1 (en muchos móviles el portal cautivo salta solo).",
+          "tip": "No necesitas internet: la página se sirve desde la memoria flash del propio ESP32.",
+          "next": "Entré al portal"
+        },
+        "4": {
+          "title": "4. Completa el asistente",
+          "short": "WiFi + sensor + token",
+          "heading": "Paso 4: el asistente de primera configuración",
+          "body": "La web del nodo te pide sus datos una única vez; luego los guarda en memoria flash y arranca solo:",
+          "f1": "El nombre y la contraseña de tu Wi-Fi de casa (2,4 GHz; el ESP32 no ve redes de 5 GHz).",
+          "f2": "El sensor que conectaste (DHT11/DHT22 en GPIO 4, B3950 en un pin ADC, o BME280 por I²C).",
+          "f3": "Tus coordenadas (con ellas descargará la línea base NASA de tu celda).",
+          "f4": "El token de estación que copiaste en el paso 2 de esta página.",
+          "f5": "El intervalo de medición (30 s por defecto) y guarda: el nodo se conectará a tu red y cerrará la suya."
+        },
+        "5": {
+          "title": "5. Nodo en línea",
+          "short": "Mide y envía",
+          "heading": "Paso 5: tu estación ya es científica",
+          "body": "El nodo queda en la IP que el asistente muestra (p. ej. 192.168.1.123): ábrela para ver el dashboard con lecturas en vivo, el ΔT contra la normal mensual NASA y el estado de la telemetría.",
+          "done": "Cada pocos minutos enviará lecturas firmadas con tu token. Si se corta el Wi-Fi, acumula en memoria y reenvía solo.",
+          "tip": "Verifícalo: el panel «Estación» de tu cuenta y el dashboard del nodo muestran la cola de telemetría pendiente en tiempo real."
+        }
+      }
+    }
   }
 }
