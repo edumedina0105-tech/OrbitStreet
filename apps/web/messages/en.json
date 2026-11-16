@@ -48,7 +48,7 @@
       "openPoint": "Oceanic / open point",
       "pointInCountry": "Point in {country}",
       "ariaGlobe": "Interactive 3D globe: drag to rotate the continents and click to pick precise coordinates",
-      "scrollCue": "Scroll to see the four questions",
+      "scrollCue": "Scroll for more information",
       "variablesTitle": "Variables and period",
       "variablesSubtitle": "Choose which variable to analyze in the cell",
       "seasonLabel": "Season",
@@ -388,7 +388,8 @@
       "weak_password": "Password must be at least 8 characters long.",
       "invalid_name": "Display name must be 1 to 40 characters.",
       "invalid_credentials": "Incorrect username or password."
-    }
+    },
+    "accountOptional": "Creating an account is optional: it lets you save your observations, cases and stations linked to your profile. You can investigate the map without an account."
   },
   "upload": {
     "title": "Upload your series",
@@ -654,10 +655,7 @@
     "challenge": "Built for the NASA Space Apps Challenge 2026 — “Be An Earth System Trend Detective!”",
     "source": "Climate source: NASA POWER (MERRA-2 reanalysis)",
     "license": "Open source under Apache-2.0.",
-    "notForecast": "Not a weather forecast: long-term change detection.",
-    "nodeTitle": "Ground node",
-    "flashLink": "Flash ESP32",
-    "guideLink": "Node guide"
+    "notForecast": "Not a weather forecast: long-term change detection."
   },
   "stationPage": {
     "kicker": "Ground node · Everything in one screen",
@@ -742,6 +740,7 @@
     },
     "moreGuide": "Full guide",
     "moreFlash": "Advanced flashing",
-    "footerNote": "The node measures real temperature and humidity, compares them with the NASA monthly normal (historical reference) and uploads them signed with its token."
+    "footerNote": "The node measures real temperature and humidity, compares them with the NASA monthly normal (historical reference) and uploads them signed with its token.",
+    "backToMap": "Back to the map"
   }
 }

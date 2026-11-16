@@ -1,0 +1,35 @@
+feat(ui): UX y rendimiento — globo fluido, superposición corregida, sesión minimal y limpiezas
+
+Rendimiento del globo (bajos FPS al girar/arrastrar):
+- Atlas countries-110m en vez de 50m (~10× menos vértices): el
+  re-render de ~240 países era el cuello de botella en cada frame; a la
+  escala de las celdas POWER (~50 km) la diferencia visual es mínima
+- Auto-spin con throttle a ~30 FPS (antes redibujaba a 60)
+- Respeta prefers-reduced-motion: sin giro ambiental si el usuario
+  prefiere menos movimiento
+
+Superposición corregida:
+- La ficha "Ground Truth Detective" invadía la franja de la barra de
+  regiones (Mundo/Sudamérica/…) en pantallas cortas: el max-h del panel
+  pasa de calc(100vh-16rem) a calc(100vh-20rem) para reservar esa
+  franja inferior en todos los tamaños
+
+/station:
+- Botón flotante "Volver al mapa" (abajo-derecha, siempre visible)
+
+Menú de sesión:
+- Sin sesión, el botón del header muestra SOLO la personita (sin
+  "Iniciar sesión"), con title/aria-label para accesibilidad
+- Al abrir el menú de login/registro, aviso honesto: la cuenta es
+  OPCIONAL — solo para guardar y vincular observaciones, casos y
+  estaciones; el mapa se investiga sin cuenta
+
+Textos y limpieza:
+- scrollCue: "Desplazar para ver más información" (es/en)
+- Footer: eliminados los botones "Flashear ESP32" y "Guía del nodo"
+  (todo vive ya en "Mi estación" del header); claves footer sin uso
+  removidas; import LogIn sin uso removido
+
+Verificado: build EXIT=0 (0 MISSING_MESSAGE), tsc limpio, lint 0
+errores, contenedor Docker 3100 con backToMap, scrollCue nuevo, footer
+limpio y botón de sesión con aria-label.

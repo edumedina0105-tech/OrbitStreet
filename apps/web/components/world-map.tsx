@@ -9,7 +9,11 @@ import {
   geoPath
 } from 'd3-geo';
 import { feature } from 'topojson-client';
-import countriesAtlas from 'world-atlas/countries-50m.json';
+// Atlas 110m (~10× menos vértices que el 50m): el render del globo es el
+// cuello de botella en cada frame de rotación/drag, y a la escala de las
+// celdas de NASA POWER (~50 km) la diferencia visual es mínima. Con 50m
+// el arrastre se sentía a bajos FPS, especialmente en móviles.
+import countriesAtlas from 'world-atlas/countries-110m.json';
 import {
   Crosshair,
   Globe2,
@@ -353,14 +357,30 @@ export function WorldMap({
   };
 
   // Rotación ambiental suave cuando está en reposo y sin zoom.
+  // Throttle a ~30 FPS: redibujar 240 países a 60 FPS sobrecarga la CPU
+  // (es la causa de los bajos FPS percibidos); a 30 el giro se ve igual
+  // de suave y libera la mitad del trabajo de render por segundo.
   useEffect(() => {
-    if (!autoSpin || isHoveringGlobe || isDragging || zoom > 1.8) return;
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (
+      !autoSpin ||
+      prefersReducedMotion ||
+      isHoveringGlobe ||
+      isDragging ||
+      zoom > 1.8
+    )
+      return;
     let rafId = 0;
     let last = performance.now();
+    const MIN_FRAME_MS = 33; // ~30 FPS
     const tick = (now: number) => {
-      const dt = Math.min(50, now - last);
-      last = now;
-      setRotation((prev) => [(prev[0] + dt * 0.008) % 360, prev[1], 0]);
+      const dt = now - last;
+      if (dt >= MIN_FRAME_MS) {
+        last = now;
+        setRotation((prev) => [(prev[0] + dt * 0.008) % 360, prev[1], 0]);
+      }
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);

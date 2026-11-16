@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { BookOpen, Cpu, Wifi } from 'lucide-react';
+import { ArrowLeft, BookOpen, Cpu, Wifi } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { WebSerialFlasher } from '@/components/web-serial-flasher';
 import { StationGate } from '@/components/station-gate';
@@ -134,6 +134,15 @@ export default async function StationPage({ params }: Props) {
         </Link>
         <p className="text-xs text-slate-500">{t('footerNote')}</p>
       </div>
+
+      {/* Botón flotante: volver al mapa (siempre visible al hacer scroll) */}
+      <Link
+        href="/"
+        className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-slate-900/90 px-4 py-2.5 text-sm font-semibold text-cyan-300 shadow-2xl shadow-black/50 backdrop-blur-md transition-colors hover:bg-slate-800 hover:text-cyan-200"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        {t('backToMap')}
+      </Link>
     </div>
   );
 }

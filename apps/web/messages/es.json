@@ -48,7 +48,7 @@
       "openPoint": "Punto oceánico / abierto",
       "pointInCountry": "Punto en {country}",
       "ariaGlobe": "Globo terráqueo 3D interactivo: arrastra para rotar los continentes y haz clic para elegir coordenadas precisas",
-      "scrollCue": "Desplázate para ver las cuatro preguntas",
+      "scrollCue": "Desplazar para ver más información",
       "variablesTitle": "Variables y periodo",
       "variablesSubtitle": "Selecciona qué variable analizar en la celda",
       "seasonLabel": "Estación del año",
@@ -388,7 +388,8 @@
       "weak_password": "La contraseña debe tener al menos 8 caracteres.",
       "invalid_name": "El nombre visible debe tener entre 1 y 40 caracteres.",
       "invalid_credentials": "Usuario o contraseña incorrectos."
-    }
+    },
+    "accountOptional": "Crear cuenta es opcional: sirve para guardar tus observaciones, casos y estaciones vinculadas a tu perfil. Puedes investigar el mapa sin cuenta."
   },
   "upload": {
     "title": "Sube tu serie",
@@ -654,10 +655,7 @@
     "challenge": "Creado para el NASA Space Apps Challenge 2026 — «¡Sé un detective de tendencias del sistema Tierra!»",
     "source": "Fuente climática: NASA POWER (reanálisis MERRA-2)",
     "license": "Código abierto bajo Apache-2.0.",
-    "notForecast": "No es un pronóstico del tiempo: detección de cambios de largo plazo.",
-    "nodeTitle": "Nodo en tierra",
-    "flashLink": "Flashear ESP32",
-    "guideLink": "Guía del nodo"
+    "notForecast": "No es un pronóstico del tiempo: detección de cambios de largo plazo."
   },
   "stationPage": {
     "kicker": "Nodo en tierra · Todo en una pantalla",
@@ -742,6 +740,7 @@
     },
     "moreGuide": "Guía completa",
     "moreFlash": "Flasheo avanzado",
-    "footerNote": "El nodo mide temperatura y humedad reales, las compara con la normal mensual NASA (referencia histórica) y las sube firmadas con su token."
+    "footerNote": "El nodo mide temperatura y humedad reales, las compara con la normal mensual NASA (referencia histórica) y las sube firmadas con su token.",
+    "backToMap": "Volver al mapa"
   }
 }

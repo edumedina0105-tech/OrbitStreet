@@ -694,9 +694,11 @@ export function MapStage() {
 
           {/* Panel izquierdo: ficha de misión del detective. En móvil es un
               panel DESPLEGABLE (plegado por defecto para ver el globo); en
-              escritorio es fijo y expandido como siempre. */}
+              escritorio es fijo y expandido como siempre. El max-h reserva
+              la franja inferior (regiones/lupas/coordenadas) para que
+              NUNCA se superpongan en pantallas cortas. */}
           <div
-            className={`pointer-events-auto absolute left-3 right-3 top-32 z-30 max-h-[calc(100vh-16rem)] overflow-y-auto md:left-6 md:right-auto md:w-[400px] ${
+            className={`pointer-events-auto absolute left-3 right-3 top-32 z-30 max-h-[calc(100vh-20rem)] overflow-y-auto md:left-6 md:right-auto md:w-[400px] ${
               mobileMissionOpen ? 'block' : 'hidden'
             } md:block`}
           >
